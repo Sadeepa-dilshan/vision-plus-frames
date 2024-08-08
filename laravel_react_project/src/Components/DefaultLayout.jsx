@@ -4,6 +4,7 @@ import { useContext } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
+import { Link } from "react-router-dom";
 
 export default function DefaultLayout(){
     const {user, token, setUser, setToken} = useStateContext();
@@ -34,6 +35,10 @@ export default function DefaultLayout(){
                 <div>
                     Header
                 </div>
+                <div>
+                        <Link to="/brands">View All Brands</Link> {/* Link to the brand index page */}
+                        <Link to="/brands/new">Create New Brand</Link> {/* Link to create a new brand */}
+                    </div>
                 <div>
                     {user.name}
                     <a href="#" onClick={onLogout} className="btn-logout"> Logout</a>
