@@ -38,6 +38,11 @@ export default function DefaultLayout(){
                 <div>
                         <Link to="/brands">View All Brands</Link> {/* Link to the brand index page */}
                         <Link to="/brands/new">Create New Brand</Link> {/* Link to create a new brand */}
+                        <Link to="/codes">View All Codes</Link> {/* Link to the CodeIndex page */}
+                        <Link to="/codes/new">Create New Code</Link>
+                        <Link to="/colors">View All Colors</Link> {/* Link to the ColorIndex page */}
+                        <Link to="/colors/new">Create New Color</Link> {/* Link to the ColorCreate page */}
+                        <Link to="/frames/new">Create New Frame</Link> {/* Link to the FrameCreate page */}
                     </div>
                 <div>
                     {user.name}

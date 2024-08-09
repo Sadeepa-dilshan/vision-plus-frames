@@ -1,58 +1,57 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
 
-export default function BrandIndex() {
-    const [brands, setBrands] = useState([]);
+export default function ColorIndex() {
+    const [colors, setColors] = useState([]);
     const [loading, setLoading] = useState(false);
-    const { token } = useStateContext(); // Get the auth token
-    const navigate = useNavigate();
+    const { token } = useStateContext(); // To handle the auth token
 
     useEffect(() => {
-        getBrands();
+        getColors();
     }, []);
 
-    const getBrands = () => {
+    const getColors = () => {
         setLoading(true);
-        axiosClient.get('/brands', {
+        axiosClient.get('/colors', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         })
         .then(({ data }) => {
             setLoading(false);
-            setBrands(data);
+            setColors(data);
         })
         .catch(() => {
             setLoading(false);
         });
     };
 
-    const handleDelete = (brandId) => {
-        if (!window.confirm("Are you sure you want to delete this brand?")) {
+    const handleDelete = (colorId) => {
+        if (!window.confirm("Are you sure you want to delete this color?")) {
             return;
         }
 
-        axiosClient.delete(`/brands/${brandId}`, {
+        axiosClient.delete(`/colors/${colorId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         })
         .then(() => {
-            getBrands(); // Refresh the brand list after deletion
+            getColors(); // Refresh the color list after deletion
         });
     };
 
     return (
         <div className="card">
-            <h2>Brands</h2>
+            <h2>Colors</h2>
             <div className="card-body">
                 <table className="table">
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Brand Name</th>
+                            <th>Color Name</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -64,16 +63,14 @@ export default function BrandIndex() {
                         </tbody>
                     ) : (
                         <tbody>
-                            {brands.map((brand) => (
-                                <tr key={brand.id}>
-                                    <td>{brand.id}</td>
-                                    <td>{brand.brand_name}</td>
+                            {colors.map((color) => (
+                                <tr key={color.id}>
+                                    <td>{color.id}</td>
+                                    <td>{color.color_name}</td>
                                     <td>
-                                        <Link to={`/brands/show/${brand.id}`} className="btn btn-edit">View</Link>
+                                        <Link to={`/colors/edit/${color.id}`} className="btn btn-edit">Edit</Link>
                                         &nbsp;
-                                        <Link to={`/brands/edit/${brand.id}`} className="btn btn-edit">Edit</Link>
-                                        &nbsp;
-                                        <button onClick={() => handleDelete(brand.id)} className="btn btn-delete">Delete</button>
+                                        <button onClick={() => handleDelete(color.id)} className="btn btn-delete">Delete</button>
                                     </td>
                                 </tr>
                             ))}
@@ -81,7 +78,6 @@ export default function BrandIndex() {
                     )}
                 </table>
             </div>
-            <Link to="/codes/new" className="btn btn-primary">Create New Code</Link>
         </div>
     );
 }

@@ -9,6 +9,14 @@ import BrandCreate from './views/BrandCreate.jsx';
 import BrandIndex from './views/BrandIndex.jsx';
 import BrandEdit from './views/BrandEdit.jsx';
 import BrandShow from './views/BrandShow.jsx'; 
+import CodeCreate from './views/CodeCreate.jsx';
+import CodeIndex from './views/CodeIndex.jsx';
+import CodeEdit from './views/CodeEdit.jsx';
+import ColorCreate from './views/ColorCreate.jsx';
+import ColorIndex from './views/ColorIndex.jsx';
+import ColorEdit from './views/ColorEdit.jsx'; 
+import FrameCreate from './views/FrameCreate.jsx';
+
 
 const router = createBrowserRouter ([
     {
@@ -42,6 +50,34 @@ const router = createBrowserRouter ([
             {
                 path: '/brands/show/:id', // Route for showing a specific brand
                 element: <BrandShow />,
+            },
+            {
+                path: '/codes',
+                element: <CodeIndex />, // Route for displaying all codes
+            },
+            {
+                path: '/codes/new', // Route for creating a new code
+                element: <CodeCreate />,
+            },
+            {
+                path: '/codes/edit/:id', // Route for editing a specific code
+                element: <CodeEdit />,
+            },
+            {
+                path: '/colors',
+                element: <ColorIndex />, // Route for displaying all colors
+            },
+            {
+                path: '/colors/new',
+                element: <ColorCreate />,
+            },
+            {
+                path: '/colors/edit/:id',
+                element: <ColorEdit />,
+            },
+            {
+                path: '/frames/new',
+                element: <FrameCreate />, // Route for creating a new frame
             },
         ]
     },
