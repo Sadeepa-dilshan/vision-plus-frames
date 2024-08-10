@@ -42,6 +42,7 @@ export default function DefaultLayout(){
                         <Link to="/codes/new">Create New Code</Link>
                         <Link to="/colors">View All Colors</Link> {/* Link to the ColorIndex page */}
                         <Link to="/colors/new">Create New Color</Link> {/* Link to the ColorCreate page */}
+                        <Link to="/frames">View All Frames</Link> {/* Link to the FrameIndex page */}
                         <Link to="/frames/new">Create New Frame</Link> {/* Link to the FrameCreate page */}
                     </div>
                 <div>

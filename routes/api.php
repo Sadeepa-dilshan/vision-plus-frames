@@ -64,7 +64,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
     Route::get('frames', [FrameController::class, 'index']);
     Route::post('frames', [FrameController::class, 'store'])->middleware('admin');
     Route::get('frames/{frame}', [FrameController::class, 'show']);
-    Route::put('frames/{frame}', [FrameController::class, 'update'])->middleware('admin');
+    Route::post('frames/{frame}', [FrameController::class, 'update'])->middleware('admin');
     Route::delete('frames/{frame}', [FrameController::class, 'destroy'])->middleware('admin');
 });
 

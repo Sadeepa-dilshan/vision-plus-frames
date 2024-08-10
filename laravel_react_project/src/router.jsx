@@ -16,6 +16,8 @@ import ColorCreate from './views/ColorCreate.jsx';
 import ColorIndex from './views/ColorIndex.jsx';
 import ColorEdit from './views/ColorEdit.jsx'; 
 import FrameCreate from './views/FrameCreate.jsx';
+import FrameIndex from './views/FrameIndex.jsx';
+import FrameEdit from './views/FrameEdit.jsx';
 
 
 const router = createBrowserRouter ([
@@ -76,8 +78,16 @@ const router = createBrowserRouter ([
                 element: <ColorEdit />,
             },
             {
+                path: '/frames',
+                element: <FrameIndex />, // Route for displaying all frames
+            },
+            {
                 path: '/frames/new',
                 element: <FrameCreate />, // Route for creating a new frame
+            },
+            {
+                path: '/frames/edit/:id',
+                element: <FrameEdit />, // Route for editing a frame
             },
         ]
     },
