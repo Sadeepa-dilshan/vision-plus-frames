@@ -5,11 +5,11 @@ import { Navigate, Outlet } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
 import { Link } from "react-router-dom";
-
-export default function DefaultLayout(){
-    const {user, token, setUser, setToken} = useStateContext();
-    if(!token){
-       return <Navigate to='/login'/>
+import NavBar from "./NavBar";
+export default function DefaultLayout() {
+    const { user, token, setUser, setToken } = useStateContext();
+    if (!token) {
+        return <Navigate to="/login" />;
     }
     
     const onLogout =  (ev) =>{
@@ -30,30 +30,12 @@ export default function DefaultLayout(){
 
     return(
         <div id="defaultLayout">
-         <div className="content">
-            <header>
-                <div>
-                    Header
-                </div>
-                <div>
-                        <Link to="/brands">View All Brands</Link> {/* Link to the brand index page */}
-                        <Link to="/brands/new">Create New Brand</Link> {/* Link to create a new brand */}
-                        <Link to="/codes">View All Codes</Link> {/* Link to the CodeIndex page */}
-                        <Link to="/codes/new">Create New Code</Link>
-                        <Link to="/colors">View All Colors</Link> {/* Link to the ColorIndex page */}
-                        <Link to="/colors/new">Create New Color</Link> {/* Link to the ColorCreate page */}
-                        <Link to="/frames">View All Frames</Link> {/* Link to the FrameIndex page */}
-                        <Link to="/frames/new">Create New Frame</Link> {/* Link to the FrameCreate page */}
-                    </div>
-                <div>
+            <NavBar />
+            <div>
                     {user.name}
                     <a href="#" onClick={onLogout} className="btn-logout"> Logout</a>
                 </div>
-            </header>
-            <main>
-            <Outlet />
-            </main>
-            </div>
         </div>
+        
     )
 }
