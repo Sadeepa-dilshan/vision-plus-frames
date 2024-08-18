@@ -11,30 +11,35 @@ export default function BrandEdit() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        axiosClient.get(`/brands/${id}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        .then(({ data }) => {
-            setBrandName(data.brand_name);
-        })
-        .catch((err) => {
-            console.error(err);
-        });
+        axiosClient
+            .get(`/brands/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            .then(({ data }) => {
+                setBrandName(data.brand_name);
+            })
+            .catch((err) => {
+                console.error(err);
+            });
     }, [id, token]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-            await axiosClient.put(`/brands/${id}`, {
-                brand_name: brandName,
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
+            await axiosClient.put(
+                `/brands/${id}`,
+                {
+                    brand_name: brandName,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
                 }
-            });
+            );
 
             navigate("/brands"); // Redirect to the brand list after updating
         } catch (err) {
@@ -60,8 +65,12 @@ export default function BrandEdit() {
                         required
                     />
                 </div>
-                {errors && <div className="error-message">{errors.brand_name}</div>}
-                <button type="submit" className="btn btn-primary">Update Brand</button>
+                {errors && (
+                    <div className="error-message">{errors.brand_name}</div>
+                )}
+                <button type="submit" className="btn btn-primary">
+                    Update Brand
+                </button>
             </form>
         </div>
     );

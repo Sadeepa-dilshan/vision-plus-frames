@@ -29,6 +29,14 @@ export default function DefaultLayout() {
     return (
         <div id="defaultLayout">
             <NavBar />
+
+            <div>
+                {user.name}
+                <a href="#" onClick={onLogout} className="btn-logout">
+                    {" "}
+                    Logout
+                </a>
+            </div>
         </div>
     );
 }

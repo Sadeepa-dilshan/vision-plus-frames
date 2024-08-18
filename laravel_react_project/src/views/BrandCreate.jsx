@@ -13,13 +13,17 @@ export default function BrandCreate() {
         e.preventDefault();
 
         try {
-            await axiosClient.post("/brands", {
-                brand_name: brandName,
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
+            await axiosClient.post(
+                "/brands",
+                {
+                    brand_name: brandName,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
                 }
-            });
+            );
 
             navigate("/brands"); // Redirect to the brand list after creation
         } catch (err) {
@@ -45,8 +49,12 @@ export default function BrandCreate() {
                         required
                     />
                 </div>
-                {errors && <div className="error-message">{errors.brand_name}</div>}
-                <button type="submit" className="btn btn-primary">Create Brand</button>
+                {errors && (
+                    <div className="error-message">{errors.brand_name}</div>
+                )}
+                <button type="submit" className="btn btn-primary">
+                    Create Brand
+                </button>
             </form>
         </div>
     );
