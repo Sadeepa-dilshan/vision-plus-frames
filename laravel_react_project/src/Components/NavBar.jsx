@@ -8,25 +8,27 @@ import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import CategoryIcon from "@mui/icons-material/Category";
 import AddToPhotosIcon from "@mui/icons-material/AddToPhotos";
+
 const drawerWidth = 240;
 
 export default function MiniDrawer() {
     const theme = useTheme();
     const [open, setOpen] = React.useState(true);
     const navigate = useNavigate();
+    const location = useLocation();
+
     const handleDrawerOpen = () => {
         setOpen(!open);
     };
 
-    // Navigation LIST
     const NavData = [
         {
             path: "/brands",
@@ -75,32 +77,46 @@ export default function MiniDrawer() {
             <Drawer variant="permanent" open={open}>
                 <DrawerHeader>
                     {open ? (
-                        <img src="/1.jpg" style={{ width: "100px" }} />
-                    ) : (
-                        <></>
-                    )}
+                        <img
+                            src="/images/logo.png"
+                            style={{ width: "100px" }}
+                            alt="logo"
+                        />
+                    ) : null}
                     <IconButton onClick={handleDrawerOpen}>
                         {theme.direction === "rtl" ? (
-                            <ChevronRightIcon />
+                            <ChevronRightIcon style={{ color: "white" }} />
                         ) : (
-                            <ChevronLeftIcon />
+                            <ChevronLeftIcon style={{ color: "white" }} />
                         )}
                     </IconButton>
                 </DrawerHeader>
                 <Divider />
                 <List>
-                    {NavData.map((text, index) => (
+                    {NavData.map((item) => (
                         <ListItem
-                            key={text.text}
+                            key={item.text}
                             disablePadding
                             sx={{ display: "block" }}
-                            onClick={() => navigate(text.path)}
+                            onClick={() => navigate(item.path)}
                         >
                             <ListItemButton
                                 sx={{
                                     minHeight: 48,
                                     justifyContent: open ? "initial" : "center",
                                     px: 2.5,
+                                    color: "white",
+                                    backgroundColor:
+                                        location.pathname === item.path
+                                            ? "yellow"
+                                            : "transparent", // Yellow background if active
+                                    "&:hover": {
+                                        backgroundColor: "yellow", // Yellow background on hover
+                                        color: "black", // Text and icon color on hover
+                                    },
+                                    "&:hover .MuiListItemIcon-root": {
+                                        color: "black", // Icon color on hover
+                                    },
                                 }}
                             >
                                 <ListItemIcon
@@ -108,19 +124,28 @@ export default function MiniDrawer() {
                                         minWidth: 0,
                                         mr: open ? 3 : "auto",
                                         justifyContent: "center",
+                                        color:
+                                            location.pathname === item.path
+                                                ? "black"
+                                                : "white", // Black icon if active
                                     }}
                                 >
-                                    {text.icon}
+                                    {item.icon}
                                 </ListItemIcon>
                                 <ListItemText
-                                    primary={text.text}
-                                    sx={{ opacity: open ? 1 : 0 }}
+                                    primary={item.text}
+                                    sx={{
+                                        opacity: open ? 1 : 0,
+                                        color:
+                                            location.pathname === item.path
+                                                ? "black"
+                                                : "white", // Black text if active,
+                                    }}
                                 />
                             </ListItemButton>
                         </ListItem>
                     ))}
                 </List>
-                <Divider />
             </Drawer>
             <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
                 <Outlet />
@@ -128,6 +153,7 @@ export default function MiniDrawer() {
         </Box>
     );
 }
+
 // STYLES
 const openedMixin = (theme) => ({
     width: drawerWidth,
@@ -136,6 +162,7 @@ const openedMixin = (theme) => ({
         duration: theme.transitions.duration.enteringScreen,
     }),
     overflowX: "hidden",
+    backgroundColor: "black", // Drawer background color when open
 });
 
 const closedMixin = (theme) => ({
@@ -148,6 +175,7 @@ const closedMixin = (theme) => ({
     [theme.breakpoints.up("sm")]: {
         width: `calc(${theme.spacing(8)} + 1px)`,
     },
+    backgroundColor: "black", // Drawer background color when closed
 });
 
 const DrawerHeader = styled("div")(({ theme }) => ({

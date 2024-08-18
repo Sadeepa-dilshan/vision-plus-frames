@@ -11,31 +11,31 @@ export default function DefaultLayout() {
     if (!token) {
         return <Navigate to="/login" />;
     }
-    
-    const onLogout =  (ev) =>{
+
+    const onLogout = (ev) => {
         ev.preventDefault();
-        axiosClient.get('/logout')
-        .then(({}) => {
-           setUser(null)
-           setToken(null)
-        })
-    }
+        axiosClient.get("/logout").then(({}) => {
+            setUser(null);
+            setToken(null);
+        });
+    };
 
     useEffect(() => {
-        axiosClient.get('/user')
-          .then(({data}) => {
-             setUser(data)
-          })
-      }, [])
+        axiosClient.get("/user").then(({ data }) => {
+            setUser(data);
+        });
+    }, []);
 
-    return(
+    return (
         <div id="defaultLayout">
             <NavBar />
             <div>
-                    {user.name}
-                    <a href="#" onClick={onLogout} className="btn-logout"> Logout</a>
-                </div>
+                {user.name}
+                <a href="#" onClick={onLogout} className="btn-logout">
+                    {" "}
+                    Logout
+                </a>
+            </div>
         </div>
-        
-    )
+    );
 }
