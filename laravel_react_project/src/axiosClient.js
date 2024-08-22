@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const axiosClient = axios.create({
-    baseURL: "http://127.0.0.1:8000/api",
+    baseURL: "https://frames.biz-solution.net/public/api",
+    withCredentials: true, 
 });
 
 axiosClient.interceptors.request.use((config) => {

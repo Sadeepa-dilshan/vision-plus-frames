@@ -80,3 +80,6 @@ Route::middleware(['auth:sanctum'])->group(function() {
 
 Route::post('login',[AuthController::class,'login']);
 Route::post('register',[AuthController::class,'register']);
+Route::get('hello', function () {
+    return response()->json(['message' => 'Hello World ,App Works!...']);
+});
