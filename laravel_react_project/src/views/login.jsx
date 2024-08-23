@@ -1,36 +1,65 @@
-import axios from "axios";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
-import { Box, Button, Grid, Paper, TextField, Typography } from "@mui/material";
+import {
+    Box,
+    Button,
+    Grid,
+    Paper,
+    TextField,
+    Typography,
+    CircularProgress,
+} from "@mui/material";
+import { useAlert } from "../contexts/AlertContext";
 
-export default function login() {
-    const [passwordRef, setPassword] = useState("");
-    const [emailRef, setEmail] = useState("");
+export default function Login() {
+    const { showAlert } = useAlert();
 
+    const [password, setPassword] = useState("");
+    const [email, setEmail] = useState("");
     const { setUser, setToken } = useStateContext();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
-    const Submit = (ev) => {
+    const Submit = async (ev) => {
         ev.preventDefault();
-        console.log(emailRef, passwordRef);
+        setLoading(true); // Start loading
+        setError(""); // Clear any previous errors
 
         const payload = {
-            email: emailRef,
-            password: passwordRef,
+            email,
+            password,
         };
-        axiosClient
-            .post("/login", payload)
-            .then(({ data }) => {
-                setUser(data.user);
-                setToken(data.token);
-            })
-            .catch((err) => {
-                const response = err.response;
-                if (response && response.status === 422) {
-                    console.log(response.data.errors);
-                }
-            });
+
+        try {
+            const { data } = await axiosClient.post("/login", payload);
+            setUser(data.user);
+            setToken(data.token);
+            setLoading(false); // Stop loading
+            console.log(data);
+            if (data.user) {
+                showAlert(
+                    data.user.name + " logged in successfully",
+                    "success"
+                );
+            } else {
+                showAlert(data.message, "error");
+            }
+        } catch (err) {
+            console.log("Error:", err);
+
+            setLoading(false); // Stop loading
+            const response = err.response;
+            console.log("Error response:", err.response); // Log the error response
+
+            if (response && response.status === 422) {
+                setError(response.data.message);
+                showAlert(response.data.message, "error");
+            } else {
+                setError("An unexpected error occurred. Please try again.");
+            }
+        }
     };
 
     return (
@@ -69,13 +98,9 @@ export default function login() {
                     zIndex: 2,
                 }}
             >
-                <Box
-                    sx={{
-                        textAlign: "center",
-                    }}
-                >
+                <Box sx={{ textAlign: "center" }}>
                     <img
-                        src="/images/Group 4 (2).png"
+                        src="/images/logo2.png"
                         style={{
                             padding: ".5rem",
                             borderRadius: "10px",
@@ -95,11 +120,12 @@ export default function login() {
                     >
                         Login
                     </Typography>
+
                     <TextField
                         label="Email"
                         sx={{ width: "100%", marginTop: "2rem" }}
                         variant="outlined"
-                        value={emailRef}
+                        value={email}
                         type="email"
                         placeholder="Enter your login email"
                         onChange={(e) => setEmail(e.target.value)}
@@ -108,19 +134,28 @@ export default function login() {
                         label="Password"
                         sx={{ width: "100%", marginY: "1rem" }}
                         variant="outlined"
-                        value={passwordRef}
+                        value={password}
                         type="password"
                         placeholder="Enter your login password"
                         onChange={(e) => setPassword(e.target.value)}
                     />
+
                     <Button
-                        sx={{ backgroundColor: "black" }}
+                        sx={{ backgroundColor: "black", position: "relative" }}
                         fullWidth
                         type="submit"
                         variant="contained"
                         size="large"
+                        disabled={loading} // Disable button when loading
                     >
-                        Login
+                        {loading ? (
+                            <CircularProgress
+                                size={24}
+                                sx={{ color: "white" }}
+                            />
+                        ) : (
+                            "Login"
+                        )}
                     </Button>
 
                     <Typography variant="body1" sx={{ marginTop: "1rem" }}>
@@ -132,6 +167,7 @@ export default function login() {
         </Grid>
     );
 }
+
 const backgroundImageStyle = {
     backgroundImage: 'url("/images/4676.jpg")',
     backgroundSize: "cover",

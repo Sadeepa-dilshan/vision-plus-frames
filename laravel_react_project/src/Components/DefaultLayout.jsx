@@ -1,11 +1,11 @@
 import axios from "axios";
 import { useEffect } from "react";
-import { useContext } from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
-import { Link } from "react-router-dom";
 import NavBar from "./NavBar";
+import { Avatar, Box, Typography } from "@mui/material";
+
 export default function DefaultLayout() {
     const { user, token, setUser, setToken } = useStateContext();
     if (!token) {
@@ -14,7 +14,7 @@ export default function DefaultLayout() {
 
     const onLogout = (ev) => {
         ev.preventDefault();
-        axiosClient.get("/logout").then(({}) => {
+        axiosClient.get("/logout").then(() => {
             setUser(null);
             setToken(null);
         });
@@ -29,14 +29,24 @@ export default function DefaultLayout() {
     return (
         <div id="defaultLayout">
             <NavBar />
-
-            <div>
-                {user.name}
-                <a href="#" onClick={onLogout} className="btn-logout">
-                    {" "}
-                    Logout
-                </a>
-            </div>
+            <Box
+                display="flex"
+                alignItems="center"
+                gap={1}
+                sx={{
+                    position: "absolute",
+                    top: 6, // Adjust position from the top
+                    right: 16, // Adjust position from the right
+                }}
+            >
+                <Avatar
+                    alt={user.name}
+                    src="/images/profile.png"
+                    sx={{ width: 30, height: 30 }}
+                    style={{ cursor: "pointer" }}
+                />
+                <Typography variant="body2">{user.name}</Typography>
+            </Box>
         </div>
     );
 }

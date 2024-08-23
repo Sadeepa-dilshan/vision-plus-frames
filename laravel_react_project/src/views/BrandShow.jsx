@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
+import { Link } from "react-router-dom";
 
 export default function BrandShow() {
     const { id } = useParams(); // Get the brand ID from the URL
@@ -33,6 +34,7 @@ export default function BrandShow() {
                 <p><strong>ID:</strong> {brand.id}</p>
                 <p><strong>Brand Name:</strong> {brand.brand_name}</p>
                 {/* Add more fields if necessary */}
+                <Link to="/codes/new" className="btn btn-primary">Create New Code</Link> {/* Link to the CodeCreate page */}
             </div>
         </div>
     );

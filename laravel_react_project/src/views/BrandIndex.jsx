@@ -81,6 +81,7 @@ export default function BrandIndex() {
                     )}
                 </table>
             </div>
+            <Link to="/codes/new" className="btn btn-primary">Create New Code</Link>
         </div>
     );
 }
