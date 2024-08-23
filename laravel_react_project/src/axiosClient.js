@@ -2,6 +2,7 @@ import axios from "axios";
 
 const axiosClient = axios.create({
     baseURL: "https://frames.biz-solution.net/public/api",
+
     withCredentials: true,
 });
 
