@@ -8,7 +8,6 @@ import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -16,10 +15,15 @@ import ListItemText from "@mui/material/ListItemText";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import CategoryIcon from "@mui/icons-material/Category";
 import AddToPhotosIcon from "@mui/icons-material/AddToPhotos";
+import axiosClient from "../axiosClient";
+import { useStateContext } from "../contexts/contextprovider";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 const drawerWidth = 240;
 
 export default function MiniDrawer() {
+    const { setUser, setToken } = useStateContext();
+
     const theme = useTheme();
     const [open, setOpen] = React.useState(true);
     const navigate = useNavigate();
@@ -27,6 +31,14 @@ export default function MiniDrawer() {
 
     const handleDrawerOpen = () => {
         setOpen(!open);
+    };
+
+    const onLogout = (ev) => {
+        ev.preventDefault();
+        axiosClient.get("/logout").then(() => {
+            setUser(null);
+            setToken(null);
+        });
     };
 
     const NavData = [
@@ -112,10 +124,13 @@ export default function MiniDrawer() {
                                             : "transparent", // Yellow background if active
                                     "&:hover": {
                                         backgroundColor: "yellow", // Yellow background on hover
-                                        color: "black", // Text and icon color on hover
-                                    },
-                                    "&:hover .MuiListItemIcon-root": {
-                                        color: "black", // Icon color on hover
+                                        color: "black", // Text color on hover
+                                        "& .MuiListItemIcon-root": {
+                                            color: "black", // Icon color on hover
+                                        },
+                                        "& .MuiListItemText-primary": {
+                                            color: "black", // Text color on hover
+                                        },
                                     },
                                 }}
                             >
@@ -139,12 +154,61 @@ export default function MiniDrawer() {
                                         color:
                                             location.pathname === item.path
                                                 ? "black"
-                                                : "white", // Black text if active,
+                                                : "white", // Black text if active
                                     }}
                                 />
                             </ListItemButton>
                         </ListItem>
                     ))}
+                </List>
+                <Box sx={{ flexGrow: 1 }} />{" "}
+                {/* Filler to push Logout to bottom */}
+                <List>
+                    <ListItem>
+                        <ListItemButton
+                            sx={{
+                                minHeight: 48,
+                                justifyContent: open ? "initial" : "center",
+                                px: 2.5,
+                                color: "white",
+                                "&:hover": {
+                                    backgroundColor: "yellow", // Yellow background on hover
+                                    color: "black", // Text color on hover
+                                    "& .MuiListItemIcon-root": {
+                                        color: "black", // Icon color on hover
+                                    },
+                                    "& .MuiListItemText-primary": {
+                                        color: "black", // Text color on hover
+                                    },
+                                },
+                            }}
+                            onClick={onLogout}
+                        >
+                            <ListItemIcon
+                                sx={{
+                                    minWidth: 0,
+                                    mr: open ? 3 : "auto",
+                                    justifyContent: "center",
+                                    color: "white",
+                                    "&:hover": {
+                                        color: "black", // Icon color on hover
+                                    },
+                                }}
+                            >
+                                <LogoutIcon
+                                    sx={{ color: "inherit" }}
+                                    onClick={onLogout}
+                                />
+                            </ListItemIcon>
+                            <ListItemText
+                                primary={"LogOut"}
+                                sx={{
+                                    opacity: open ? 1 : 0,
+                                    color: "inherit", // Text color on hover
+                                }}
+                            />
+                        </ListItemButton>
+                    </ListItem>
                 </List>
             </Drawer>
             <Box component="main" sx={{ flexGrow: 1, p: 3 }}>

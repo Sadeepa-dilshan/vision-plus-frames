@@ -1,51 +1,183 @@
-import axios from "axios";
-import { useRef } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
+import {
+    Box,
+    Button,
+    Grid,
+    Paper,
+    TextField,
+    Typography,
+    CircularProgress,
+} from "@mui/material";
+import { useAlert } from "../contexts/AlertContext";
 
-export default function register(){
+export default function register() {
+    const { showAlert } = useAlert();
 
-    const nameRef = useRef();
-    const emailRef = useRef();
-    const passwordRef = useRef();
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const { setUser, setToken } = useStateContext();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
-    const {setUser, setToken} = useStateContext();
-
-    const Submit =  (ev) =>{
+    const Submit = async (ev) => {
         ev.preventDefault();
+        setLoading(true); // Start loading
+        setError(""); // Clear any previous errors
+
         const payload = {
-            name: nameRef.current.value,
-            email: emailRef.current.value,
-            password: passwordRef.current.value,
-        }
-        axiosClient.post("/register",payload).then(({data})=>{
+            name,
+            email,
+            password,
+        };
+
+        try {
+            const { data } = await axiosClient.post("/register", payload);
             setUser(data.user);
             setToken(data.token);
-    }).catch(err => {
-        const response = err.response;
-        if(response && response.status === 422){
-            console.log(response.data.errors);
+            setLoading(false); // Stop loading
+            showAlert("Registration successful!", "success");
+        } catch (err) {
+            console.log("Error:", err);
+
+            setLoading(false); // Stop loading
+            const response = err.response;
+            console.log("Error response:", err.response); // Log the error response
+
+            if (response && response.status === 422) {
+                setError(response.data.message);
+                showAlert(response.data.message, "error");
+            } else {
+                setError("An unexpected error occurred. Please try again.");
+                showAlert(
+                    "An unexpected error occurred. Please try again.",
+                    "error"
+                );
+            }
         }
-    });
+    };
+
+    return (
+        <Grid
+            container
+            direction="row"
+            justifyContent="center"
+            alignItems="center"
+            height={"100vh"}
+            style={backgroundImageStyle}
+        >
+            <Box
+                sx={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    height: "100%",
+                    width: "100%",
+                    backgroundColor: "rgba(0, 0, 0, 0.5)", // Dark overlay
+                    zIndex: 1,
+                }}
+            />
+
+            <Paper
+                variant="elevation"
+                elevation={2}
+                sx={{
+                    padding: "1rem",
+                    width: {
+                        xs: "96%",
+                        sm: "70%",
+                        md: "50%",
+                        lg: "60%",
+                        xl: "40%",
+                    },
+                    zIndex: 2,
+                }}
+            >
+                <Box sx={{ textAlign: "center" }}>
+                    <img
+                        src="/images/logo2.png"
+                        style={{
+                            padding: ".5rem",
+                            borderRadius: "10px",
+                            width: "80%",
+                        }}
+                        alt="Logo"
+                    />
+                </Box>
+
+                <form onSubmit={Submit}>
+                    <Typography
+                        variant="h6"
+                        component="h1"
+                        fontWeight={"bold"}
+                        sx={{ textAlign: "center", marginX: "1rem" }}
+                        fontStyle={"revert-layer"}
+                    >
+                        Register
+                    </Typography>
+
+                    <TextField
+                        label="Name"
+                        sx={{ width: "100%", marginTop: "2rem" }}
+                        variant="outlined"
+                        value={name}
+                        type="text"
+                        placeholder="Enter your name"
+                        onChange={(e) => setName(e.target.value)}
+                    />
+                    <TextField
+                        label="Email"
+                        sx={{ width: "100%", marginTop: "2rem" }}
+                        variant="outlined"
+                        value={email}
+                        type="email"
+                        placeholder="Enter your email"
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <TextField
+                        label="Password"
+                        sx={{ width: "100%", marginY: "1rem" }}
+                        variant="outlined"
+                        value={password}
+                        type="password"
+                        placeholder="Enter your password"
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+
+                    <Button
+                        sx={{ backgroundColor: "black", position: "relative" }}
+                        fullWidth
+                        type="submit"
+                        variant="contained"
+                        size="large"
+                        disabled={loading} // Disable button when loading
+                    >
+                        {loading ? (
+                            <CircularProgress
+                                size={24}
+                                sx={{ color: "white" }}
+                            />
+                        ) : (
+                            "Register"
+                        )}
+                    </Button>
+
+                    <Typography variant="body1" sx={{ marginTop: "1rem" }}>
+                        Already Have An Account? <Link to="/login">Login</Link>
+                    </Typography>
+                </form>
+            </Paper>
+        </Grid>
+    );
 }
 
-    return(
-        <div className="login-signup-form animated fadeinDown">
-            <div className="form">
-                <h1 className="title">
-                    Create A New Account
-                </h1>
-                <form onSubmit={Submit}>
-                    <input ref={nameRef} type="name" placeholder="Name" />
-                    <input ref={emailRef} type="email" placeholder="Email" />
-                    <input ref={passwordRef} type="password" placeholder="Password" />
-                    <button className="btn btn-block">Register</button>
-                    <p className="message">
-                        Already Have An Account? <Link to= '/login'>Login</Link>
-                    </p>
-                </form>
-            </div>
-        </div>
-    )
-}
+const backgroundImageStyle = {
+    backgroundImage: 'url("/images/4676.jpg")',
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    height: "100vh",
+    width: "100%",
+};
