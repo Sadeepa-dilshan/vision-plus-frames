@@ -2,8 +2,23 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
-
+import { storage } from "../firebaseConfig";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 export default function FrameCreate() {
+    const uploadSingleImages = async (ID, image, index) => {
+        try {
+            const storageRef = ref(storage, `product/${ID}/${index}`);
+            const response = await fetch(image);
+            const blob = await response.blob();
+            await uploadBytes(storageRef, blob);
+            const downloadURL = await getDownloadURL(storageRef);
+            return { success: true, downloadURL };
+        } catch (error) {
+            console.error("Error uploading images:", error);
+            return { success: false, error: error.message };
+        }
+    };
+
     const [brands, setBrands] = useState([]); // For storing the list of brands
     const [codes, setCodes] = useState([]); // For storing the list of codes
     const [colors, setColors] = useState([]); // For storing the list of colors
@@ -20,73 +35,87 @@ export default function FrameCreate() {
 
     useEffect(() => {
         // Fetch all brands, codes, and colors to populate the dropdowns
-        axiosClient.get('/brands', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        .then(({ data }) => {
-            setBrands(data);
-        })
-        .catch((err) => {
-            console.error(err);
-        });
+        axiosClient
+            .get("/brands", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            .then(({ data }) => {
+                setBrands(data);
+            })
+            .catch((err) => {
+                console.error(err);
+            });
 
-        axiosClient.get('/codes', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        .then(({ data }) => {
-            setCodes(data);
-        })
-        .catch((err) => {
-            console.error(err);
-        });
+        axiosClient
+            .get("/codes", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            .then(({ data }) => {
+                setCodes(data);
+            })
+            .catch((err) => {
+                console.error(err);
+            });
 
-        axiosClient.get('/colors', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        .then(({ data }) => {
-            setColors(data);
-        })
-        .catch((err) => {
-            console.error(err);
-        });
+        axiosClient
+            .get("/colors", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            .then(({ data }) => {
+                setColors(data);
+            })
+            .catch((err) => {
+                console.error(err);
+            });
     }, [token]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log(
+            brandId,
+            codeId,
+            colorId,
+            price,
+            frameShape,
+            quantity,
+            image
+        );
 
         const formData = new FormData();
-        formData.append('brand_id', brandId);
-        formData.append('code_id', codeId);
-        formData.append('color_id', colorId);
-        formData.append('price', price);
-        formData.append('size', frameShape); // Changed to frameShape
-        formData.append('quantity', quantity);
+        formData.append("brand_id", brandId);
+        formData.append("code_id", codeId);
+        formData.append("color_id", colorId);
+        formData.append("price", price);
+        formData.append("size", frameShape); // Changed to frameShape
+        formData.append("quantity", quantity);
         if (image) {
-            formData.append('image', image);
+            formData.append("image", image);
+            const imgURL = uploadSingleImages(brandId, image, 0);
+            console.log(imgURL);
         }
 
-        try {
-            await axiosClient.post("/frames", formData, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'multipart/form-data',
-                }
-            });
+        // try {
+        //     await axiosClient.post("/frames", formData, {
+        //         headers: {
+        //             Authorization: `Bearer ${token}`,
+        //             "Content-Type": "multipart/form-data",
+        //         },
+        //     });
 
-            navigate("/frames"); // Redirect to the frame list after creation
-        } catch (err) {
-            if (err.response && err.response.status === 422) {
-                setErrors(err.response.data.errors);
-            } else {
-                console.error(err);
-            }
-        }
+        //     navigate("/frames"); // Redirect to the frame list after creation
+        // } catch (err) {
+        //     if (err.response && err.response.status === 422) {
+        //         setErrors(err.response.data.errors);
+        //     } else {
+        //         console.error(err);
+        //     }
+        // }
     };
 
     return (
@@ -182,8 +211,12 @@ export default function FrameCreate() {
                         onChange={(e) => setImage(e.target.files[0])}
                     />
                 </div>
-                {errors && <div className="error-message">{errors.message}</div>}
-                <button type="submit" className="btn btn-primary">Create Frame</button>
+                {errors && (
+                    <div className="error-message">{errors.message}</div>
+                )}
+                <button type="submit" className="btn btn-primary">
+                    Create Frame
+                </button>
             </form>
         </div>
     );
