@@ -5,6 +5,7 @@ import { useStateContext } from "../contexts/contextprovider";
 import { storage } from "../firebaseConfig";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 export default function FrameCreate() {
+    //! TODO SAVE IMG  INSIDE FIREBASE
     const uploadSingleImages = async (ID, image, index) => {
         try {
             const storageRef = ref(storage, `product/${ID}/${index}`);
@@ -18,7 +19,7 @@ export default function FrameCreate() {
             return { success: false, error: error.message };
         }
     };
-
+    //! TODO SAVE IMG  INSIDE FIREBASE
     const [brands, setBrands] = useState([]); // For storing the list of brands
     const [codes, setCodes] = useState([]); // For storing the list of codes
     const [colors, setColors] = useState([]); // For storing the list of colors
@@ -96,6 +97,8 @@ export default function FrameCreate() {
         formData.append("quantity", quantity);
         if (image) {
             formData.append("image", image);
+
+            //TODO SAVE IMG  INSIDE FIREBASE
             const imgURL = uploadSingleImages(brandId, image, 0);
             console.log(imgURL);
         }
