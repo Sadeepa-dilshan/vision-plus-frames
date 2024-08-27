@@ -8,34 +8,22 @@ export default function FrameCreate() {
     //! TODO SAVE IMG  INSIDE FIREBASE
     const uploadSingleImages = async (ID, image, index) => {
         try {
-            const storageRef = ref(storage, `product/${ID}/${index}`);
-            const response = await fet(image);
-            const blob = await response.blob();
-            await uploadBytes(storageRef, blob);
+            // Create a reference to the storage location
+            const storageRef = ref(storage, `images/${ID}/${index}`);
+
+            // Upload the image file to Firebase Storage
+            await uploadBytes(storageRef, image);
+
+            // Get the download URL for the uploaded file
             const downloadURL = await getDownloadURL(storageRef);
+
             return { success: true, downloadURL };
         } catch (error) {
-            console.error("Error uploading images:", error);
+            console.error("Error uploading image:", error);
             return { success: false, error: error.message };
         }
     };
-    const uploadImageToFirebase = async (file, path) => {
-        try {
-            // Create a reference to the storage location
-            const storageRef = ref(storage, path);
-    
-            // Upload the file to Firebase Storage
-            const uploadResult = await uploadBytes(storageRef, file);
-    
-            // Get the download URL for the uploaded file
-            const downloadURL = await getDownloadURL(storageRef);
-    
-            return downloadURL;
-        } catch (error) {
-            console.error("Error uploading image:", error);
-            throw new Error("Image upload failed.");
-        }
-    };
+
     //! TODO SAVE IMG  INSIDE FIREBASE
     const [brands, setBrands] = useState([]); // For storing the list of brands
     const [codes, setCodes] = useState([]); // For storing the list of codes
@@ -113,34 +101,34 @@ export default function FrameCreate() {
         formData.append("size", frameShape); // Changed to frameShape
         formData.append("quantity", quantity);
         if (image) {
-            formData.append("image", image);
-
             //TODO SAVE IMG  INSIDE FIREBASE
-            const imgURL = uploadSingleImages(brandId, image, 0);
+            const imgURL = await uploadSingleImages(brandId, image, 0);
 
             if (imgURL.success) {
-                console.log(imgURL);
+                //! IMAGE URL IS STORED IN downloadURL
+                console.log(imgURL["downloadURL"]);
+                formData.append("image", imgURL["downloadURL"]);
             } else {
                 console.log(imgURL);
             }
         }
 
-        // try {
-        //     await axiosClient.post("/frames", formData, {
-        //         headers: {
-        //             Authorization: `Bearer ${token}`,
-        //             "Content-Type": "multipart/form-data",
-        //         },
-        //     });
+        try {
+            await axiosClient.post("/frames", formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "multipart/form-data",
+                },
+            });
 
-        //     navigate("/frames"); // Redirect to the frame list after creation
-        // } catch (err) {
-        //     if (err.response && err.response.status === 422) {
-        //         setErrors(err.response.data.errors);
-        //     } else {
-        //         console.error(err);
-        //     }
-        // }
+            navigate("/frames"); // Redirect to the frame list after creation
+        } catch (err) {
+            if (err.response && err.response.status === 422) {
+                setErrors(err.response.data.errors);
+            } else {
+                console.error(err);
+            }
+        }
     };
 
     return (
