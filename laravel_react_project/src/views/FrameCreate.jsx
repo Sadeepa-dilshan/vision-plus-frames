@@ -9,7 +9,7 @@ export default function FrameCreate() {
     const uploadSingleImages = async (ID, image, index) => {
         try {
             const storageRef = ref(storage, `product/${ID}/${index}`);
-            const response = await fetch(image);
+            const response = await fet(image);
             const blob = await response.blob();
             await uploadBytes(storageRef, blob);
             const downloadURL = await getDownloadURL(storageRef);
@@ -17,6 +17,23 @@ export default function FrameCreate() {
         } catch (error) {
             console.error("Error uploading images:", error);
             return { success: false, error: error.message };
+        }
+    };
+    const uploadImageToFirebase = async (file, path) => {
+        try {
+            // Create a reference to the storage location
+            const storageRef = ref(storage, path);
+    
+            // Upload the file to Firebase Storage
+            const uploadResult = await uploadBytes(storageRef, file);
+    
+            // Get the download URL for the uploaded file
+            const downloadURL = await getDownloadURL(storageRef);
+    
+            return downloadURL;
+        } catch (error) {
+            console.error("Error uploading image:", error);
+            throw new Error("Image upload failed.");
         }
     };
     //! TODO SAVE IMG  INSIDE FIREBASE
@@ -100,7 +117,12 @@ export default function FrameCreate() {
 
             //TODO SAVE IMG  INSIDE FIREBASE
             const imgURL = uploadSingleImages(brandId, image, 0);
-            console.log(imgURL);
+
+            if (imgURL.success) {
+                console.log(imgURL);
+            } else {
+                console.log(imgURL);
+            }
         }
 
         // try {
