@@ -10,6 +10,8 @@ import {
     TextField,
     Typography,
     CircularProgress,
+    Alert,
+    Fade,
 } from "@mui/material";
 import { useAlert } from "../contexts/AlertContext";
 
@@ -22,7 +24,7 @@ export default function Login() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    const Submit = async (ev) => {
+    const handleSubmit = async (ev) => {
         ev.preventDefault();
         setLoading(true); // Start loading
         setError(""); // Clear any previous errors
@@ -58,6 +60,10 @@ export default function Login() {
                 showAlert(response.data.message, "error");
             } else {
                 setError("An unexpected error occurred. Please try again.");
+                showAlert(
+                    "An unexpected error occurred. Please try again.",
+                    "error"
+                );
             }
         }
     };
@@ -68,8 +74,13 @@ export default function Login() {
             direction="row"
             justifyContent="center"
             alignItems="center"
-            height={"100vh"}
-            style={backgroundImageStyle}
+            height="100vh"
+            sx={{
+                backgroundImage: 'url("/images/4676.jpg")',
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                position: "relative",
+            }}
         >
             <Box
                 sx={{
@@ -83,95 +94,114 @@ export default function Login() {
                 }}
             />
 
-            <Paper
-                variant="elevation"
-                elevation={2}
-                sx={{
-                    padding: "1rem",
-                    width: {
-                        xs: "96%",
-                        sm: "70%",
-                        md: "50%",
-                        lg: "60%",
-                        xl: "40%",
-                    },
-                    zIndex: 2,
-                }}
-            >
-                <Box sx={{ textAlign: "center" }}>
-                    <img
-                        src="/images/logo2.png"
-                        style={{
-                            padding: ".5rem",
-                            borderRadius: "10px",
-                            width: "80%",
-                        }}
-                        alt="Logo"
-                    />
-                </Box>
+            <Fade in timeout={1000}>
+                <Paper
+                    variant="elevation"
+                    elevation={3}
+                    sx={{
+                        padding: "2rem",
+                        width: {
+                            xs: "90%",
+                            sm: "80%",
+                            md: "60%",
+                            lg: "50%",
+                            xl: "40%",
+                        },
+                        backgroundColor: "white",
+                        zIndex: 2,
+                        transition: "transform 0.3s ease-in-out",
+                        "&:hover": {
+                            transform: "scale(1.02)",
+                        },
+                        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+                    }}
+                >
+                    <Box sx={{ textAlign: "center", marginBottom: "1rem" }}>
+                        <img
+                            src="/images/logo2.png"
+                            alt="Logo"
+                            style={{
+                                width: "70%",
+                                marginBottom: "1rem",
+                            }}
+                        />
+                    </Box>
 
-                <form onSubmit={Submit}>
                     <Typography
-                        variant="h6"
+                        variant="h4"
                         component="h1"
-                        fontWeight={"bold"}
-                        sx={{ textAlign: "center", marginX: "1rem" }}
-                        fontStyle={"revert-layer"}
+                        fontWeight="bold"
+                        sx={{ textAlign: "center", marginBottom: "1rem" }}
                     >
                         Login
                     </Typography>
 
-                    <TextField
-                        label="Email"
-                        sx={{ width: "100%", marginTop: "2rem" }}
-                        variant="outlined"
-                        value={email}
-                        type="email"
-                        placeholder="Enter your login email"
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                    <TextField
-                        label="Password"
-                        sx={{ width: "100%", marginY: "1rem" }}
-                        variant="outlined"
-                        value={password}
-                        type="password"
-                        placeholder="Enter your login password"
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-
-                    <Button
-                        sx={{ backgroundColor: "black", position: "relative" }}
-                        fullWidth
-                        type="submit"
-                        variant="contained"
-                        size="large"
-                        disabled={loading} // Disable button when loading
-                    >
-                        {loading ? (
-                            <CircularProgress
-                                size={24}
-                                sx={{ color: "white" }}
-                            />
-                        ) : (
-                            "Login"
+                    <form onSubmit={handleSubmit}>
+                        {error && (
+                            <Alert
+                                severity="error"
+                                sx={{ marginBottom: "1rem" }}
+                            >
+                                {error}
+                            </Alert>
                         )}
-                    </Button>
+                        <TextField
+                            label="Email"
+                            sx={{ width: "100%", marginTop: "1rem" }}
+                            variant="outlined"
+                            value={email}
+                            type="email"
+                            placeholder="Enter your login email"
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                        <TextField
+                            label="Password"
+                            sx={{ width: "100%", marginTop: "1rem" }}
+                            variant="outlined"
+                            value={password}
+                            type="password"
+                            placeholder="Enter your login password"
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
 
-                    <Typography variant="body1" sx={{ marginTop: "1rem" }}>
-                        Not Registered?{" "}
-                        <Link to="/register">Create a new account</Link>
-                    </Typography>
-                </form>
-            </Paper>
+                        <Button
+                            sx={{
+                                backgroundColor: "black",
+                                color: "white",
+                                position: "relative",
+                                marginTop: "1rem",
+                                "&:hover": {
+                                    backgroundColor: "darkgrey",
+                                },
+                            }}
+                            fullWidth
+                            type="submit"
+                            variant="contained"
+                            size="large"
+                            disabled={loading} // Disable button when loading
+                        >
+                            {loading ? (
+                                <CircularProgress
+                                    size={24}
+                                    sx={{ color: "white" }}
+                                />
+                            ) : (
+                                "Login"
+                            )}
+                        </Button>
+
+                        <Typography
+                            variant="body1"
+                            sx={{ marginTop: "1rem", textAlign: "center" }}
+                        >
+                            Not Registered?{" "}
+                            <Link to="/register" style={{ color: "#1976d2" }}>
+                                Create a new account
+                            </Link>
+                        </Typography>
+                    </form>
+                </Paper>
+            </Fade>
         </Grid>
     );
 }
-
-const backgroundImageStyle = {
-    backgroundImage: 'url("/images/4676.jpg")',
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    height: "100vh",
-    width: "100%",
-};

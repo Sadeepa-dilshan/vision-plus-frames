@@ -10,10 +10,11 @@ import {
     TextField,
     Typography,
     CircularProgress,
+    Alert,
 } from "@mui/material";
 import { useAlert } from "../contexts/AlertContext";
 
-export default function register() {
+export default function Register() {
     const { showAlert } = useAlert();
 
     const [name, setName] = useState("");
@@ -23,7 +24,7 @@ export default function register() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    const Submit = async (ev) => {
+    const handleSubmit = async (ev) => {
         ev.preventDefault();
         setLoading(true); // Start loading
         setError(""); // Clear any previous errors
@@ -42,7 +43,6 @@ export default function register() {
             showAlert("Registration successful!", "success");
         } catch (err) {
             console.log("Error:", err);
-
             setLoading(false); // Stop loading
             const response = err.response;
             console.log("Error response:", err.response); // Log the error response
@@ -66,8 +66,12 @@ export default function register() {
             direction="row"
             justifyContent="center"
             alignItems="center"
-            height={"100vh"}
-            style={backgroundImageStyle}
+            height="100vh"
+            sx={{
+                backgroundImage: 'url("/images/4676.jpg")',
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+            }}
         >
             <Box
                 sx={{
@@ -83,45 +87,49 @@ export default function register() {
 
             <Paper
                 variant="elevation"
-                elevation={2}
+                elevation={3}
                 sx={{
-                    padding: "1rem",
+                    padding: "2rem",
                     width: {
-                        xs: "96%",
-                        sm: "70%",
-                        md: "50%",
-                        lg: "60%",
+                        xs: "90%",
+                        sm: "80%",
+                        md: "60%",
+                        lg: "50%",
                         xl: "40%",
                     },
+                    backgroundColor: "white",
                     zIndex: 2,
                 }}
             >
-                <Box sx={{ textAlign: "center" }}>
+                <Box sx={{ textAlign: "center", marginBottom: "1rem" }}>
                     <img
                         src="/images/logo2.png"
-                        style={{
-                            padding: ".5rem",
-                            borderRadius: "10px",
-                            width: "80%",
-                        }}
                         alt="Logo"
+                        style={{
+                            width: "70%",
+                            marginBottom: "1rem",
+                        }}
                     />
                 </Box>
 
-                <form onSubmit={Submit}>
-                    <Typography
-                        variant="h6"
-                        component="h1"
-                        fontWeight={"bold"}
-                        sx={{ textAlign: "center", marginX: "1rem" }}
-                        fontStyle={"revert-layer"}
-                    >
-                        Register
-                    </Typography>
+                <Typography
+                    variant="h4"
+                    component="h1"
+                    fontWeight="bold"
+                    sx={{ textAlign: "center", marginBottom: "1rem" }}
+                >
+                    Register
+                </Typography>
 
+                <form onSubmit={handleSubmit}>
+                    {error && (
+                        <Alert severity="error" sx={{ marginBottom: "1rem" }}>
+                            {error}
+                        </Alert>
+                    )}
                     <TextField
                         label="Name"
-                        sx={{ width: "100%", marginTop: "2rem" }}
+                        sx={{ width: "100%", marginTop: "1rem" }}
                         variant="outlined"
                         value={name}
                         type="text"
@@ -130,7 +138,7 @@ export default function register() {
                     />
                     <TextField
                         label="Email"
-                        sx={{ width: "100%", marginTop: "2rem" }}
+                        sx={{ width: "100%", marginTop: "1rem" }}
                         variant="outlined"
                         value={email}
                         type="email"
@@ -139,7 +147,7 @@ export default function register() {
                     />
                     <TextField
                         label="Password"
-                        sx={{ width: "100%", marginY: "1rem" }}
+                        sx={{ width: "100%", marginTop: "1rem" }}
                         variant="outlined"
                         value={password}
                         type="password"
@@ -148,7 +156,12 @@ export default function register() {
                     />
 
                     <Button
-                        sx={{ backgroundColor: "black", position: "relative" }}
+                        sx={{
+                            backgroundColor: "black",
+                            color: "white",
+                            position: "relative",
+                            marginTop: "1rem",
+                        }}
                         fullWidth
                         type="submit"
                         variant="contained"
@@ -165,19 +178,14 @@ export default function register() {
                         )}
                     </Button>
 
-                    <Typography variant="body1" sx={{ marginTop: "1rem" }}>
-                        Already Have An Account? <Link to="/login">Login</Link>
+                    <Typography
+                        variant="body1"
+                        sx={{ marginTop: "1rem", textAlign: "center" }}
+                    >
+                        Already have an account? <Link to="/login">Login</Link>
                     </Typography>
                 </form>
             </Paper>
         </Grid>
     );
 }
-
-const backgroundImageStyle = {
-    backgroundImage: 'url("/images/4676.jpg")',
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    height: "100vh",
-    width: "100%",
-};
