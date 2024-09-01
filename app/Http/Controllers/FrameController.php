@@ -24,19 +24,11 @@ class FrameController extends Controller
             'color_id' => 'required|exists:colors,id',
             'price' => 'required|numeric',
             'size' => 'required|string|max:255',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|string',
             'quantity' => 'required|integer',
         ]);
 
-        $frameData = $request->only(['brand_id', 'code_id', 'color_id', 'price', 'size']);
-        
-        if ($request->hasFile('image')) {
-            $imageName = $request->file('image')->getClientOriginalName();
-            $destinationPath = base_path('laravel_react_project/public/images/frames');
-            $request->file('image')->move($destinationPath, $imageName);
-            $frameData['image'] = $imageName;
-        }
-
+        $frameData = $request->only(['brand_id', 'code_id', 'color_id', 'price', 'size','image']);
         $frame = Frame::create($frameData);
 
         Stock::create([

@@ -80,7 +80,7 @@ export default function FrameIndex() {
                                     <td>{frame.id}</td>
                                     <td>
                                         {frame.image ? (
-                                                <img src={`images/frames/${frame.image}`} width="50" height="50" />
+                                              <img src={`${frame.image}`} width="50" height="50" />
                                             ) : (
                                                 "No Image"
                                         )}
