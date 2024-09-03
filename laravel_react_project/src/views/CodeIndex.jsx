@@ -2,6 +2,19 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
+import {
+    Button,
+    CircularProgress,
+    Container,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Typography,
+} from "@mui/material";
 
 export default function CodeIndex() {
     const [codes, setCodes] = useState([]);
@@ -15,18 +28,19 @@ export default function CodeIndex() {
 
     const getCodes = () => {
         setLoading(true);
-        axiosClient.get('/codes', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        .then(({ data }) => {
-            setLoading(false);
-            setCodes(data);
-        })
-        .catch(() => {
-            setLoading(false);
-        });
+        axiosClient
+            .get("/codes", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            .then(({ data }) => {
+                setLoading(false);
+                setCodes(data);
+            })
+            .catch(() => {
+                setLoading(false);
+            });
     };
 
     const handleDelete = (codeId) => {
@@ -34,53 +48,76 @@ export default function CodeIndex() {
             return;
         }
 
-        axiosClient.delete(`/codes/${codeId}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        .then(() => {
-            getCodes(); // Refresh the code list after deletion
-        });
+        axiosClient
+            .delete(`/codes/${codeId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            .then(() => {
+                getCodes(); // Refresh the code list after deletion
+            });
     };
 
     return (
-        <div className="card">
-            <h2>Codes</h2>
-            <div className="card-body">
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Code Name</th>
-                            <th>Brand Name</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
+        <Paper elevation={3} sx={{ padding: 2, marginTop: 3 }}>
+            <Typography variant="h4" component="h2" gutterBottom>
+                Codes
+            </Typography>
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>ID</TableCell>
+                            <TableCell>Code Name</TableCell>
+                            <TableCell>Brand Name</TableCell>
+                            <TableCell>Actions</TableCell>
+                        </TableRow>
+                    </TableHead>
                     {loading ? (
-                        <tbody>
-                            <tr>
-                                <td colSpan="4" className="text-center">Loading...</td>
-                            </tr>
-                        </tbody>
+                        <TableBody>
+                            <TableRow>
+                                <TableCell colSpan={4} align="center">
+                                    <CircularProgress />
+                                </TableCell>
+                            </TableRow>
+                        </TableBody>
                     ) : (
-                        <tbody>
+                        <TableBody>
                             {codes.map((code) => (
-                                <tr key={code.id}>
-                                    <td>{code.id}</td>
-                                    <td>{code.code_name}</td>
-                                    <td>{code.brand.brand_name}</td>
-                                    <td>
-                                        <Link to={`/codes/edit/${code.id}`} className="btn btn-edit">Edit</Link>
-                                        &nbsp;
-                                        <button onClick={() => handleDelete(code.id)} className="btn btn-delete">Delete</button>
-                                    </td>
-                                </tr>
+                                <TableRow key={code.id}>
+                                    <TableCell>{code.id}</TableCell>
+                                    <TableCell>{code.code_name}</TableCell>
+                                    <TableCell>
+                                        {code.brand.brand_name}
+                                    </TableCell>
+                                    <TableCell>
+                                        <Button
+                                            component={Link}
+                                            to={`/codes/edit/${code.id}`}
+                                            variant="outlined"
+                                            size="small"
+                                            sx={{ marginRight: 1 }}
+                                        >
+                                            Edit
+                                        </Button>
+                                        <Button
+                                            onClick={() =>
+                                                handleDelete(code.id)
+                                            }
+                                            variant="contained"
+                                            color="error"
+                                            size="small"
+                                        >
+                                            Delete
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
                             ))}
-                        </tbody>
+                        </TableBody>
                     )}
-                </table>
-            </div>
-        </div>
+                </Table>
+            </TableContainer>
+        </Paper>
     );
 }
