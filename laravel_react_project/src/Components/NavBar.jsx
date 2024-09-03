@@ -18,6 +18,7 @@ import AddToPhotosIcon from "@mui/icons-material/AddToPhotos";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
 import LogoutIcon from "@mui/icons-material/Logout";
+import DashboardIcon from "@mui/icons-material/Dashboard";
 
 const drawerWidth = 240;
 
@@ -42,6 +43,11 @@ export default function MiniDrawer() {
     };
 
     const NavData = [
+        {
+            path: "/dashboard",
+            text: "Dashboard",
+            icon: <DashboardIcon />,
+        },
         {
             path: "/brands",
             text: "Brands",

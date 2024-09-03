@@ -4,6 +4,20 @@ import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
 import { storage } from "../firebaseConfig";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import {
+    Container,
+    Typography,
+    TextField,
+    MenuItem,
+    Button,
+    Grid,
+    InputLabel,
+    FormControl,
+    Select,
+    Alert,
+    Skeleton,
+    Card,
+} from "@mui/material";
 export default function FrameCreate() {
     //! TODO SAVE IMG  INSIDE FIREBASE
     const uploadSingleImages = async (ID, image, index) => {
@@ -132,105 +146,181 @@ export default function FrameCreate() {
     };
 
     return (
-        <div className="card">
-            <h2>Create New Frame</h2>
+        <Container maxWidth="sm">
+            <Typography variant="h4" component="h1" gutterBottom>
+                Create New Frame
+            </Typography>
             <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label htmlFor="brandId">Select Brand:</label>
-                    <select
-                        id="brandId"
-                        value={brandId}
-                        onChange={(e) => setBrandId(e.target.value)}
-                        required
-                    >
-                        <option value="">-- Select a Brand --</option>
-                        {brands.map((brand) => (
-                            <option key={brand.id} value={brand.id}>
-                                {brand.brand_name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <div className="form-group">
-                    <label htmlFor="codeId">Select Code:</label>
-                    <select
-                        id="codeId"
-                        value={codeId}
-                        onChange={(e) => setCodeId(e.target.value)}
-                        required
-                    >
-                        <option value="">-- Select a Code --</option>
-                        {codes.map((code) => (
-                            <option key={code.id} value={code.id}>
-                                {code.code_name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <div className="form-group">
-                    <label htmlFor="colorId">Select Color:</label>
-                    <select
-                        id="colorId"
-                        value={colorId}
-                        onChange={(e) => setColorId(e.target.value)}
-                        required
-                    >
-                        <option value="">-- Select a Color --</option>
-                        {colors.map((color) => (
-                            <option key={color.id} value={color.id}>
-                                {color.color_name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <div className="form-group">
-                    <label htmlFor="price">Price:</label>
-                    <input
-                        type="number"
-                        id="price"
-                        value={price}
-                        onChange={(e) => setPrice(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="frameShape">Frame Shape:</label>
-                    <select
-                        id="frameShape"
-                        value={frameShape}
-                        onChange={(e) => setFrameShape(e.target.value)}
-                        required
-                    >
-                        <option value="">-- Select Frame Shape --</option>
-                        <option value="Full">Full</option>
-                        <option value="Half">Half</option>
-                    </select>
-                </div>
-                <div className="form-group">
-                    <label htmlFor="quantity">Quantity:</label>
-                    <input
-                        type="number"
-                        id="quantity"
-                        value={quantity}
-                        onChange={(e) => setQuantity(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="image">Upload Image:</label>
-                    <input
-                        type="file"
-                        id="image"
-                        onChange={(e) => setImage(e.target.files[0])}
-                    />
-                </div>
-                {errors && (
-                    <div className="error-message">{errors.message}</div>
-                )}
-                <button type="submit" className="btn btn-primary">
-                    Create Frame
-                </button>
+                <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                        <FormControl fullWidth>
+                            <InputLabel id="brandId-label">
+                                Select Brand
+                            </InputLabel>
+                            <Select
+                                labelId="brandId-label"
+                                id="brandId"
+                                value={brandId}
+                                label="Select Brand"
+                                onChange={(e) => setBrandId(e.target.value)}
+                                required
+                            >
+                                <MenuItem value="">
+                                    <em>-- Select a Brand --</em>
+                                </MenuItem>
+                                {brands.map((brand) => (
+                                    <MenuItem key={brand.id} value={brand.id}>
+                                        {brand.brand_name}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormControl fullWidth>
+                            <InputLabel id="codeId-label">
+                                Select Code
+                            </InputLabel>
+                            <Select
+                                labelId="codeId-label"
+                                id="codeId"
+                                value={codeId}
+                                label="Select Code"
+                                onChange={(e) => setCodeId(e.target.value)}
+                                required
+                            >
+                                <MenuItem value="">
+                                    <em>-- Select a Code --</em>
+                                </MenuItem>
+                                {codes.map((code) => (
+                                    <MenuItem key={code.id} value={code.id}>
+                                        {code.code_name}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormControl fullWidth>
+                            <InputLabel id="colorId-label">
+                                Select Color
+                            </InputLabel>
+                            <Select
+                                labelId="colorId-label"
+                                id="colorId"
+                                value={colorId}
+                                label="Select Color"
+                                onChange={(e) => setColorId(e.target.value)}
+                                required
+                            >
+                                <MenuItem value="">
+                                    <em>-- Select a Color --</em>
+                                </MenuItem>
+                                {colors.map((color) => (
+                                    <MenuItem key={color.id} value={color.id}>
+                                        {color.color_name}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                            fullWidth
+                            id="price"
+                            label="Price"
+                            type="number"
+                            value={price}
+                            onChange={(e) => setPrice(e.target.value)}
+                            required
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormControl fullWidth>
+                            <InputLabel id="frameShape-label">
+                                Frame Shape
+                            </InputLabel>
+                            <Select
+                                labelId="frameShape-label"
+                                id="frameShape"
+                                value={frameShape}
+                                label="Frame Shape"
+                                onChange={(e) => setFrameShape(e.target.value)}
+                                required
+                            >
+                                <MenuItem value="">
+                                    <em>-- Select Frame Shape --</em>
+                                </MenuItem>
+                                <MenuItem value="Full">Full</MenuItem>
+                                <MenuItem value="Half">Half</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                            fullWidth
+                            id="quantity"
+                            label="Quantity"
+                            type="number"
+                            value={quantity}
+                            onChange={(e) => setQuantity(e.target.value)}
+                            required
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Card sx={{ p: 2 }} variant="outlined">
+                            {image ? (
+                                <img
+                                    style={{
+                                        maxWidth: "200px",
+                                        height: "200px",
+                                        objectFit: "contain",
+                                    }}
+                                    src={URL.createObjectURL(image)}
+                                    alt="Image Preview"
+                                />
+                            ) : (
+                                <Skeleton
+                                    variant="rectangular"
+                                    width="200px"
+                                    height="200px"
+                                />
+                            )}
+
+                            <Button
+                                variant="outlined"
+                                component="label"
+                                fullWidth
+                                sx={{ mt: 2 }}
+                            >
+                                Upload Image
+                                <input
+                                    type="file"
+                                    hidden
+                                    onChange={(e) =>
+                                        setImage(e.target.files[0])
+                                    }
+                                />
+                            </Button>
+                        </Card>
+                    </Grid>
+                    {errors && (
+                        <Grid item xs={12}>
+                            <Alert severity="error">{errors.message}</Alert>
+                        </Grid>
+                    )}
+                    <Grid item xs={12}>
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            color="primary"
+                            fullWidth
+                        >
+                            Create Frame
+                        </Button>
+                    </Grid>
+                </Grid>
             </form>
-        </div>
+        </Container>
     );
 }

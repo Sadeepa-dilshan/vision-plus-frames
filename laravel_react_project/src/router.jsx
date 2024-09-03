@@ -19,6 +19,7 @@ import FrameCreate from "./views/FrameCreate.jsx";
 import FrameIndex from "./views/FrameIndex.jsx";
 import FrameEdit from "./views/FrameEdit.jsx";
 import AnimatedPage from "./Components/PageLoadAnimation.jsx";
+import Dashboard from "./views/Dashboard.jsx";
 
 const router = createBrowserRouter([
     {
@@ -150,6 +151,14 @@ const router = createBrowserRouter([
                 element: (
                     <AnimatedPage>
                         <FrameEdit />
+                    </AnimatedPage>
+                ),
+            },
+            {
+                path: "/dashboard",
+                element: (
+                    <AnimatedPage>
+                        <Dashboard />
                     </AnimatedPage>
                 ),
             },
