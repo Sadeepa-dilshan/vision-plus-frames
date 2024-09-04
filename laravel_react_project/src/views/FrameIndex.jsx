@@ -1,9 +1,21 @@
+/* eslint-disable react/prop-types */
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { Button, CircularProgress, Box } from "@mui/material";
+import {
+    MaterialReactTable,
+    useMaterialReactTable,
+} from "material-react-table";
+import {
+    Button,
+    CircularProgress,
+    Box,
+    Typography,
+    IconButton,
+    Skeleton,
+} from "@mui/material";
+import { Delete, Edit, Fullscreen } from "@mui/icons-material";
 
 export default function FrameIndex() {
     const [frames, setFrames] = useState([]);
@@ -49,96 +61,127 @@ export default function FrameIndex() {
     };
 
     const columns = [
-        { field: "id", headerName: "ID", width: 70 },
         {
-            field: "image",
-            headerName: "Image",
-            width: 100,
-            renderCell: (params) =>
-                params.value ? (
-                    <img
-                        src={params.value}
-                        alt="Frame"
-                        style={{ width: 50, height: 50 }}
-                    />
-                ) : (
-                    "No Image"
-                ),
-        },
-        {
-            field: "brand",
-            headerName: "Brand",
-            width: 150,
-            valueGetter: (params) => params.brand_name,
-        },
-        {
-            field: "code",
-            headerName: "Code",
-            width: 150,
-            valueGetter: (params) => params.code_name,
-        },
-        {
-            field: "color",
-            headerName: "Color",
-            width: 150,
-            valueGetter: (params) => params.color_name,
-        },
-        { field: "price", headerName: "Price", width: 100 },
-        { field: "size", headerName: "Shape", width: 100 },
-        {
-            field: "stocks",
-            headerName: "Quantity",
-            width: 120,
-            valueGetter: (params) => params.qty,
-        },
-        {
-            field: "actions",
-            headerName: "Actions",
-            width: 200,
-            renderCell: (params) => (
+            accessorKey: "actions",
+            header: "Actions",
+            size: 200,
+            Cell: ({ row }) => (
                 <>
-                    <Button
+                    <IconButton
                         variant="contained"
                         color="primary"
                         size="small"
                         onClick={() =>
-                            navigate(`/frames/edit/${params.row.id}`)
+                            navigate(`/frames/edit/${row.original.id}`)
                         }
                         style={{ marginRight: 10 }}
                     >
-                        Edit
-                    </Button>
-                    <Button
+                        <Edit />
+                    </IconButton>
+                    <IconButton
                         variant="contained"
                         color="secondary"
                         size="small"
-                        onClick={() => handleDelete(params.row.id)}
+                        onClick={() => handleDelete(row.original.id)}
                     >
-                        Delete
-                    </Button>
+                        <Delete color="error" />
+                    </IconButton>
                 </>
             ),
         },
+        {
+            accessorKey: "id",
+            header: "ID",
+            size: 70,
+        },
+        {
+            accessorKey: "image",
+            header: "Image",
+            size: 100,
+            Cell: ({ cell }) =>
+                cell.getValue() ? (
+                    <img
+                        src={cell.getValue()}
+                        alt="Frame"
+                        style={{ width: 50, height: 50, objectFit: "contain" }}
+                    />
+                ) : (
+                    <Skeleton
+                        animation="pulse"
+                        variant="rectangular"
+                        width={50}
+                        height={50}
+                    />
+                ),
+        },
+        {
+            accessorKey: "brand.brand_name",
+            header: "Brand",
+            size: 150,
+        },
+        {
+            accessorKey: "code.code_name",
+            header: "Code",
+            size: 150,
+        },
+        {
+            accessorKey: "color.color_name",
+            header: "Color",
+            size: 150,
+        },
+        {
+            accessorKey: "price",
+            header: "Price",
+            size: 100,
+        },
+        {
+            accessorKey: "size",
+            header: "Shape",
+            size: 100,
+        },
+        {
+            accessorKey: "stocks",
+            header: "Quantity",
+            size: 120,
+            Cell: ({ row }) => {
+                const stock = row.original.stocks?.[0]; // Access the first element of the stocks array
+                return stock ? stock.qty : "N/A"; // Return the qty or "N/A" if stocks is empty
+            },
+        },
     ];
+    console.log(frames);
 
     return (
-        <Box sx={{ height: 400, width: "100%" }}>
+        <Box sx={{ height: "100%", width: "100%" }}>
             <h2>Frames</h2>
-            {console.log(frames)}
 
-            {loading ? (
-                <CircularProgress />
-            ) : (
-                <DataGrid
-                    rows={frames}
-                    columns={columns}
-                    pageSize={5}
-                    rowsPerPageOptions={[5, 10, 15]}
-                    checkboxSelection
-                    disableSelectionOnClick
-                    slots={{ toolbar: GridToolbar }}
-                />
-            )}
+            <MaterialReactTable
+                columns={columns}
+                data={frames}
+                enableRowSelection
+                enablePagination
+                enableColumnFilters
+                enableSorting
+                enableToolbarInternalActions
+                initialState={{ pagination: { pageSize: 5 } }}
+                muiToolbarAlertBannerProps={{
+                    color: "primary",
+                }}
+                muiTableContainerProps={{
+                    sx: { maxHeight: 400 },
+                }}
+                state={{ isLoading: loading }}
+                muiTableProps={{
+                    sx: {
+                        "& .MuiTableCell-root": {
+                            padding: ".5rem", // Reduce padding for smaller density
+                        },
+                        "& .MuiTableRow-root": {
+                            height: ".5rem", // Reduce row height for smaller density
+                        },
+                    },
+                }}
+            />
         </Box>
     );
 }

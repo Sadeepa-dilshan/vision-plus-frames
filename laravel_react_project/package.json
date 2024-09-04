@@ -20,6 +20,7 @@
     "dayjs": "^1.11.13",
     "firebase": "^10.13.1",
     "framer-motion": "^11.3.29",
+    "material-react-table": "^2.13.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.1"
