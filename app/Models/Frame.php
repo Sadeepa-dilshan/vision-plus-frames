@@ -33,4 +33,8 @@ class Frame extends Model
     {
         return $this->hasMany(Stock::class);
     }
+    public function stockChanges()
+    {
+        return $this->hasMany(StockChange::class);
+    }
 }

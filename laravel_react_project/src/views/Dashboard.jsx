@@ -6,80 +6,62 @@ import {
     Card,
     CardContent,
     Typography,
-    Modal,
-    Button,
-    CircularProgress,
+    Skeleton,
     useMediaQuery,
     useTheme,
-    Skeleton,
+    Button
 } from "@mui/material";
-import ResponsiveDatePicker from "../Components/ResponsiveDatePicker";
-
-const dummyData = [
-    {
-        id: 1,
-        brand_name: "Dolce",
-        colors: ["Red", "Blue"],
-        frames: { half: 10, full: 20 },
-        total_sales: 1500,
-    },
-    {
-        id: 2,
-        brand_name: "Guess",
-        colors: ["Green", "Yellow"],
-        frames: { half: 5, full: 15 },
-        total_sales: 1200,
-    },
-    {
-        id: 3,
-        brand_name: "Carera",
-        colors: ["Black", "White"],
-        frames: { half: 8, full: 25 },
-        total_sales: 1800,
-    },
-    {
-        id: 4,
-        brand_name: "Crown",
-        colors: ["Pink", "Purple"],
-        frames: { half: 12, full: 30 },
-        total_sales: 2000,
-    },
-];
+import ResponsiveDatePicker from "../Components/ResponsiveDatePicker"; 
+import dayjs from 'dayjs';
 
 export default function Dashboard() {
-    const [brands, setBrands] = useState([]);
-    const [selectedBrand, setSelectedBrand] = useState(null);
+    const [frames, setFrames] = useState([]);
     const [loading, setLoading] = useState(false);
     const { token } = useStateContext(); // Get the auth token
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+    // Default to last 30 days
+    const [fromDate, setFromDate] = useState(dayjs().subtract(30, 'day'));
+    const [toDate, setToDate] = useState(dayjs());
+
     useEffect(() => {
-        getBrands();
-    }, []);
+        fetchTopFrames();
+    }, [fromDate, toDate]); // Fetch data when date range changes
 
-    const getBrands = () => {
+    // Fetch top 5 frames with most stock reductions based on selected date range
+    const fetchTopFrames = async () => {
         setLoading(true);
-        // Use dummyData for now
-        setTimeout(() => {
+        try {
+            const response = await axiosClient.get('/top-frames-by-stock-reduction', {
+                params: {
+                    start_date: fromDate.format('YYYY-MM-DD'),
+                    end_date: toDate.format('YYYY-MM-DD'),
+                },
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            setFrames(response.data);
+        } catch (error) {
+            console.error('Error fetching top frames:', error);
+        } finally {
             setLoading(false);
-            setBrands(dummyData);
-        }, 1000);
-    };
-
-    const handleBrandClick = (brand) => {
-        setSelectedBrand(brand);
-    };
-
-    const handleCloseModal = () => {
-        setSelectedBrand(null);
+        }
     };
 
     return (
         <Box sx={{ padding: 1 }}>
-            <ResponsiveDatePicker />
+            {/* Date Range Picker */}
+            <ResponsiveDatePicker 
+                fromDate={fromDate} 
+                toDate={toDate} 
+                setFromDate={setFromDate} 
+                setToDate={setToDate} 
+            />
+
             <Typography variant="h4" gutterBottom>
-                Brand List
+                Top 5 Frames by Stock Reduction
             </Typography>
 
             {loading ? (
@@ -96,9 +78,9 @@ export default function Dashboard() {
                         width: isMobile ? "100%" : "40%",
                     }}
                 >
-                    {brands.map((brand) => (
+                    {frames.map((frame) => (
                         <Card
-                            key={brand.id}
+                            key={frame.frame_id}
                             sx={{
                                 cursor: "pointer",
                                 transition: "transform 0.2s",
@@ -107,7 +89,6 @@ export default function Dashboard() {
                                 },
                                 padding: 1,
                             }}
-                            onClick={() => handleBrandClick(brand)}
                         >
                             <CardContent>
                                 <Box
@@ -119,24 +100,38 @@ export default function Dashboard() {
                                 >
                                     <Box>
                                         <Typography variant="h5" noWrap>
-                                            {brand.brand_name}
+                                        {frame.frame.brand_name || "Unknown Brand"}
+                                        </Typography>
+                                        <Typography variant="body2" noWrap sx={{ fontWeight: 'bold' }}>
+                                            Frame Code: {frame.frame.code_name || "Unknown Code"}
                                         </Typography>
                                         <Typography variant="body2" noWrap>
-                                            {brand.colors.join(", ")}
+                                        Frame Color:{frame.frame.color_name || "Unknown Color"}
                                         </Typography>
                                     </Box>
                                     <Typography variant="h6" fontWeight="bold">
-                                        {brand.total_sales}
+                                        Total Reduction: {frame.total_reduction}
                                     </Typography>
                                 </Box>
                                 <Box sx={{ mt: 0.5 }}>
                                     <Typography variant="body2">
-                                        Half Frames: {brand.frames.half}
+                                        Frame Price: ${frame.frame.price}
                                     </Typography>
                                     <Typography variant="body2">
-                                        Full Frames: {brand.frames.full}
+                                        Frame Size: {frame.frame.size}
                                     </Typography>
                                 </Box>
+                                {frame.frame.image ? (
+                                        <img
+                                            src={`${frame.frame.image}`}
+                                            alt="Frame"
+                                            style={{ width: '100px', height: 'auto', marginTop: '10px' }} 
+                                        />
+                                    ) : (
+                                        <Typography variant="body2" color="textSecondary" sx={{ marginTop: '10px' }}>
+                                            No Image Available
+                                        </Typography>
+                                    )}
                             </CardContent>
                         </Card>
                     ))}

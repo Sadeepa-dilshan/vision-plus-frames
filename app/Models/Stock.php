@@ -16,4 +16,8 @@ class Stock extends Model
     {
         return $this->belongsTo(Frame::class);
     }
+    public function stockChanges()
+    {
+        return $this->hasMany(StockChange::class);
+    }
 }

@@ -66,6 +66,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
     Route::get('frames/{frame}', [FrameController::class, 'show']);
     Route::post('frames/{frame}', [FrameController::class, 'update'])->middleware('admin');
     Route::delete('frames/{frame}', [FrameController::class, 'destroy'])->middleware('admin');
+    Route::get('top-frames-by-stock-reduction', [FrameController::class, 'topFramesByStockReduction']);
 });
 
 // Stocks Routes
@@ -83,3 +84,4 @@ Route::post('register',[AuthController::class,'register']);
 Route::get('hello', function () {
     return response()->json(['message' => 'Hello World ,App Works!...']);
 });
+Route::get('top-frames-by-stock-reduction', [FrameController::class, 'topFramesByStockReduction']);

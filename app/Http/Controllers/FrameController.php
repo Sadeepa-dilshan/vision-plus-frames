@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use Log;
+use Carbon\Carbon;
 use App\Models\Frame;
 use App\Models\Stock;
+use App\Models\StockChange;
 use Illuminate\Http\Request;
 
 class FrameController extends Controller
@@ -34,6 +36,7 @@ class FrameController extends Controller
         Stock::create([
             'frame_id' => $frame->id,
             'qty' => $request->quantity,
+            'initial_count' => $request->quantity,
         ]);
 
         return response()->json($frame, 201);
@@ -81,14 +84,51 @@ class FrameController extends Controller
         // Update frame data
         $frame->update($frameData);
 
-        // Update stock quantity
-        if ($frame->stocks()->exists()) {
-            $frame->stocks()->update(['qty' => $request->quantity]);
+        // Update stock and stock_changes
+        $existingStock = $frame->stocks()->first();
+
+        if ($existingStock) {
+            // Calculate the change in quantity and status
+            if ($request->quantity > $existingStock->qty) {
+                $changeQty = $request->quantity - $existingStock->qty;
+                $status = 'plus';
+            } elseif ($request->quantity < $existingStock->qty) {
+                $changeQty = $existingStock->qty - $request->quantity;
+                $status = 'minus';
+            } else {
+                $changeQty = 0; // No change in stock
+            }
+    
+            // Update the existing stock quantity
+            $existingStock->update(['qty' => $request->quantity]);
+    
+            // Insert a new record in stock_changes table only if changeQty is not 0 or negative
+            if ($changeQty > 0) {
+                StockChange::create([
+                    'stock_id' => $existingStock->id,
+                    'frame_id' => $frame->id,
+                    'change_date' => now(),
+                    'change_qty' => $changeQty,
+                    'status' => $status,
+                ]);
+            }
         } else {
-            Stock::create([
+            // Create a new stock entry
+            $newStock = Stock::create([
                 'frame_id' => $frame->id,
                 'qty' => $request->quantity,
             ]);
+    
+            // Add the initial stock change entry only if the quantity is greater than 0
+            if ($request->quantity > 0) {
+                StockChange::create([
+                    'stock_id' => $newStock->id,
+                    'frame_id' => $frame->id,
+                    'change_date' => now(),
+                    'change_qty' => $request->quantity, // The first quantity added
+                    'status' => 'plus',
+                ]);
+            }
         }
 
         return response()->json($frame, 200);
@@ -99,5 +139,46 @@ class FrameController extends Controller
         $frame->delete();
 
         return response()->json(null, 204);
+    }
+
+    public function topFramesByStockReduction(Request $request)
+    {
+        $startDate = $request->input('start_date', Carbon::now()->subDays(30)->toDateString());
+        $endDate = $request->input('end_date', Carbon::now()->toDateString());
+    
+        // Ensure dates are formatted correctly
+        $startDate = Carbon::parse($startDate)->startOfDay();
+        $endDate = Carbon::parse($endDate)->endOfDay();
+    
+        // Query the stock_changes table for the top 5 frames 
+        $topFrames = StockChange::with(['frame.brand', 'frame.code', 'frame.color']) 
+            ->select('frame_id')
+            ->where('status', 'minus')
+            ->whereBetween('change_date', [$startDate, $endDate])
+            ->selectRaw('SUM(change_qty) as total_reduction')
+            ->groupBy('frame_id')
+            ->orderBy('total_reduction', 'desc')
+            ->take(5)
+            ->get()
+            ->map(function ($stockChange) {
+                $frame = $stockChange->frame;
+    
+                return [
+                    'frame_id' => $frame->id,
+                    'total_reduction' => $stockChange->total_reduction,
+                    'frame' => [
+                        'id' => $frame->id,
+                        'brand_name' => $frame->brand->brand_name ?? null,
+                        'code_name' => $frame->code->code_name ?? null,   
+                        'color_name' => $frame->color->color_name ?? null, 
+                        'price' => $frame->price,
+                        'size' => $frame->size,
+                        'image' => $frame->image,
+                        'created_at' => $frame->created_at,
+                        'updated_at' => $frame->updated_at,
+                    ]
+                ];
+            });
+        return response()->json($topFrames, 200);
     }
 }
