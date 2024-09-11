@@ -2,9 +2,22 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
+import { fetchData } from "../hooks/useFetchData";
+import { useAlert } from "../contexts/AlertContext";
+import {
+    Button,
+    CircularProgress,
+    TextField,
+    Card,
+    Typography,
+    Box,
+} from "@mui/material";
 
 export default function BrandCreate() {
     const [brandName, setBrandName] = useState("");
+    const { showAlert } = useAlert();
+    const [loading, setLoading] = useState(false);
+
     const [errors, setErrors] = useState(null);
     const { token } = useStateContext(); // To handle the auth token
     const navigate = useNavigate();
@@ -13,49 +26,82 @@ export default function BrandCreate() {
         e.preventDefault();
 
         try {
-            await axiosClient.post(
-                "/brands",
-                {
-                    brand_name: brandName,
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
+            setLoading(true);
+            const getData = await fetchData("/brands", token);
 
-            navigate("/brands"); // Redirect to the brand list after creation
+            if (getData.state) {
+                const exists = getData["data"].some(
+                    (item) => item.brand_name === brandName
+                );
+                if (exists) {
+                    showAlert("Brand already exists", "error");
+                } else {
+                    await axiosClient.post(
+                        "/brands",
+                        {
+                            brand_name: brandName,
+                        },
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        }
+                    );
+                    showAlert("Brand created successfully", "success");
+                    navigate("/brands"); // Redirect to the brand list after creation
+                }
+            }
         } catch (err) {
             if (err.response && err.response.status === 422) {
                 setErrors(err.response.data.errors);
             } else {
                 console.error(err);
             }
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div className="card">
-            <h2>Create New Brand</h2>
+        <Card sx={{ padding: 4, maxWidth: 500, margin: "auto", marginTop: 5 }}>
+            <Typography variant="h4" gutterBottom>
+                Create New Brand
+            </Typography>
             <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label htmlFor="brandName">Brand Name:</label>
-                    <input
-                        type="text"
-                        id="brandName"
+                <Box sx={{ marginBottom: 3 }}>
+                    <TextField
+                        fullWidth
+                        label="Brand Name"
                         value={brandName}
-                        onChange={(e) => setBrandName(e.target.value)}
+                        onChange={(e) =>
+                            setBrandName(e.target.value.toLocaleLowerCase())
+                        }
+                        variant="outlined"
+                        error={!!errors}
+                        helperText={errors ? errors.brand_name : ""}
                         required
                     />
-                </div>
-                {errors && (
-                    <div className="error-message">{errors.brand_name}</div>
-                )}
-                <button type="submit" className="btn btn-primary">
-                    Create Brand
-                </button>
+                </Box>
+                <Box
+                    sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                    }}
+                >
+                    <Button
+                        disabled={loading}
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                        startIcon={
+                            loading ? <CircularProgress size={24} /> : null
+                        }
+                    >
+                        {loading ? "Creating..." : "Create Brand"}
+                    </Button>
+                </Box>
             </form>
-        </div>
+        </Card>
     );
 }

@@ -2,6 +2,20 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
+import {
+    CircularProgress,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Typography,
+    IconButton,
+    Grid,
+} from "@mui/material";
+import { Edit, Delete, Fullscreen } from "@mui/icons-material";
 
 export default function ColorIndex() {
     const [colors, setColors] = useState([]);
@@ -14,70 +28,95 @@ export default function ColorIndex() {
 
     const getColors = () => {
         setLoading(true);
-        axiosClient.get('/colors', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        .then(({ data }) => {
-            setLoading(false);
-            setColors(data);
-        })
-        .catch(() => {
-            setLoading(false);
-        });
+        axiosClient
+            .get("/colors", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            .then(({ data }) => {
+                setLoading(false);
+                setColors(data);
+                // TODO: Store inside session storage
+            })
+            .catch(() => {
+                setLoading(false);
+            });
     };
+    console.log(colors);
 
     const handleDelete = (colorId) => {
         if (!window.confirm("Are you sure you want to delete this color?")) {
             return;
         }
 
-        axiosClient.delete(`/colors/${colorId}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        .then(() => {
-            getColors(); // Refresh the color list after deletion
-        });
+        axiosClient
+            .delete(`/colors/${colorId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            .then(() => {
+                getColors(); // Refresh the color list after deletion
+            });
     };
 
     return (
-        <div className="card">
-            <h2>Colors</h2>
-            <div className="card-body">
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Color Name</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
+        <Paper elevation={3} sx={{ padding: 2, marginTop: 3 }}>
+            <Typography variant="h4" component="h2" gutterBottom>
+                Colors
+            </Typography>
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            {/* <TableCell>ID</TableCell> */}
+                            <TableCell>Actions</TableCell>
+                            <TableCell>Color Name</TableCell>
+                        </TableRow>
+                    </TableHead>
                     {loading ? (
-                        <tbody>
-                            <tr>
-                                <td colSpan="3" className="text-center">Loading...</td>
-                            </tr>
-                        </tbody>
+                        <TableBody>
+                            <TableRow>
+                                <TableCell colSpan={3} align="center">
+                                    <CircularProgress />
+                                </TableCell>
+                            </TableRow>
+                        </TableBody>
                     ) : (
-                        <tbody>
+                        <TableBody>
                             {colors.map((color) => (
-                                <tr key={color.id}>
-                                    <td>{color.id}</td>
-                                    <td>{color.color_name}</td>
-                                    <td>
-                                        <Link to={`/colors/edit/${color.id}`} className="btn btn-edit">Edit</Link>
-                                        &nbsp;
-                                        <button onClick={() => handleDelete(color.id)} className="btn btn-delete">Delete</button>
-                                    </td>
-                                </tr>
+                                <TableRow key={color.id}>
+                                    {/* <TableCell>{color.id}</TableCell> */}
+                                    <TableCell>
+                                        <IconButton
+                                            component={Link}
+                                            to={`/colors/edit/${color.id}`}
+                                            size="small"
+                                            sx={{ marginRight: 1 }}
+                                        >
+                                            <Edit color="primary" />
+                                        </IconButton>
+                                        <IconButton
+                                            onClick={() =>
+                                                handleDelete(color.id)
+                                            }
+                                            size="small"
+                                        >
+                                            <Delete color="error" />
+                                        </IconButton>
+                                    </TableCell>
+                                    <TableCell
+                                        sx={{ textTransform: "capitalize" }}
+                                    >
+                                        {color.color_name}
+                                    </TableCell>
+                                </TableRow>
                             ))}
-                        </tbody>
+                        </TableBody>
                     )}
-                </table>
-            </div>
-        </div>
+                </Table>
+            </TableContainer>
+        </Paper>
     );
 }

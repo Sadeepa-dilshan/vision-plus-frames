@@ -5,11 +5,24 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { Paper } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 
-export default function ResponsiveDatePicker({ fromDate, toDate, setFromDate, setToDate }) {
+export default function ResponsiveDatePicker({
+    fromDate,
+    toDate,
+    setFromDate,
+    setToDate,
+}) {
     return (
-        <Paper elevation={2} sx={{ p: 2, width: "400px" }}>
+        <Paper
+            elevation={2}
+            sx={{
+                p: 2,
+                flexWrap: "wrap",
+                display: "flex",
+                justifyContent: "center",
+            }}
+        >
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DemoContainer components={["DatePicker"]}>
+                <DemoContainer sx={{ mx: 2 }} components={["DatePicker"]}>
                     <DemoItem label="Select Date From">
                         <DatePicker
                             value={fromDate}

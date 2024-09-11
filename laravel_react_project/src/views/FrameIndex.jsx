@@ -15,7 +15,7 @@ import {
     IconButton,
     Skeleton,
 } from "@mui/material";
-import { Delete, Edit, Fullscreen } from "@mui/icons-material";
+import { Delete, Edit } from "@mui/icons-material";
 
 export default function FrameIndex() {
     const [frames, setFrames] = useState([]);
@@ -26,6 +26,7 @@ export default function FrameIndex() {
     useEffect(() => {
         getFrames();
     }, []);
+    console.log(frames);
 
     const getFrames = () => {
         setLoading(true);
@@ -89,11 +90,7 @@ export default function FrameIndex() {
                 </>
             ),
         },
-        {
-            accessorKey: "id",
-            header: "ID",
-            size: 70,
-        },
+
         {
             accessorKey: "image",
             header: "Image",
@@ -149,7 +146,6 @@ export default function FrameIndex() {
             },
         },
     ];
-    console.log(frames);
 
     return (
         <Box sx={{ height: "100%", width: "100%" }}>

@@ -6,6 +6,7 @@ import {
     Button,
     CircularProgress,
     Container,
+    IconButton,
     Paper,
     Table,
     TableBody,
@@ -15,6 +16,7 @@ import {
     TableRow,
     Typography,
 } from "@mui/material";
+import { Delete, Edit } from "@mui/icons-material";
 
 export default function CodeIndex() {
     const [codes, setCodes] = useState([]);
@@ -68,10 +70,11 @@ export default function CodeIndex() {
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>ID</TableCell>
+                            {/* <TableCell>ID</TableCell> */}
+
+                            <TableCell>Actions</TableCell>
                             <TableCell>Code Name</TableCell>
                             <TableCell>Brand Name</TableCell>
-                            <TableCell>Actions</TableCell>
                         </TableRow>
                     </TableHead>
                     {loading ? (
@@ -86,22 +89,19 @@ export default function CodeIndex() {
                         <TableBody>
                             {codes.map((code) => (
                                 <TableRow key={code.id}>
-                                    <TableCell>{code.id}</TableCell>
-                                    <TableCell>{code.code_name}</TableCell>
+                                    {/* <TableCell>{code.id}</TableCell> */}
+
                                     <TableCell>
-                                        {code.brand.brand_name}
-                                    </TableCell>
-                                    <TableCell>
-                                        <Button
+                                        <IconButton
                                             component={Link}
                                             to={`/codes/edit/${code.id}`}
                                             variant="outlined"
                                             size="small"
                                             sx={{ marginRight: 1 }}
                                         >
-                                            Edit
-                                        </Button>
-                                        <Button
+                                            <Edit color="primary" />
+                                        </IconButton>
+                                        <IconButton
                                             onClick={() =>
                                                 handleDelete(code.id)
                                             }
@@ -109,8 +109,18 @@ export default function CodeIndex() {
                                             color="error"
                                             size="small"
                                         >
-                                            Delete
-                                        </Button>
+                                            <Delete />
+                                        </IconButton>
+                                    </TableCell>
+                                    <TableCell
+                                        sx={{ textTransform: "capitalize" }}
+                                    >
+                                        {code.code_name}
+                                    </TableCell>
+                                    <TableCell
+                                        sx={{ textTransform: "capitalize" }}
+                                    >
+                                        {code.brand.brand_name}
                                     </TableCell>
                                 </TableRow>
                             ))}

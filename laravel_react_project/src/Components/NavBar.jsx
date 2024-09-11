@@ -19,9 +19,15 @@ import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DashboardIcon from "@mui/icons-material/Dashboard";
-
+import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
 const drawerWidth = 240;
-
+import FolderCopyIcon from "@mui/icons-material/FolderCopy";
+import PinIcon from "@mui/icons-material/Pin";
+import { Add } from "@mui/icons-material";
+import ColorLensIcon from "@mui/icons-material/ColorLens";
+import FormatColorFillIcon from "@mui/icons-material/FormatColorFill";
+import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
+import QueueIcon from "@mui/icons-material/Queue";
 export default function MiniDrawer() {
     const { setUser, setToken } = useStateContext();
 
@@ -51,42 +57,42 @@ export default function MiniDrawer() {
         {
             path: "/brands",
             text: "Brands",
-            icon: <CategoryIcon />,
+            icon: <FolderCopyIcon />,
         },
         {
             path: "/brands/new",
             text: "New Brand",
-            icon: <AddToPhotosIcon />,
+            icon: <CreateNewFolderIcon />,
         },
         {
             path: "/codes",
             text: "Codes",
-            icon: <AddToPhotosIcon />,
+            icon: <PinIcon />,
         },
         {
             path: "/codes/new",
             text: "Add Code",
-            icon: <AddToPhotosIcon />,
+            icon: <Add />,
         },
         {
             path: "/colors",
             text: "Colours",
-            icon: <AddToPhotosIcon />,
+            icon: <ColorLensIcon />,
         },
         {
             path: "/colors/new",
             text: "Add Colour",
-            icon: <AddToPhotosIcon />,
+            icon: <FormatColorFillIcon />,
         },
         {
             path: "/frames",
             text: "Frames",
-            icon: <AddToPhotosIcon />,
+            icon: <RemoveRedEyeIcon />,
         },
         {
             path: "/frames/new",
             text: "New Frames",
-            icon: <AddToPhotosIcon />,
+            icon: <QueueIcon />,
         },
     ];
 
@@ -217,7 +223,7 @@ export default function MiniDrawer() {
                     </ListItem>
                 </List>
             </Drawer>
-            <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+            <Box component="main" sx={{ flexGrow: 1, margin: ".5rem" }}>
                 <Outlet />
             </Box>
         </Box>

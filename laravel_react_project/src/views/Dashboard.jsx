@@ -9,11 +9,13 @@ import {
     Skeleton,
     useMediaQuery,
     useTheme,
-    Button
 } from "@mui/material";
-import ResponsiveDatePicker from "../Components/ResponsiveDatePicker"; 
-import dayjs from 'dayjs';
-
+import ResponsiveDatePicker from "../Components/ResponsiveDatePicker";
+import dayjs from "dayjs";
+import { Error, Sell } from "@mui/icons-material";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import CircleIcon from "@mui/icons-material/Circle";
+import NightlightRoundIcon from "@mui/icons-material/NightlightRound";
 export default function Dashboard() {
     const [frames, setFrames] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -22,7 +24,7 @@ export default function Dashboard() {
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
     // Default to last 30 days
-    const [fromDate, setFromDate] = useState(dayjs().subtract(30, 'day'));
+    const [fromDate, setFromDate] = useState(dayjs().subtract(30, "day"));
     const [toDate, setToDate] = useState(dayjs());
 
     useEffect(() => {
@@ -33,18 +35,21 @@ export default function Dashboard() {
     const fetchTopFrames = async () => {
         setLoading(true);
         try {
-            const response = await axiosClient.get('/top-frames-by-stock-reduction', {
-                params: {
-                    start_date: fromDate.format('YYYY-MM-DD'),
-                    end_date: toDate.format('YYYY-MM-DD'),
-                },
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const response = await axiosClient.get(
+                "/top-frames-by-stock-reduction",
+                {
+                    params: {
+                        start_date: fromDate.format("YYYY-MM-DD"),
+                        end_date: toDate.format("YYYY-MM-DD"),
+                    },
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
             setFrames(response.data);
         } catch (error) {
-            console.error('Error fetching top frames:', error);
+            console.error("Error fetching top frames:", error);
         } finally {
             setLoading(false);
         }
@@ -53,14 +58,14 @@ export default function Dashboard() {
     return (
         <Box sx={{ padding: 1 }}>
             {/* Date Range Picker */}
-            <ResponsiveDatePicker 
-                fromDate={fromDate} 
-                toDate={toDate} 
-                setFromDate={setFromDate} 
-                setToDate={setToDate} 
+            <ResponsiveDatePicker
+                fromDate={fromDate}
+                toDate={toDate}
+                setFromDate={setFromDate}
+                setToDate={setToDate}
             />
 
-            <Typography variant="h4" gutterBottom>
+            <Typography margin={2} variant="h5" gutterBottom>
                 Top 5 Frames by Stock Reduction
             </Typography>
 
@@ -73,12 +78,14 @@ export default function Dashboard() {
                 <Box
                     sx={{
                         display: "flex",
-                        flexDirection: "column",
-                        gap: 1,
-                        width: isMobile ? "100%" : "40%",
+                        flexDirection: "rows",
+                        flexWrap: "wrap",
+
+                        gap: 2,
+                        width: "100%",
                     }}
                 >
-                    {frames.map((frame) => (
+                    {frames.map((frame, index) => (
                         <Card
                             key={frame.frame_id}
                             sx={{
@@ -88,6 +95,7 @@ export default function Dashboard() {
                                     transform: "scale(1.03)",
                                 },
                                 padding: 1,
+                                width: isMobile ? "100%" : "300px",
                             }}
                         >
                             <CardContent>
@@ -99,39 +107,113 @@ export default function Dashboard() {
                                     }}
                                 >
                                     <Box>
-                                        <Typography variant="h5" noWrap>
-                                        {frame.frame.brand_name || "Unknown Brand"}
-                                        </Typography>
-                                        <Typography variant="body2" noWrap sx={{ fontWeight: 'bold' }}>
-                                            Frame Code: {frame.frame.code_name || "Unknown Code"}
-                                        </Typography>
+                                        <Box
+                                            display={"flex"}
+                                            sx={{
+                                                alignItems: "center",
+                                                justifyContent: "space-evenly",
+                                            }}
+                                        >
+                                            <Typography
+                                                color={"primary"}
+                                                variant="h5"
+                                                noWrap
+                                                marginRight={1}
+                                            >
+                                                #{index + 1}
+                                            </Typography>
+                                            <Typography
+                                                variant="h6"
+                                                fontWeight={"bold"}
+                                                noWrap
+                                            >
+                                                {frame.frame.brand_name ||
+                                                    "Unknown Brand"}{" "}
+                                                -{" "}
+                                                {frame.frame.code_name ||
+                                                    "Unknown Code"}
+                                            </Typography>
+                                        </Box>
+                                        {frame.frame.image ? (
+                                            <img
+                                                src={`${frame.frame.image}`}
+                                                alt="Frame"
+                                                style={{
+                                                    width: "100px",
+                                                    height: "auto",
+                                                    marginTop: "10px",
+                                                }}
+                                            />
+                                        ) : (
+                                            <Typography
+                                                variant="body2"
+                                                color="textSecondary"
+                                                sx={{ marginTop: "10px" }}
+                                            >
+                                                No Image Available
+                                            </Typography>
+                                        )}
                                         <Typography variant="body2" noWrap>
-                                        Frame Color:{frame.frame.color_name || "Unknown Color"}
+                                            Color:
+                                            {frame.frame.color_name ||
+                                                "Unknown Color"}
                                         </Typography>
                                     </Box>
-                                    <Typography variant="h6" fontWeight="bold">
-                                        Total Reduction: {frame.total_reduction}
+                                </Box>
+                                <Box
+                                    sx={{
+                                        mt: 0.5,
+                                        display: "flex",
+                                        alignItems: "center",
+                                    }}
+                                >
+                                    <Typography variant="body2">
+                                        Size -
+                                    </Typography>
+                                    <Typography variant="body2">
+                                        {frame.frame.size == "Half" ? (
+                                            <NightlightRoundIcon color="disabled" />
+                                        ) : frame.frame.size == "Full" ? (
+                                            <CircleIcon color="disabled" />
+                                        ) : (
+                                            <Error />
+                                        )}
+                                    </Typography>
+                                    <Typography variant="body2">
+                                        {frame.frame.size}
                                     </Typography>
                                 </Box>
-                                <Box sx={{ mt: 0.5 }}>
-                                    <Typography variant="body2">
-                                        Frame Price: ${frame.frame.price}
+
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "space-between",
+                                    }}
+                                >
+                                    <Typography
+                                        fontWeight={"bold"}
+                                        variant="body2"
+                                    >
+                                        RS {frame.frame.price}
                                     </Typography>
-                                    <Typography variant="body2">
-                                        Frame Size: {frame.frame.size}
-                                    </Typography>
-                                </Box>
-                                {frame.frame.image ? (
-                                        <img
-                                            src={`${frame.frame.image}`}
-                                            alt="Frame"
-                                            style={{ width: '100px', height: 'auto', marginTop: '10px' }} 
-                                        />
-                                    ) : (
-                                        <Typography variant="body2" color="textSecondary" sx={{ marginTop: '10px' }}>
-                                            No Image Available
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "space-between",
+                                        }}
+                                    >
+                                        <ShoppingCartIcon color="seagreen" />
+                                        <Typography
+                                            color={"seagreen"}
+                                            variant="h6"
+                                            fontWeight="bold"
+                                        >
+                                            {frame.total_reduction}
                                         </Typography>
-                                    )}
+                                    </Box>
+                                </Box>
                             </CardContent>
                         </Card>
                     ))}

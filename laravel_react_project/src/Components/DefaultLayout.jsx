@@ -27,7 +27,7 @@ export default function DefaultLayout() {
     }, []);
 
     return (
-        <div id="defaultLayout">
+        <div>
             <NavBar />
             <Box
                 display="flex"

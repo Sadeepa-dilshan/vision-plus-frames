@@ -7,6 +7,7 @@ import {
     CircularProgress,
     Container,
     Grid,
+    IconButton,
     Paper,
     Table,
     TableBody,
@@ -15,8 +16,10 @@ import {
     TableHead,
     TableRow,
     Typography,
+    useMediaQuery,
 } from "@mui/material";
-
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import { Delete, Edit, Remove } from "@mui/icons-material";
 export default function BrandIndex() {
     const [brands, setBrands] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -69,9 +72,10 @@ export default function BrandIndex() {
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>ID</TableCell>
-                            <TableCell>Brand Name</TableCell>
+                            {/* <TableCell>ID</TableCell> */}
                             <TableCell>Actions</TableCell>
+
+                            <TableCell>Brand Name</TableCell>
                         </TableRow>
                     </TableHead>
                     {loading ? (
@@ -86,28 +90,27 @@ export default function BrandIndex() {
                         <TableBody>
                             {brands.map((brand) => (
                                 <TableRow key={brand.id}>
-                                    <TableCell>{brand.id}</TableCell>
-                                    <TableCell>{brand.brand_name}</TableCell>
+                                    {/* <TableCell>{brand.id}</TableCell> */}
                                     <TableCell>
-                                        <Button
+                                        <IconButton
                                             component={Link}
                                             to={`/brands/show/${brand.id}`}
                                             variant="outlined"
                                             size="small"
                                             sx={{ marginRight: 1 }}
                                         >
-                                            View
-                                        </Button>
-                                        <Button
+                                            <FullscreenIcon />
+                                        </IconButton>
+                                        <IconButton
                                             component={Link}
                                             to={`/brands/edit/${brand.id}`}
                                             variant="outlined"
                                             size="small"
                                             sx={{ marginRight: 1 }}
                                         >
-                                            Edit
-                                        </Button>
-                                        <Button
+                                            <Edit color="primary" />
+                                        </IconButton>
+                                        <IconButton
                                             onClick={() =>
                                                 handleDelete(brand.id)
                                             }
@@ -115,8 +118,13 @@ export default function BrandIndex() {
                                             color="error"
                                             size="small"
                                         >
-                                            Delete
-                                        </Button>
+                                            <Delete color="error" />
+                                        </IconButton>
+                                    </TableCell>
+                                    <TableCell
+                                        sx={{ textTransform: "capitalize" }}
+                                    >
+                                        {brand.brand_name}
                                     </TableCell>
                                 </TableRow>
                             ))}

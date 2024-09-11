@@ -2,8 +2,24 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
+import { useAlert } from "../contexts/AlertContext";
+import { fetchData } from "../hooks/useFetchData";
+import {
+    Card,
+    TextField,
+    Button,
+    CircularProgress,
+    MenuItem,
+    Select,
+    InputLabel,
+    FormControl,
+    Typography,
+    Box,
+} from "@mui/material";
 
 export default function CodeEdit() {
+    const { showAlert } = useAlert();
+    const [loading, setLoading] = useState(false);
     const { id } = useParams(); // Get the code ID from the URL
     const [brands, setBrands] = useState([]); // For storing the list of brands
     const [brandId, setBrandId] = useState(""); // Selected brand ID
@@ -14,89 +30,132 @@ export default function CodeEdit() {
 
     useEffect(() => {
         // Fetch all brands to populate the dropdown
-        axiosClient.get('/brands', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        .then(({ data }) => {
-            setBrands(data);
-        })
-        .catch((err) => {
-            console.error(err);
-        });
+        axiosClient
+            .get("/brands", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            .then(({ data }) => {
+                setBrands(data);
+            })
+            .catch((err) => {
+                console.error(err);
+            });
 
         // Fetch the code details to pre-fill the form
-        axiosClient.get(`/codes/${id}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        .then(({ data }) => {
-            setBrandId(data.brand_id);
-            setCodeName(data.code_name);
-        })
-        .catch((err) => {
-            console.error(err);
-        });
+        axiosClient
+            .get(`/codes/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            .then(({ data }) => {
+                setBrandId(data.brand_id);
+                setCodeName(data.code_name);
+            })
+            .catch((err) => {
+                console.error(err);
+            });
     }, [id, token]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+        setLoading(true);
         try {
-            await axiosClient.put(`/codes/${id}`, {
-                brand_id: brandId,
-                code_name: codeName,
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
+            const getData = await fetchData("/codes", token);
+            if (getData.state) {
+                const exists = getData["data"].some(
+                    (item) => item.code_name === codeName
+                );
+                if (exists) {
+                    showAlert("Code already exists", "error");
+                } else {
+                    await axiosClient.put(
+                        `/codes/${id}`,
+                        {
+                            brand_id: brandId,
+                            code_name: codeName,
+                        },
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        }
+                    );
+                    showAlert("Code updated successfully", "success");
+                    navigate("/codes");
                 }
-            });
-
-            navigate("/codes"); // Redirect to the code list after updating
+            }
         } catch (err) {
             if (err.response && err.response.status === 422) {
                 setErrors(err.response.data.errors);
             } else {
                 console.error(err);
             }
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div className="card">
-            <h2>Edit Code</h2>
+        <Card sx={{ padding: 4, maxWidth: 500, margin: "auto", marginTop: 5 }}>
+            <Typography variant="h4" gutterBottom>
+                Edit Code
+            </Typography>
             <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label htmlFor="brandId">Select Brand:</label>
-                    <select
-                        id="brandId"
-                        value={brandId}
-                        onChange={(e) => setBrandId(e.target.value)}
-                        required
-                    >
-                        <option value="">-- Select a Brand --</option>
-                        {brands.map((brand) => (
-                            <option key={brand.id} value={brand.id}>
-                                {brand.brand_name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <div className="form-group">
-                    <label htmlFor="codeName">Code Name:</label>
-                    <input
-                        type="text"
-                        id="codeName"
+                <Box sx={{ marginBottom: 3 }}>
+                    <FormControl fullWidth>
+                        <InputLabel>Select Brand</InputLabel>
+                        <Select
+                            label="Select Brand"
+                            value={brandId}
+                            onChange={(e) => setBrandId(e.target.value)}
+                            required
+                        >
+                            <MenuItem value="">
+                                <em>-- Select a Brand --</em>
+                            </MenuItem>
+                            {brands.map((brand) => (
+                                <MenuItem key={brand.id} value={brand.id}>
+                                    {brand.brand_name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </Box>
+                <Box sx={{ marginBottom: 3 }}>
+                    <TextField
+                        fullWidth
+                        label="Code Name"
                         value={codeName}
                         onChange={(e) => setCodeName(e.target.value)}
+                        variant="outlined"
+                        error={!!errors}
+                        helperText={errors ? errors.code_name : ""}
                         required
                     />
-                </div>
-                {errors && <div className="error-message">{errors.code_name}</div>}
-                <button type="submit" className="btn btn-primary">Update Code</button>
+                </Box>
+                <Box
+                    sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                    }}
+                >
+                    <Button
+                        disabled={loading}
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                        startIcon={
+                            loading ? <CircularProgress size={24} /> : null
+                        }
+                    >
+                        {loading ? "Updating..." : "Update Code"}
+                    </Button>
+                </Box>
             </form>
-        </div>
+        </Card>
     );
 }
