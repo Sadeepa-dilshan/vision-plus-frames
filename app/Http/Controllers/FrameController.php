@@ -26,11 +26,12 @@ class FrameController extends Controller
             'color_id' => 'required|exists:colors,id',
             'price' => 'required|numeric',
             'size' => 'required|string|max:255',
+            'species' => 'required|string|max:255',
             'image' => 'nullable|string',
             'quantity' => 'required|integer',
         ]);
 
-        $frameData = $request->only(['brand_id', 'code_id', 'color_id', 'price', 'size','image']);
+        $frameData = $request->only(['brand_id', 'code_id', 'color_id', 'price', 'size','species','image']);
         $frame = Frame::create($frameData);
 
         Stock::create([
@@ -57,11 +58,12 @@ class FrameController extends Controller
             'color_id' => 'required|exists:colors,id',
             'price' => 'required|numeric',
             'size' => 'required|string|max:255',
+            'species' => 'required|string|max:255',
             'image' => 'nullable|image|max:2048',
             'quantity' => 'required|integer',
         ]);
 
-        $frameData = $request->only(['brand_id', 'code_id', 'color_id', 'price', 'size']);
+        $frameData = $request->only(['brand_id', 'code_id', 'color_id', 'price', 'size','species']);
 
         // Handle image upload if a new image is provided
         if ($request->hasFile('image')) {
@@ -173,6 +175,7 @@ class FrameController extends Controller
                         'color_name' => $frame->color->color_name ?? null, 
                         'price' => $frame->price,
                         'size' => $frame->size,
+                        'species' => $frame->species,
                         'image' => $frame->image,
                         'created_at' => $frame->created_at,
                         'updated_at' => $frame->updated_at,

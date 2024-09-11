@@ -90,11 +90,6 @@ export default function FrameIndex() {
             ),
         },
         {
-            accessorKey: "id",
-            header: "ID",
-            size: 70,
-        },
-        {
             accessorKey: "image",
             header: "Image",
             size: 100,
@@ -132,6 +127,11 @@ export default function FrameIndex() {
         {
             accessorKey: "price",
             header: "Price",
+            size: 100,
+        },
+        {
+            accessorKey: "species",
+            header: "Species",
             size: 100,
         },
         {

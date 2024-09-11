@@ -115,10 +115,13 @@ export default function Dashboard() {
                                 </Box>
                                 <Box sx={{ mt: 0.5 }}>
                                     <Typography variant="body2">
-                                        Frame Price: ${frame.frame.price}
+                                        Frame Price: Rs {frame.frame.price}
                                     </Typography>
                                     <Typography variant="body2">
                                         Frame Size: {frame.frame.size}
+                                    </Typography>
+                                    <Typography variant="body2">
+                                        Frame Species: {frame.frame.species}
                                     </Typography>
                                 </Box>
                                 {frame.frame.image ? (

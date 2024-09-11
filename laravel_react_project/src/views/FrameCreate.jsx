@@ -47,6 +47,7 @@ export default function FrameCreate() {
     const [colorId, setColorId] = useState(""); // Selected color ID
     const [price, setPrice] = useState(""); // Frame price
     const [frameShape, setFrameShape] = useState(""); // Frame shape (Full or Half)
+    const [frameSpecies, setFrameSpecies] = useState("");
     const [image, setImage] = useState(null); // Frame image
     const [quantity, setQuantity] = useState(""); // Frame quantity
     const [errors, setErrors] = useState(null);
@@ -103,6 +104,7 @@ export default function FrameCreate() {
             colorId,
             price,
             frameShape,
+            frameSpecies,
             quantity,
             image
         );
@@ -112,7 +114,8 @@ export default function FrameCreate() {
         formData.append("code_id", codeId);
         formData.append("color_id", colorId);
         formData.append("price", price);
-        formData.append("size", frameShape); // Changed to frameShape
+        formData.append("size", frameShape);
+        formData.append("species", frameSpecies); 
         formData.append("quantity", quantity);
         if (image) {
             //TODO SAVE IMG  INSIDE FIREBASE
@@ -253,6 +256,27 @@ export default function FrameCreate() {
                                 </MenuItem>
                                 <MenuItem value="Full">Full</MenuItem>
                                 <MenuItem value="Half">Half</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormControl fullWidth>
+                            <InputLabel id="frameSpecies-label">
+                                Frame Species
+                            </InputLabel>
+                            <Select
+                                labelId="frameSpecies-label"
+                                id="frameSpecies"
+                                value={frameSpecies}
+                                label="Frame Species"
+                                onChange={(e) => setFrameSpecies(e.target.value)}
+                                required
+                            >
+                                <MenuItem value="">
+                                    <em>-- Select Frame Species --</em>
+                                </MenuItem>
+                                <MenuItem value="Plastic">Plastic</MenuItem>
+                                <MenuItem value="Metal">Metal</MenuItem>
                             </Select>
                         </FormControl>
                     </Grid>

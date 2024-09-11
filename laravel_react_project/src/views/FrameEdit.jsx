@@ -13,6 +13,7 @@ export default function FrameEdit() {
         color_id: '',
         price: '',
         size: '',
+        species: '',
         image: '',
         quantity: '',
     });
@@ -99,6 +100,7 @@ export default function FrameEdit() {
         formData.append('color_id', frame.color_id || '');
         formData.append('price', frame.price || '');
         formData.append('size', frame.size || '');
+        formData.append('species', frame.species || '');
         formData.append('quantity', frame.quantity || '');
         if (frame.image instanceof File) {
             formData.append('image', frame.image);
@@ -199,6 +201,20 @@ export default function FrameEdit() {
                         <option value="">-- Select Frame Shape --</option>
                         <option value="Full">Full</option>
                         <option value="Half">Half</option>
+                    </select>
+                </div>
+                <div className="form-group">
+                    <label htmlFor="size">Frame Species:</label>
+                    <select
+                        id="species"
+                        name="species"
+                        value={frame.species}
+                        onChange={handleInputChange}
+                        required
+                    >
+                        <option value="">-- Select Frame Species --</option>
+                        <option value="Plastic">Plastic</option>
+                        <option value="Metal">Metal</option>
                     </select>
                 </div>
                 <div className="form-group">

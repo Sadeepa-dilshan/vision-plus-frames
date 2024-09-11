@@ -12,7 +12,7 @@ class Frame extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['brand_id', 'code_id', 'color_id', 'price', 'size','image'];
+    protected $fillable = ['brand_id', 'code_id', 'color_id', 'price', 'size','species','image'];
 
     public function brand()
     {
