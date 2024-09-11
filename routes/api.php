@@ -76,6 +76,8 @@ Route::middleware(['auth:sanctum'])->group(function() {
     Route::get('stocks/{stock}', [StockController::class, 'show']);
     Route::put('stocks/{stock}', [StockController::class, 'update'])->middleware('admin');
     Route::delete('stocks/{stock}', [StockController::class, 'destroy'])->middleware('admin');
+    Route::get('/frames/{frameId}/stock-history', [StockController::class, 'getStockHistory']);
+
 });
 
 

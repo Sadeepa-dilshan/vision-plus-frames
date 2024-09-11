@@ -86,6 +86,15 @@ export default function FrameIndex() {
                     >
                         <Delete color="error" />
                     </IconButton>
+                     {/* Add History Button */}
+                    <IconButton
+                        variant="contained"
+                        color="info"
+                        size="small"
+                        onClick={() => navigate(`/frames/history/${row.original.id}`)}
+                    >
+                    <Fullscreen />
+                    </IconButton>
                 </>
             ),
         },

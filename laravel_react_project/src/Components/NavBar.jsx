@@ -19,6 +19,7 @@ import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DashboardIcon from "@mui/icons-material/Dashboard";
+import FrameHistory from "../views/FrameHistory";
 
 const drawerWidth = 240;
 

@@ -34,11 +34,13 @@ class FrameController extends Controller
         $frameData = $request->only(['brand_id', 'code_id', 'color_id', 'price', 'size','species','image']);
         $frame = Frame::create($frameData);
 
-        Stock::create([
+        $stock = Stock::create([
             'frame_id' => $frame->id,
             'qty' => $request->quantity,
-            'initial_count' => $request->quantity,
         ]);
+
+        $stock->initial_count = $request->quantity;
+        $stock->save();
 
         return response()->json($frame, 201);
     }
