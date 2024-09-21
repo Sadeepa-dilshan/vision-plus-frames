@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
@@ -9,19 +9,26 @@ import {
     Select,
     MenuItem,
     Button,
-    CircularProgress,
     FormControl,
     InputLabel,
-    FormHelperText,
-    Typography,
     Card,
     CardContent,
+    CardHeader,
+    CircularProgress,
     Grid,
+    Typography,
+    Autocomplete,
+    Skeleton,
 } from "@mui/material";
+
+import { storage } from "../firebaseConfig";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export default function FrameEdit() {
     const { showAlert } = useAlert();
     const [loading, setLoading] = useState(false);
+    const [loadinginitial, setLoadinginitial] = useState(true);
+
     const { id } = useParams();
     const navigate = useNavigate();
     const { token } = useStateContext();
@@ -31,6 +38,7 @@ export default function FrameEdit() {
         color_id: "",
         price: "",
         size: "",
+        species: "",
         image: "",
         quantity: "",
     });
@@ -40,13 +48,42 @@ export default function FrameEdit() {
     const [imagePreview, setImagePreview] = useState(null);
     const [errors, setErrors] = useState({});
 
+    const [filterCode, setFilterCode] = useState([]);
     useEffect(() => {
-        getFrameDetails();
-        getBrands();
-        getCodes();
-        getColors();
+        const loadData = async () => {
+            try {
+                await Promise.all([
+                    getFrameDetails(),
+                    getBrands(),
+                    getCodes(),
+                    getColors(),
+                ]);
+            } catch (error) {
+                console.error("Error loading data", error);
+            } finally {
+                setLoadinginitial(false); // Set loading to false once data is fetched
+            }
+        };
+        loadData();
     }, [id]);
 
+    const uploadSingleImages = async (ID, image, index) => {
+        try {
+            // Create a reference to the storage location
+            const storageRef = ref(storage, `images/${ID}/${index}`);
+
+            // Upload the image file to Firebase Storage
+            await uploadBytes(storageRef, image);
+
+            // Get the download URL for the uploaded file
+            const downloadURL = await getDownloadURL(storageRef);
+
+            return { success: true, downloadURL: downloadURL };
+        } catch (error) {
+            console.error("Error uploading image:", error);
+            return { success: false, error: error.message };
+        }
+    };
     const getFrameDetails = () => {
         axiosClient
             .get(`/frames/${id}`, {
@@ -59,9 +96,7 @@ export default function FrameEdit() {
                     ...data,
                     quantity: data.stocks.length ? data.stocks[0].qty : "",
                 });
-                setImagePreview(
-                    `${process.env.REACT_APP_API_URL}/images/frames/${data.image}`
-                );
+                setImagePreview(data.image);
             })
             .catch(() => {
                 console.error("Failed to fetch frame details");
@@ -119,229 +154,328 @@ export default function FrameEdit() {
         setLoading(true);
         e.preventDefault();
         const formData = new FormData();
+
         formData.append("brand_id", frame.brand_id || "");
         formData.append("code_id", frame.code_id || "");
         formData.append("color_id", frame.color_id || "");
         formData.append("price", frame.price || "");
         formData.append("size", frame.size || "");
+        formData.append("species", frame.species || "");
         formData.append("quantity", frame.quantity || "");
-        if (frame.image instanceof File) {
-            formData.append("image", frame.image);
-        }
 
-        try {
-            const getData = await fetchData("/frames", token);
-            if (getData.state) {
-                const exists = getData["data"].some(
-                    (item) => item.code_id === frame.code_id
+        if (frame.code_id) {
+            if (frame.image instanceof File) {
+                const imageUploard = await uploadSingleImages(
+                    frame.code_id,
+                    frame.image,
+                    frame.code_id
                 );
-                if (exists) {
-                    showAlert("Frame with this code already exists", "error");
+
+                if (imageUploard && imageUploard.success) {
+                    console.log("imageUploard.downloadURL");
+                    formData.append("image", imageUploard.downloadURL);
                 } else {
-                    await axiosClient.post(`/frames/${id}`, formData, {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            "Content-Type": "multipart/form-data",
-                        },
-                    });
-                    navigate("/frames");
+                    formData.append("image", frame.image);
                 }
-            }
-        } catch (err) {
-            if (err.response && err.response.status === 422) {
-                setErrors(err.response.data.errors);
             } else {
-                console.error(err);
+                formData.append("image", frame.image);
             }
-        } finally {
-            setLoading(false);
+
+            try {
+                const getData = await fetchData("/frames", token);
+                if (getData.state) {
+                    const exists = getData["data"].some(
+                        (item) => item.code_id === frame.code_id
+                    );
+                    if (!exists) {
+                        showAlert(
+                            "Frame with this code already exists",
+                            "error"
+                        );
+                    } else {
+                        await axiosClient.post(`/frames/${id}`, formData, {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                                "Content-Type": "multipart/form-data",
+                            },
+                        });
+                        navigate("/frames");
+                    }
+                }
+            } catch (err) {
+                if (err.response && err.response.status === 422) {
+                    setErrors(err.response.data.errors);
+                } else {
+                    console.error(err);
+                }
+            } finally {
+                setLoading(false);
+            }
         }
     };
-
+    useEffect(() => {
+        if (frame.brand_id) {
+            setFilterCode(
+                codes.filter((code) => code.brand_id === frame.brand_id)
+            );
+        }
+    }, [frame.brand_id, codes]);
     return (
         <Card>
+            <CardHeader title="Edit Frame" />
             <CardContent>
-                <Typography variant="h4" gutterBottom>
-                    Edit Frame
-                </Typography>
-                <form onSubmit={handleSubmit}>
-                    <Grid container spacing={3}>
-                        <Grid item xs={12} sm={6}>
-                            <FormControl fullWidth>
-                                <InputLabel id="brand_id-label">
-                                    Select Brand
-                                </InputLabel>
-                                <Select
-                                    labelId="brand_id-label"
-                                    id="brand_id"
-                                    name="brand_id"
-                                    value={frame.brand_id}
-                                    onChange={handleInputChange}
-                                    required
-                                >
-                                    <MenuItem value="">
-                                        <em>-- Select a Brand --</em>
-                                    </MenuItem>
-                                    {brands.map((brand) => (
-                                        <MenuItem
-                                            key={brand.id}
-                                            value={brand.id}
-                                        >
-                                            {brand.brand_name}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                                <FormHelperText>
-                                    {errors.brand_id}
-                                </FormHelperText>
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <FormControl fullWidth>
-                                <InputLabel id="code_id-label">
-                                    Select Code
-                                </InputLabel>
-                                <Select
-                                    labelId="code_id-label"
-                                    id="code_id"
-                                    name="code_id"
-                                    value={frame.code_id}
-                                    onChange={handleInputChange}
-                                    required
-                                >
-                                    <MenuItem value="">
-                                        <em>-- Select a Code --</em>
-                                    </MenuItem>
-                                    {codes.map((code) => (
-                                        <MenuItem key={code.id} value={code.id}>
-                                            {code.code_name}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                                <FormHelperText>
-                                    {errors.code_id}
-                                </FormHelperText>
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <FormControl fullWidth>
-                                <InputLabel id="color_id-label">
-                                    Select Color
-                                </InputLabel>
-                                <Select
-                                    labelId="color_id-label"
-                                    id="color_id"
-                                    name="color_id"
-                                    value={frame.color_id}
-                                    onChange={handleInputChange}
-                                    required
-                                >
-                                    <MenuItem value="">
-                                        <em>-- Select a Color --</em>
-                                    </MenuItem>
-                                    {colors.map((color) => (
-                                        <MenuItem
-                                            key={color.id}
-                                            value={color.id}
-                                        >
-                                            {color.color_name}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                                <FormHelperText>
-                                    {errors.color_id}
-                                </FormHelperText>
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                label="Price"
-                                id="price"
-                                name="price"
-                                type="number"
-                                value={frame.price}
-                                onChange={handleInputChange}
-                                fullWidth
-                                required
-                                error={!!errors.price}
-                                helperText={errors.price}
+                {loadinginitial ? (
+                    <Grid container spacing={2}>
+                        {/* Loading skeleton for Brand */}
+                        <Grid item xs={12} md={6}>
+                            <Skeleton
+                                variant="rectangular"
+                                width="100%"
+                                height={56}
                             />
                         </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <FormControl fullWidth>
-                                <InputLabel id="size-label">
-                                    Frame Shape
-                                </InputLabel>
-                                <Select
-                                    labelId="size-label"
-                                    id="size"
-                                    name="size"
-                                    value={frame.size}
-                                    onChange={handleInputChange}
-                                    required
-                                >
-                                    <MenuItem value="">
-                                        <em>-- Select Frame Shape --</em>
-                                    </MenuItem>
-                                    <MenuItem value="Full">Full</MenuItem>
-                                    <MenuItem value="Half">Half</MenuItem>
-                                </Select>
-                                <FormHelperText>{errors.size}</FormHelperText>
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                label="Quantity"
-                                id="quantity"
-                                name="quantity"
-                                type="number"
-                                value={frame.quantity}
-                                onChange={handleInputChange}
-                                fullWidth
-                                required
-                                error={!!errors.quantity}
-                                helperText={errors.quantity}
+                        {/* Loading skeleton for Code */}
+                        <Grid item xs={12} md={6}>
+                            <Skeleton
+                                variant="rectangular"
+                                width="100%"
+                                height={56}
                             />
                         </Grid>
+                        {/* Loading skeleton for Color */}
+                        <Grid item xs={12} md={6}>
+                            <Skeleton
+                                variant="rectangular"
+                                width="100%"
+                                height={56}
+                            />
+                        </Grid>
+                        {/* Loading skeleton for Price */}
+                        <Grid item xs={12} md={6}>
+                            <Skeleton
+                                variant="rectangular"
+                                width="100%"
+                                height={56}
+                            />
+                        </Grid>
+                        {/* Loading skeleton for Image */}
                         <Grid item xs={12}>
-                            <FormControl fullWidth>
-                                <input
-                                    type="file"
-                                    id="image"
-                                    name="image"
-                                    onChange={handleImageChange}
-                                />
-                                {imagePreview && (
-                                    <img
-                                        src={imagePreview}
-                                        alt="Preview"
-                                        width="100"
-                                        style={{ marginTop: 10 }}
-                                    />
-                                )}
-                                {errors.image && (
-                                    <FormHelperText error>
-                                        {errors.image}
-                                    </FormHelperText>
-                                )}
-                            </FormControl>
+                            <Skeleton
+                                variant="rectangular"
+                                width="100%"
+                                height={100}
+                            />
+                        </Grid>
+                        {/* Loading skeleton for Button */}
+                        <Grid item xs={12}>
+                            <Skeleton
+                                variant="rectangular"
+                                width="100%"
+                                height={56}
+                            />
                         </Grid>
                     </Grid>
-                    <div style={{ marginTop: 20 }}>
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            color="primary"
-                            disabled={loading}
-                        >
-                            {loading ? (
-                                <CircularProgress size={24} />
-                            ) : (
-                                "Save Changes"
-                            )}
-                        </Button>
-                    </div>
-                </form>
+                ) : (
+                    <form onSubmit={handleSubmit}>
+                        <Grid container spacing={2}>
+                            {/* Brand Selection */}
+                            <Grid item xs={12} md={6}>
+                                <FormControl fullWidth margin="normal">
+                                    <InputLabel id="brand-label">
+                                        Select Brand
+                                    </InputLabel>
+                                    <Select
+                                        labelId="brand-label"
+                                        id="brand_id"
+                                        name="brand_id"
+                                        value={frame.brand_id}
+                                        onChange={handleInputChange}
+                                        required
+                                    >
+                                        {brands.map((brand) => (
+                                            <MenuItem
+                                                key={brand.id}
+                                                value={brand.id}
+                                            >
+                                                {brand.brand_name}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            {/* Code Selection */}
+                            {console.log()}
+                            <Grid item xs={12} md={6}>
+                                <FormControl fullWidth margin="normal">
+                                    <InputLabel id="code-label">
+                                        Select Code
+                                    </InputLabel>
+                                    <Select
+                                        labelId="code-label"
+                                        id="code_id"
+                                        name="code_id"
+                                        value={frame.code_id}
+                                        onChange={handleInputChange}
+                                        required
+                                    >
+                                        {filterCode.map((code) => (
+                                            <MenuItem
+                                                key={code.id}
+                                                value={code.id}
+                                            >
+                                                {code.code_name}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+
+                            {/* Color Selection */}
+                            <Grid item xs={12} md={6}>
+                                <FormControl fullWidth margin="normal">
+                                    <InputLabel id="color-label">
+                                        Select Color
+                                    </InputLabel>
+                                    <Select
+                                        labelId="color-label"
+                                        id="color_id"
+                                        name="color_id"
+                                        label="Select Color"
+                                        value={frame.color_id}
+                                        onChange={handleInputChange}
+                                        required
+                                    >
+                                        {colors.map((color) => (
+                                            <MenuItem
+                                                key={color.id}
+                                                value={color.id}
+                                            >
+                                                {color.color_name}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            {/* Price Input */}
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    fullWidth
+                                    margin="normal"
+                                    id="price"
+                                    name="price"
+                                    label="Price"
+                                    type="number"
+                                    value={frame.price}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </Grid>
+                            {/* Frame Shape Selection */}
+                            <Grid item xs={12} md={6}>
+                                <FormControl fullWidth margin="normal">
+                                    <InputLabel id="size-label">
+                                        Frame Shape
+                                    </InputLabel>
+                                    <Select
+                                        labelId="size-label"
+                                        id="size"
+                                        name="size"
+                                        value={frame.size}
+                                        onChange={handleInputChange}
+                                        required
+                                    >
+                                        <MenuItem value="">
+                                            -- Select Frame Shape --
+                                        </MenuItem>
+                                        <MenuItem value="Full">Full</MenuItem>
+                                        <MenuItem value="Half">Half</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            {/* Frame Species Selection */}
+                            <Grid item xs={12} md={6}>
+                                <FormControl fullWidth margin="normal">
+                                    <InputLabel id="species-label">
+                                        Frame Species
+                                    </InputLabel>
+                                    <Select
+                                        labelId="species-label"
+                                        id="species"
+                                        name="species"
+                                        value={frame.species}
+                                        onChange={handleInputChange}
+                                        required
+                                    >
+                                        <MenuItem value="">
+                                            -- Select Frame Species --
+                                        </MenuItem>
+                                        <MenuItem value="Plastic">
+                                            Plastic
+                                        </MenuItem>
+                                        <MenuItem value="Metal">Metal</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            {/* Quantity Input */}
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    fullWidth
+                                    margin="normal"
+                                    id="quantity"
+                                    name="quantity"
+                                    label="Quantity"
+                                    type="number"
+                                    value={frame.quantity}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </Grid>
+                            {/* Image Upload */}
+                            <Grid item xs={12}>
+                                <FormControl fullWidth margin="normal">
+                                    <label htmlFor="image">
+                                        <Typography variant="body1">
+                                            Upload Image
+                                        </Typography>
+                                    </label>
+                                    <input
+                                        type="file"
+                                        id="image"
+                                        name="image"
+                                        onChange={handleImageChange}
+                                        style={{ marginTop: 10 }}
+                                    />
+                                    {imagePreview && (
+                                        <img
+                                            src={imagePreview}
+                                            alt="Preview"
+                                            width="100"
+                                            style={{ marginTop: 10 }}
+                                        />
+                                    )}
+                                </FormControl>
+                            </Grid>
+                            {/* Error Alert */}
+                            {/* Submit Button */}
+                            <Grid item xs={12}>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    type="submit"
+                                    disabled={loading}
+                                    fullWidth
+                                    style={{ marginTop: 16 }}
+                                >
+                                    {loading ? (
+                                        <CircularProgress size={24} />
+                                    ) : (
+                                        "Save Changes"
+                                    )}
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </form>
+                )}
             </CardContent>
         </Card>
     );

@@ -16,13 +16,15 @@ import {
     TableHead,
     TableRow,
     Typography,
-    useMediaQuery,
+    TextField,
 } from "@mui/material";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
-import { Delete, Edit, Remove } from "@mui/icons-material";
+import { Delete, Edit } from "@mui/icons-material";
+
 export default function BrandIndex() {
     const [brands, setBrands] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState(""); // New state for search term
     const { token } = useStateContext(); // Get the auth token
     const navigate = useNavigate();
 
@@ -63,34 +65,49 @@ export default function BrandIndex() {
             });
     };
 
+    const handleSearch = (event) => {
+        setSearchTerm(event.target.value);
+    };
+
+    // Filter brands based on the search term
+    const filteredBrands = brands.filter((brand) =>
+        brand.brand_name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <Paper elevation={3} sx={{ padding: 2, marginTop: 3 }}>
             <Typography variant="h4" component="h2" gutterBottom>
                 Brands
             </Typography>
+            {/* Search input */}
+            <TextField
+                label="Search Brands"
+                variant="outlined"
+                fullWidth
+                sx={{ marginBottom: 2 }}
+                onChange={handleSearch}
+                value={searchTerm}
+            />
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
                         <TableRow>
-                            {/* <TableCell>ID</TableCell> */}
                             <TableCell>Actions</TableCell>
-
                             <TableCell>Brand Name</TableCell>
                         </TableRow>
                     </TableHead>
                     {loading ? (
                         <TableBody>
                             <TableRow>
-                                <TableCell colSpan={3} align="center">
+                                <TableCell colSpan={2} align="center">
                                     <CircularProgress />
                                 </TableCell>
                             </TableRow>
                         </TableBody>
                     ) : (
                         <TableBody>
-                            {brands.map((brand) => (
+                            {filteredBrands.map((brand) => (
                                 <TableRow key={brand.id}>
-                                    {/* <TableCell>{brand.id}</TableCell> */}
                                     <TableCell>
                                         <IconButton
                                             component={Link}
@@ -121,11 +138,7 @@ export default function BrandIndex() {
                                             <Delete color="error" />
                                         </IconButton>
                                     </TableCell>
-                                    <TableCell
-                                        sx={{ textTransform: "capitalize" }}
-                                    >
-                                        {brand.brand_name}
-                                    </TableCell>
+                                    <TableCell>{brand.brand_name}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

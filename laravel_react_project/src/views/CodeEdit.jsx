@@ -53,6 +53,7 @@ export default function CodeEdit() {
             .then(({ data }) => {
                 setBrandId(data.brand_id);
                 setCodeName(data.code_name);
+                console.log(data);
             })
             .catch((err) => {
                 console.error(err);
@@ -66,8 +67,10 @@ export default function CodeEdit() {
             const getData = await fetchData("/codes", token);
             if (getData.state) {
                 const exists = getData["data"].some(
-                    (item) => item.code_name === codeName
+                    (item) =>
+                        item.brand_id === brandId && item.code_name === codeName
                 );
+
                 if (exists) {
                     showAlert("Code already exists", "error");
                 } else {

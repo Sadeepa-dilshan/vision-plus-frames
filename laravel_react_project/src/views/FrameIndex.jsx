@@ -3,19 +3,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
-import {
-    MaterialReactTable,
-    useMaterialReactTable,
-} from "material-react-table";
-import {
-    Button,
-    CircularProgress,
-    Box,
-    Typography,
-    IconButton,
-    Skeleton,
-} from "@mui/material";
-import { Delete, Edit } from "@mui/icons-material";
+import { MaterialReactTable } from "material-react-table";
+import { Box, IconButton, Skeleton } from "@mui/material";
+import { Delete, Edit, History } from "@mui/icons-material";
 
 export default function FrameIndex() {
     const [frames, setFrames] = useState([]);
@@ -26,7 +16,6 @@ export default function FrameIndex() {
     useEffect(() => {
         getFrames();
     }, []);
-    console.log(frames);
 
     const getFrames = () => {
         setLoading(true);
@@ -65,7 +54,7 @@ export default function FrameIndex() {
         {
             accessorKey: "actions",
             header: "Actions",
-            size: 200,
+            size: 50,
             Cell: ({ row }) => (
                 <>
                     <IconButton
@@ -87,10 +76,20 @@ export default function FrameIndex() {
                     >
                         <Delete color="error" />
                     </IconButton>
+                    {/* Add History Button */}
+                    <IconButton
+                        variant="contained"
+                        color="info"
+                        size="small"
+                        onClick={() =>
+                            navigate(`/frames/history/${row.original.id}`)
+                        }
+                    >
+                        <History color="info" />
+                    </IconButton>
                 </>
             ),
         },
-
         {
             accessorKey: "image",
             header: "Image",
@@ -100,7 +99,11 @@ export default function FrameIndex() {
                     <img
                         src={cell.getValue()}
                         alt="Frame"
-                        style={{ width: 50, height: 50, objectFit: "contain" }}
+                        style={{
+                            width: 100,
+                            height: 100,
+                            objectFit: "contain",
+                        }}
                     />
                 ) : (
                     <Skeleton
@@ -114,32 +117,37 @@ export default function FrameIndex() {
         {
             accessorKey: "brand.brand_name",
             header: "Brand",
-            size: 150,
+            size: 50,
         },
         {
             accessorKey: "code.code_name",
             header: "Code",
-            size: 150,
+            size: 50,
         },
         {
             accessorKey: "color.color_name",
             header: "Color",
-            size: 150,
+            size: 50,
         },
         {
             accessorKey: "price",
             header: "Price",
-            size: 100,
+            size: 50,
+        },
+        {
+            accessorKey: "species",
+            header: "Species",
+            size: 50,
         },
         {
             accessorKey: "size",
             header: "Shape",
-            size: 100,
+            size: 50,
         },
         {
             accessorKey: "stocks",
             header: "Quantity",
-            size: 120,
+            size: 50,
             Cell: ({ row }) => {
                 const stock = row.original.stocks?.[0]; // Access the first element of the stocks array
                 return stock ? stock.qty : "N/A"; // Return the qty or "N/A" if stocks is empty
@@ -148,23 +156,29 @@ export default function FrameIndex() {
     ];
 
     return (
-        <Box sx={{ height: "100%", width: "100%" }}>
+        <Box
+            sx={{
+                height: "100%",
+                width: "100%",
+                overflowX: "auto", // Allow horizontal scroll if needed
+            }}
+        >
             <h2>Frames</h2>
 
             <MaterialReactTable
                 columns={columns}
                 data={frames}
-                enableRowSelection
+                enableRowSelection={false}
                 enablePagination
                 enableColumnFilters
                 enableSorting
                 enableToolbarInternalActions
-                initialState={{ pagination: { pageSize: 5 } }}
+                initialState={{ pagination: { pageSize: 20 } }}
                 muiToolbarAlertBannerProps={{
                     color: "primary",
                 }}
                 muiTableContainerProps={{
-                    sx: { maxHeight: 400 },
+                    sx: { maxHeight: "calc(100vh - 200px)" },
                 }}
                 state={{ isLoading: loading }}
                 muiTableProps={{

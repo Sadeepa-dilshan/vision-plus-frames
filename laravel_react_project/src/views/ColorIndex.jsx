@@ -13,13 +13,14 @@ import {
     TableRow,
     Typography,
     IconButton,
-    Grid,
+    TextField, // Import TextField for search input
 } from "@mui/material";
-import { Edit, Delete, Fullscreen } from "@mui/icons-material";
+import { Edit, Delete } from "@mui/icons-material";
 
 export default function ColorIndex() {
     const [colors, setColors] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState(""); // New state for search term
     const { token } = useStateContext(); // To handle the auth token
 
     useEffect(() => {
@@ -43,7 +44,6 @@ export default function ColorIndex() {
                 setLoading(false);
             });
     };
-    console.log(colors);
 
     const handleDelete = (colorId) => {
         if (!window.confirm("Are you sure you want to delete this color?")) {
@@ -61,11 +61,29 @@ export default function ColorIndex() {
             });
     };
 
+    const handleSearch = (event) => {
+        setSearchTerm(event.target.value);
+    };
+
+    // Filter colors based on the search term
+    const filteredColors = colors.filter((color) =>
+        color.color_name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <Paper elevation={3} sx={{ padding: 2, marginTop: 3 }}>
             <Typography variant="h4" component="h2" gutterBottom>
                 Colors
             </Typography>
+            {/* Search input */}
+            <TextField
+                label="Search Colors"
+                variant="outlined"
+                fullWidth
+                sx={{ marginBottom: 2 }}
+                onChange={handleSearch}
+                value={searchTerm}
+            />
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
@@ -78,14 +96,14 @@ export default function ColorIndex() {
                     {loading ? (
                         <TableBody>
                             <TableRow>
-                                <TableCell colSpan={3} align="center">
+                                <TableCell colSpan={2} align="center">
                                     <CircularProgress />
                                 </TableCell>
                             </TableRow>
                         </TableBody>
                     ) : (
                         <TableBody>
-                            {colors.map((color) => (
+                            {filteredColors.map((color) => (
                                 <TableRow key={color.id}>
                                     {/* <TableCell>{color.id}</TableCell> */}
                                     <TableCell>

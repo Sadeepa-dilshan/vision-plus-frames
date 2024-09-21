@@ -73,9 +73,7 @@ export default function BrandCreate() {
                         fullWidth
                         label="Brand Name"
                         value={brandName}
-                        onChange={(e) =>
-                            setBrandName(e.target.value.toLocaleLowerCase())
-                        }
+                        onChange={(e) => setBrandName(e.target.value)}
                         variant="outlined"
                         error={!!errors}
                         helperText={errors ? errors.brand_name : ""}

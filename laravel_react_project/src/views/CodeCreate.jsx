@@ -50,7 +50,8 @@ export default function CodeCreate() {
             const getData = await fetchData("/codes", token);
             if (getData.state) {
                 const exists = getData["data"].some(
-                    (item) => item.code_name === codeName
+                    (item) =>
+                        item.brand_id === brandId && item.code_name === codeName
                 );
                 if (exists) {
                     showAlert("Code already exists", "error");
@@ -117,9 +118,7 @@ export default function CodeCreate() {
                         fullWidth
                         label="Code Name"
                         value={codeName}
-                        onChange={(e) =>
-                            setCodeName(e.target.value.toLocaleLowerCase())
-                        }
+                        onChange={(e) => setCodeName(e.target.value)}
                         variant="outlined"
                         error={!!errors}
                         helperText={errors ? errors.code_name : ""}
