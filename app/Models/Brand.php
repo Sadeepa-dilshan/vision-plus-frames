@@ -10,7 +10,7 @@ class Brand extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['brand_name'];
+    protected $fillable = ['brand_name','price'];
 
     public function codes()
     {

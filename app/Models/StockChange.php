@@ -19,6 +19,7 @@ class StockChange extends Model
         'change_date',
         'change_qty',
         'status',
+        'branch',
     ];
 
     /**

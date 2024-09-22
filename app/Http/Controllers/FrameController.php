@@ -61,33 +61,32 @@ class FrameController extends Controller
             'price' => 'required|numeric',
             'size' => 'required|string|max:255',
             'species' => 'required|string|max:255',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|url',
             'quantity' => 'required|integer',
+            'branch' => 'required|string|max:255',
         ]);
 
-        $frameData = $request->only(['brand_id', 'code_id', 'color_id', 'price', 'size','species']);
-
+        $frameData = $request->only(['brand_id', 'code_id', 'color_id', 'price', 'size','species','image']);
         // Handle image upload if a new image is provided
-        if ($request->hasFile('image')) {
-            // Delete old image if it exists
-            if ($frame->image) {
-                $oldImagePath =  base_path('laravel_react_project/public/images/frames/' . $frame->image);
-                if (file_exists($oldImagePath)) {
-                    unlink($oldImagePath);
-                }
-            }
-            // Store the new image
-            $imageName = $request->file('image')->getClientOriginalName();
-            $randomNumber = rand(1000, 9999); 
-            $fileName = pathinfo($imageName, PATHINFO_FILENAME) . '_' . $randomNumber . '.' . $request->file('image')->getClientOriginalExtension();
-            $destinationPath = base_path('laravel_react_project/public/images/frames/');
-            $request->file('image')->move($destinationPath, $fileName);
-            $frameData['image'] = $fileName;
-        }
+        // if ($request->hasFile('image')) {
+        //     // Delete old image if it exists
+        //     if ($frame->image) {
+        //         $oldImagePath =  base_path('laravel_react_project/public/images/frames/' . $frame->image);
+        //         if (file_exists($oldImagePath)) {
+        //             unlink($oldImagePath);
+        //         }
+        //     }
+        //     // Store the new image
+        //     $imageName = $request->file('image')->getClientOriginalName();
+        //     $randomNumber = rand(1000, 9999); 
+        //     $fileName = pathinfo($imageName, PATHINFO_FILENAME) . '_' . $randomNumber . '.' . $request->file('image')->getClientOriginalExtension();
+        //     $destinationPath = base_path('laravel_react_project/public/images/frames/');
+        //     $request->file('image')->move($destinationPath, $fileName);
+        //     $frameData['image'] = $fileName;
+        // }
 
         // Update frame data
         $frame->update($frameData);
-
         // Update stock and stock_changes
         $existingStock = $frame->stocks()->first();
 
@@ -114,6 +113,7 @@ class FrameController extends Controller
                     'change_date' => now(),
                     'change_qty' => $changeQty,
                     'status' => $status,
+                    'branch' => $request->branch,
                 ]);
             }
         } else {
@@ -131,6 +131,7 @@ class FrameController extends Controller
                     'change_date' => now(),
                     'change_qty' => $request->quantity, // The first quantity added
                     'status' => 'plus',
+                    'branch' => $request->branch,
                 ]);
             }
         }
@@ -166,7 +167,6 @@ class FrameController extends Controller
             ->get()
             ->map(function ($stockChange) {
                 $frame = $stockChange->frame;
-    
                 return [
                     'frame_id' => $frame->id,
                     'total_reduction' => $stockChange->total_reduction,
