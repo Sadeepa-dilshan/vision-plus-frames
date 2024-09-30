@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosClient = axios.create({
-    baseURL: "https://frames.biz-solution.net/public/api",
+    baseURL: "https://www.visionplusframes.com/public/api",
     withCredentials: true,
 });
 

@@ -6,11 +6,23 @@ import { useStateContext } from "../contexts/contextprovider";
 import { MaterialReactTable } from "material-react-table";
 import { Box, IconButton, Skeleton } from "@mui/material";
 import { Delete, Edit, History } from "@mui/icons-material";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import ImageModal from "../Components/ImageModal";
 
 export default function FrameIndex() {
     const [frames, setFrames] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [imgFullVIew, setImgFullView] = useState("");
     const { token } = useStateContext(); // To handle the auth token
+    const [open, setOpen] = useState(false);
+    const [selectedframeIDs, setSelectedframeIDs] = useState(false);
+    const handleOpen = () => {
+        setOpen(true);
+    };
+    const handleClose = () => {
+        setOpen(false);
+        setImgFullView("");
+    };
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -87,6 +99,18 @@ export default function FrameIndex() {
                     >
                         <History color="info" />
                     </IconButton>
+                    {/* <IconButton
+                        variant="contained"
+                        color="info"
+                        size="small"
+                        // onClick={() => handleOpen()}
+                        onClick={() => {
+                            setSelectedframeIDs(row.original);
+                            handleOpen();
+                        }}
+                    >
+                        <LocalShippingIcon color="info" />
+                    </IconButton> */}
                 </>
             ),
         },
@@ -97,12 +121,17 @@ export default function FrameIndex() {
             Cell: ({ cell }) =>
                 cell.getValue() ? (
                     <img
+                        onClick={() => {
+                            handleOpen();
+                            setImgFullView(cell.getValue());
+                        }}
                         src={cell.getValue()}
                         alt="Frame"
                         style={{
                             width: 100,
                             height: 100,
                             objectFit: "contain",
+                            cursor: "pointer",
                         }}
                     />
                 ) : (
@@ -191,6 +220,12 @@ export default function FrameIndex() {
                         },
                     },
                 }}
+            />
+            <ImageModal
+                open={open}
+                imgFullVIew={imgFullVIew}
+                handleClose={handleClose}
+                selectedframeIDs={selectedframeIDs}
             />
         </Box>
     );

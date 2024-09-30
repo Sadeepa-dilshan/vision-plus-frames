@@ -15,6 +15,7 @@ import {
 
 export default function BrandCreate() {
     const [brandName, setBrandName] = useState("");
+    const [price, setPrice] = useState("");
     const { showAlert } = useAlert();
     const [loading, setLoading] = useState(false);
 
@@ -40,6 +41,7 @@ export default function BrandCreate() {
                         "/brands",
                         {
                             brand_name: brandName,
+                            price: price,
                         },
                         {
                             headers: {
@@ -80,25 +82,28 @@ export default function BrandCreate() {
                         required
                     />
                 </Box>
-                <Box
-                    sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                    }}
-                >
-                    <Button
-                        disabled={loading}
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        startIcon={
-                            loading ? <CircularProgress size={24} /> : null
-                        }
-                    >
-                        {loading ? "Creating..." : "Create Brand"}
-                    </Button>
+                <Box sx={{ marginBottom: 3 }}>
+                    <TextField
+                        fullWidth
+                        label="Price"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        variant="outlined"
+                        error={!!errors}
+                        helperText={errors ? errors.price : ""}
+                        required
+                    />
                 </Box>
+
+                <Button
+                    disabled={loading}
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    startIcon={loading ? <CircularProgress size={24} /> : null}
+                >
+                    {loading ? "Creating..." : "Create Brand"}
+                </Button>
             </form>
         </Card>
     );

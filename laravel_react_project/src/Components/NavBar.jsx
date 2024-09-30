@@ -1,15 +1,8 @@
 import * as React from "react";
-import { styled, useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
-import MuiDrawer from "@mui/material/Drawer";
-import Divider from "@mui/material/Divider";
-import IconButton from "@mui/material/IconButton";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { useMediaQuery } from "@mui/material";
-import { Menu } from "@mui/icons-material";
-
 // Icons
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import FolderCopyIcon from "@mui/icons-material/FolderCopy";
@@ -22,8 +15,6 @@ import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import QueueIcon from "@mui/icons-material/Queue";
 import DesktopNav from "./DesktopNav";
 import MobileNav from "./MobileNav";
-
-const drawerWidth = 240;
 
 export default function MiniDrawer() {
     const theme = useTheme();

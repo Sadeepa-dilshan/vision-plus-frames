@@ -94,6 +94,7 @@ export default function BrandIndex() {
                         <TableRow>
                             <TableCell>Actions</TableCell>
                             <TableCell>Brand Name</TableCell>
+                            <TableCell>Brand Price</TableCell>
                         </TableRow>
                     </TableHead>
                     {loading ? (
@@ -139,6 +140,7 @@ export default function BrandIndex() {
                                         </IconButton>
                                     </TableCell>
                                     <TableCell>{brand.brand_name}</TableCell>
+                                    <TableCell>{brand.price}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

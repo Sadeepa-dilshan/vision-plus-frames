@@ -23,6 +23,7 @@ export default function FrameHistory() {
     useEffect(() => {
         fetchHistory();
     }, []);
+    console.log(history);
 
     const fetchHistory = async () => {
         try {

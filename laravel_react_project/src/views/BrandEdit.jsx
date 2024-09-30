@@ -17,6 +17,8 @@ export default function BrandEdit() {
     const { showAlert } = useAlert();
     const { id } = useParams(); // Get the brand ID from the URL
     const [brandName, setBrandName] = useState("");
+    const [price, setPrice] = useState("");
+
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState(null);
     const { token } = useStateContext(); // Get the auth token
@@ -31,6 +33,7 @@ export default function BrandEdit() {
             })
             .then(({ data }) => {
                 setBrandName(data.brand_name);
+                setPrice(data.price);
             })
             .catch((err) => {
                 console.error(err);
@@ -47,12 +50,12 @@ export default function BrandEdit() {
                 const exists = getData["data"].some(
                     (item) => item.brand_name === brandName
                 );
-                if (exists) {
-                    showAlert("Brand already exists", "error");
+                if (!exists) {
+                    showAlert("Brand is Not exists", "error");
                 } else {
                     await axiosClient.put(
                         `/brands/${id}`,
-                        { brand_name: brandName },
+                        { brand_name: brandName, price: price },
                         {
                             headers: { Authorization: `Bearer ${token}` },
                         }
@@ -91,25 +94,27 @@ export default function BrandEdit() {
                         required
                     />
                 </Box>
-                <Box
-                    sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                    }}
-                >
-                    <Button
-                        disabled={loading}
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        startIcon={
-                            loading ? <CircularProgress size={24} /> : null
-                        }
-                    >
-                        {loading ? "Updating..." : "Update Brand"}
-                    </Button>
+                <Box sx={{ marginBottom: 3 }}>
+                    <TextField
+                        fullWidth
+                        label="Price"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        variant="outlined"
+                        error={!!errors}
+                        helperText={errors ? errors.price : ""}
+                        required
+                    />
                 </Box>
+                <Button
+                    disabled={loading}
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    startIcon={loading ? <CircularProgress size={24} /> : null}
+                >
+                    {loading ? "Updating..." : "Update Brand"}
+                </Button>
             </form>
         </Card>
     );

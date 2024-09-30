@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import Login from "./views/login.jsx";
 import Register from "./views/register.jsx";
 import DefaultLayout from "./Components/DefaultLayout.jsx";
@@ -27,6 +27,14 @@ const router = createBrowserRouter([
         path: "/",
         element: <DefaultLayout />,
         children: [
+            {
+                path: "/",
+                element: (
+                    <AnimatedPage>
+                        <Navigate to="/dashboard" replace />
+                    </AnimatedPage>
+                ),
+            },
             {
                 path: "/users",
                 element: (

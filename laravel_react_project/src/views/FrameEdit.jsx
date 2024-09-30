@@ -41,8 +41,13 @@ export default function FrameEdit() {
         species: "",
         image: "",
         quantity: "",
+        change_qty: "",
+        branch: "",
     });
+    console.log(frame);
+
     const [brands, setBrands] = useState([]);
+
     const [codes, setCodes] = useState([]);
     const [colors, setColors] = useState([]);
     const [imagePreview, setImagePreview] = useState(null);
@@ -162,6 +167,7 @@ export default function FrameEdit() {
         formData.append("size", frame.size || "");
         formData.append("species", frame.species || "");
         formData.append("quantity", frame.quantity || "");
+        formData.append("branch", frame.branch || "");
 
         if (frame.code_id) {
             if (frame.image instanceof File) {
@@ -304,7 +310,7 @@ export default function FrameEdit() {
                                 </FormControl>
                             </Grid>
                             {/* Code Selection */}
-                            {console.log()}
+
                             <Grid item xs={12} md={6}>
                                 <FormControl fullWidth margin="normal">
                                     <InputLabel id="code-label">
@@ -430,6 +436,32 @@ export default function FrameEdit() {
                                     required
                                 />
                             </Grid>
+
+                            <Grid item xs={12} md={10}>
+                                <FormControl fullWidth margin="normal" required>
+                                    <InputLabel>Select Branch</InputLabel>
+                                    <Select
+                                        id="branch"
+                                        name="branch"
+                                        value={frame.branch}
+                                        onChange={handleInputChange}
+                                        label="Select Branch"
+                                    >
+                                        <MenuItem value="mathugama">
+                                            Mathugama
+                                        </MenuItem>
+                                        <MenuItem value="aluthgama">
+                                            Aluthgama
+                                        </MenuItem>
+                                        <MenuItem value="colombo">
+                                            Colombo
+                                        </MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+
+                            {/* Add Select for selecting branch */}
+
                             {/* Image Upload */}
                             <Grid item xs={12}>
                                 <FormControl fullWidth margin="normal">
