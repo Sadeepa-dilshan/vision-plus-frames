@@ -410,6 +410,9 @@ export default function FrameEdit() {
                                         onChange={handleInputChange}
                                         label="Select Branch"
                                     >
+                                        <MenuItem value="initial stock">
+                                            Initial Stock
+                                        </MenuItem>
                                         <MenuItem value="mathugama">
                                             Mathugama
                                         </MenuItem>

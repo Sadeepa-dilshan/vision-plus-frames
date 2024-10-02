@@ -18,6 +18,8 @@ export default function FrameIndex() {
     const handleOpen = () => {
         setOpen(true);
     };
+    console.log(frames);
+
     const handleClose = () => {
         setOpen(false);
         setImgFullView("");

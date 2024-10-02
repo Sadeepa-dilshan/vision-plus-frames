@@ -160,10 +160,18 @@ export default function FrameHistory() {
                                                                 }{" "}
                                                                 units
                                                             </Typography>
-                                                            <Typography variant="body1">
+                                                            <Typography
+                                                                textTransform={
+                                                                    "capitalize"
+                                                                }
+                                                                variant="body1"
+                                                            >
                                                                 {change.branch ||
                                                                     "None"}{" "}
-                                                                Branch
+                                                                {change.branch ===
+                                                                "initial stock"
+                                                                    ? ""
+                                                                    : "Branch"}
                                                             </Typography>
 
                                                             <Typography
