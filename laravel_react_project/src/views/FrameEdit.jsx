@@ -417,7 +417,7 @@ export default function FrameEdit() {
                                             Aluthgama
                                         </MenuItem>
                                         <MenuItem value="colombo">
-                                            Colombo
+                                            Kaluthara
                                         </MenuItem>
                                     </Select>
                                 </FormControl>
