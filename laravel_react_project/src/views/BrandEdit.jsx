@@ -36,7 +36,7 @@ export default function BrandEdit() {
                 setPrice(data.price);
             })
             .catch((err) => {
-                console.error(err);
+                showAlert(err.response.data.message || "server Error", "error");
             });
     }, [id, token]);
 
@@ -48,10 +48,13 @@ export default function BrandEdit() {
 
             if (getData.state) {
                 const exists = getData["data"].some(
-                    (item) => item.brand_name === brandName
+                    (item) =>
+                        item.brand_name === brandName &&
+                        parseInt(item.price) == parseInt(price)
                 );
-                if (!exists) {
-                    showAlert("Brand is Not exists", "error");
+
+                if (exists) {
+                    showAlert("Brand is already exists", "error");
                 } else {
                     await axiosClient.put(
                         `/brands/${id}`,
@@ -68,8 +71,6 @@ export default function BrandEdit() {
         } catch (err) {
             if (err.response && err.response.status === 422) {
                 setErrors(err.response.data.errors);
-            } else {
-                console.error(err);
             }
         } finally {
             setLoading(false);

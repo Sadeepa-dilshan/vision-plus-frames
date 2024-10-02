@@ -14,11 +14,13 @@ import {
 } from "@mui/material";
 import { Add, Remove } from "@mui/icons-material";
 import { motion } from "framer-motion";
-
+import InfiniteScroll from "react-infinite-scroll-component";
 export default function FrameHistory() {
     const { id } = useParams(); // Get frame ID from the URL
-    const [history, setHistory] = useState(null);
+    const [history, setHistory] = useState([]);
+
     const [loading, setLoading] = useState(true);
+    //DATE FILTER
 
     useEffect(() => {
         fetchHistory();
@@ -69,9 +71,7 @@ export default function FrameHistory() {
                                 Stock History for Frame:{" "}
                                 {history.frame.code.code_name}
                             </Typography>
-                            <Typography variant="body1" color="textSecondary">
-                                Initial Stock Count: {history.initial_count}
-                            </Typography>
+
                             <Typography variant="body2" color="textSecondary">
                                 Created At:{" "}
                                 {new Date(
@@ -144,7 +144,13 @@ export default function FrameHistory() {
                                                             )}
                                                         </Avatar>
                                                         <Box>
-                                                            <Typography variant="body1">
+                                                            <Typography
+                                                                variant="body1"
+                                                                sx={{
+                                                                    fontWeight:
+                                                                        "bold",
+                                                                }}
+                                                            >
                                                                 {change.status ===
                                                                 "plus"
                                                                     ? "Added"
@@ -154,11 +160,17 @@ export default function FrameHistory() {
                                                                 }{" "}
                                                                 units
                                                             </Typography>
+                                                            <Typography variant="body1">
+                                                                {change.branch ||
+                                                                    "None"}{" "}
+                                                                Branch
+                                                            </Typography>
+
                                                             <Typography
                                                                 variant="body2"
                                                                 color="textSecondary"
                                                             >
-                                                                Change Date:{" "}
+                                                                Date:{" "}
                                                                 {new Date(
                                                                     change.change_date
                                                                 ).toLocaleString()}

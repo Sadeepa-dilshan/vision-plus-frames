@@ -23,6 +23,7 @@ import {
 
 import { storage } from "../firebaseConfig";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import EditLoading from "../Components/EditLoading";
 
 export default function FrameEdit() {
     const { showAlert } = useAlert();
@@ -41,11 +42,9 @@ export default function FrameEdit() {
         species: "",
         image: "",
         quantity: "",
-        change_qty: "",
         branch: "",
     });
-    console.log(frame);
-
+    const [defaltQuantity, setDefaltQuantity] = useState(0);
     const [brands, setBrands] = useState([]);
 
     const [codes, setCodes] = useState([]);
@@ -102,6 +101,7 @@ export default function FrameEdit() {
                     quantity: data.stocks.length ? data.stocks[0].qty : "",
                 });
                 setImagePreview(data.image);
+                setDefaltQuantity(data.stocks.length ? data.stocks[0].qty : 0);
             })
             .catch(() => {
                 console.error("Failed to fetch frame details");
@@ -178,7 +178,6 @@ export default function FrameEdit() {
                 );
 
                 if (imageUploard && imageUploard.success) {
-                    console.log("imageUploard.downloadURL");
                     formData.append("image", imageUploard.downloadURL);
                 } else {
                     formData.append("image", frame.image);
@@ -199,13 +198,25 @@ export default function FrameEdit() {
                             "error"
                         );
                     } else {
-                        await axiosClient.post(`/frames/${id}`, formData, {
-                            headers: {
-                                Authorization: `Bearer ${token}`,
-                                "Content-Type": "multipart/form-data",
-                            },
-                        });
-                        navigate("/frames");
+                        //GET INPUT & FRAME TOTAL
+                        const currentQuantity = defaltQuantity || 0; // Use 0 if quantity is NaN
+                        const inputQuantity =
+                            parseInt(formData.get("quantity")) || 0; // Use 0 if NaN
+
+                        if (currentQuantity && inputQuantity) {
+                            formData.set(
+                                "quantity",
+                                currentQuantity + inputQuantity
+                            );
+
+                            await axiosClient.post(`/frames/${id}`, formData, {
+                                headers: {
+                                    Authorization: `Bearer ${token}`,
+                                    "Content-Type": "multipart/form-data",
+                                },
+                            });
+                            navigate("/frames");
+                        }
                     }
                 }
             } catch (err) {
@@ -231,56 +242,7 @@ export default function FrameEdit() {
             <CardHeader title="Edit Frame" />
             <CardContent>
                 {loadinginitial ? (
-                    <Grid container spacing={2}>
-                        {/* Loading skeleton for Brand */}
-                        <Grid item xs={12} md={6}>
-                            <Skeleton
-                                variant="rectangular"
-                                width="100%"
-                                height={56}
-                            />
-                        </Grid>
-                        {/* Loading skeleton for Code */}
-                        <Grid item xs={12} md={6}>
-                            <Skeleton
-                                variant="rectangular"
-                                width="100%"
-                                height={56}
-                            />
-                        </Grid>
-                        {/* Loading skeleton for Color */}
-                        <Grid item xs={12} md={6}>
-                            <Skeleton
-                                variant="rectangular"
-                                width="100%"
-                                height={56}
-                            />
-                        </Grid>
-                        {/* Loading skeleton for Price */}
-                        <Grid item xs={12} md={6}>
-                            <Skeleton
-                                variant="rectangular"
-                                width="100%"
-                                height={56}
-                            />
-                        </Grid>
-                        {/* Loading skeleton for Image */}
-                        <Grid item xs={12}>
-                            <Skeleton
-                                variant="rectangular"
-                                width="100%"
-                                height={100}
-                            />
-                        </Grid>
-                        {/* Loading skeleton for Button */}
-                        <Grid item xs={12}>
-                            <Skeleton
-                                variant="rectangular"
-                                width="100%"
-                                height={56}
-                            />
-                        </Grid>
-                    </Grid>
+                    <EditLoading />
                 ) : (
                     <form onSubmit={handleSubmit}>
                         <Grid container spacing={2}>
@@ -294,6 +256,7 @@ export default function FrameEdit() {
                                         labelId="brand-label"
                                         id="brand_id"
                                         name="brand_id"
+                                        label="Select Brand"
                                         value={frame.brand_id}
                                         onChange={handleInputChange}
                                         required
@@ -319,6 +282,7 @@ export default function FrameEdit() {
                                     <Select
                                         labelId="code-label"
                                         id="code_id"
+                                        label="Select Code"
                                         name="code_id"
                                         value={frame.code_id}
                                         onChange={handleInputChange}
@@ -383,6 +347,7 @@ export default function FrameEdit() {
                                         Frame Shape
                                     </InputLabel>
                                     <Select
+                                        label="Frame Shape"
                                         labelId="size-label"
                                         id="size"
                                         name="size"
@@ -390,9 +355,6 @@ export default function FrameEdit() {
                                         onChange={handleInputChange}
                                         required
                                     >
-                                        <MenuItem value="">
-                                            -- Select Frame Shape --
-                                        </MenuItem>
                                         <MenuItem value="Full">Full</MenuItem>
                                         <MenuItem value="Half">Half</MenuItem>
                                     </Select>
@@ -405,6 +367,7 @@ export default function FrameEdit() {
                                         Frame Species
                                     </InputLabel>
                                     <Select
+                                        label="Frame Species"
                                         labelId="species-label"
                                         id="species"
                                         name="species"
@@ -487,7 +450,7 @@ export default function FrameEdit() {
                                     )}
                                 </FormControl>
                             </Grid>
-                            {/* Error Alert */}
+
                             {/* Submit Button */}
                             <Grid item xs={12}>
                                 <Button

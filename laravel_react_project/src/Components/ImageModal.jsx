@@ -1,7 +1,6 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import {
     IconButton,
@@ -26,17 +25,10 @@ const style = {
     width: "auto",
 };
 
-export default function ImageModal({
-    open,
-    handleClose,
-    imgFullVIew,
-    selectedframeIDs,
-}) {
+export default function ImageModal({ open, handleClose, imgFullVIew }) {
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
     const isMediumScreen = useMediaQuery(theme.breakpoints.between("sm", "md"));
-    const isLargeScreen = useMediaQuery(theme.breakpoints.up("md"));
-    console.log(selectedframeIDs);
 
     // State to handle stock reduction and selected branch
     const [stock, setStock] = React.useState("");

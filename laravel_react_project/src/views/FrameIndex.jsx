@@ -6,7 +6,6 @@ import { useStateContext } from "../contexts/contextprovider";
 import { MaterialReactTable } from "material-react-table";
 import { Box, IconButton, Skeleton } from "@mui/material";
 import { Delete, Edit, History } from "@mui/icons-material";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import ImageModal from "../Components/ImageModal";
 
 export default function FrameIndex() {
