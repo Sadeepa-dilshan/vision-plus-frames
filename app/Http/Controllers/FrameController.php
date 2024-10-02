@@ -167,9 +167,11 @@ class FrameController extends Controller
             ->get()
             ->map(function ($stockChange) {
                 $frame = $stockChange->frame;
+                $currentQty = Stock::where('frame_id', $frame->id)->value('qty');
                 return [
                     'frame_id' => $frame->id,
                     'total_reduction' => $stockChange->total_reduction,
+                    'current_qty' => $currentQty ?? 0,  
                     'frame' => [
                         'id' => $frame->id,
                         'brand_name' => $frame->brand->brand_name ?? null,
