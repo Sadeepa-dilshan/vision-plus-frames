@@ -87,3 +87,4 @@ Route::get('hello', function () {
     return response()->json(['message' => 'Hello World ,App Works!...']);
 });
 Route::get('top-frames-by-stock-reduction', [FrameController::class, 'topFramesByStockReduction']);
+Route::get('/frames/{frameId}/stock-history', [StockController::class, 'getStockHistory']);
