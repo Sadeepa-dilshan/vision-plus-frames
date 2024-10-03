@@ -5,8 +5,9 @@ import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
 import { MaterialReactTable } from "material-react-table";
 import { Box, IconButton, Skeleton } from "@mui/material";
-import { Delete, Edit, History } from "@mui/icons-material";
+import { Delete, Edit, History, LocalShipping } from "@mui/icons-material";
 import ImageModal from "../Components/ImageModal";
+import FrameStockManageModel from "../Components/FrameStockManageModel";
 
 export default function FrameIndex() {
     const [frames, setFrames] = useState([]);
@@ -14,22 +15,28 @@ export default function FrameIndex() {
     const [imgFullVIew, setImgFullView] = useState("");
     const { token } = useStateContext(); // To handle the auth token
     const [open, setOpen] = useState(false);
+    const [openStockManageModel, setOpenStockManageModel] = useState(false);
     const [selectedframeIDs, setSelectedframeIDs] = useState(false);
+    const [handleRefresh, setHandleRefresh] = useState(false);
     const handleOpen = () => {
         setOpen(true);
     };
-    console.log(frames);
 
     const handleClose = () => {
         setOpen(false);
         setImgFullView("");
     };
+    const CloseStockManage = () => {
+        setOpenStockManageModel(false);
+    };
     const navigate = useNavigate();
 
     useEffect(() => {
         getFrames();
-    }, []);
-
+    }, [handleRefresh]);
+    const handleRefreshTable = () => {
+        setHandleRefresh(!handleRefresh);
+    };
     const getFrames = () => {
         setLoading(true);
         axiosClient
@@ -100,18 +107,18 @@ export default function FrameIndex() {
                     >
                         <History color="info" />
                     </IconButton>
-                    {/* <IconButton
+                    <IconButton
                         variant="contained"
                         color="info"
                         size="small"
                         // onClick={() => handleOpen()}
                         onClick={() => {
                             setSelectedframeIDs(row.original);
-                            handleOpen();
+                            setOpenStockManageModel(true);
                         }}
                     >
-                        <LocalShippingIcon color="info" />
-                    </IconButton> */}
+                        <LocalShipping color="info" />
+                    </IconButton>
                 </>
             ),
         },
@@ -227,6 +234,12 @@ export default function FrameIndex() {
                 imgFullVIew={imgFullVIew}
                 handleClose={handleClose}
                 selectedframeIDs={selectedframeIDs}
+            />
+            <FrameStockManageModel
+                open={openStockManageModel}
+                handleClose={CloseStockManage}
+                selectedframeIDs={selectedframeIDs}
+                handleRefreshTable={handleRefreshTable}
             />
         </Box>
     );

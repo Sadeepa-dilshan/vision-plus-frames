@@ -199,24 +199,15 @@ export default function FrameEdit() {
                         );
                     } else {
                         //GET INPUT & FRAME TOTAL
-                        const currentQuantity = defaltQuantity || 0; // Use 0 if quantity is NaN
-                        const inputQuantity =
-                            parseInt(formData.get("quantity")) || 0; // Use 0 if NaN
-
-                        if (currentQuantity && inputQuantity) {
-                            formData.set(
-                                "quantity",
-                                currentQuantity + inputQuantity
-                            );
-
-                            await axiosClient.post(`/frames/${id}`, formData, {
-                                headers: {
-                                    Authorization: `Bearer ${token}`,
-                                    "Content-Type": "multipart/form-data",
-                                },
-                            });
-                            navigate("/frames");
-                        }
+                        formData.set("quantity", parseInt(frame.quantity));
+                        formData.set("branch", "stock");
+                        await axiosClient.post(`/frames/${id}`, formData, {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                                "Content-Type": "multipart/form-data",
+                            },
+                        });
+                        navigate("/frames");
                     }
                 }
             } catch (err) {
@@ -397,33 +388,8 @@ export default function FrameEdit() {
                                     value={frame.quantity}
                                     onChange={handleInputChange}
                                     required
+                                    disabled
                                 />
-                            </Grid>
-
-                            <Grid item xs={12} md={10}>
-                                <FormControl fullWidth margin="normal" required>
-                                    <InputLabel>Select Branch</InputLabel>
-                                    <Select
-                                        id="branch"
-                                        name="branch"
-                                        value={frame.branch}
-                                        onChange={handleInputChange}
-                                        label="Select Branch"
-                                    >
-                                        <MenuItem value="initial stock">
-                                            Initial Stock
-                                        </MenuItem>
-                                        <MenuItem value="mathugama">
-                                            Mathugama
-                                        </MenuItem>
-                                        <MenuItem value="aluthgama">
-                                            Aluthgama
-                                        </MenuItem>
-                                        <MenuItem value="colombo">
-                                            Kaluthara
-                                        </MenuItem>
-                                    </Select>
-                                </FormControl>
                             </Grid>
 
                             {/* Add Select for selecting branch */}

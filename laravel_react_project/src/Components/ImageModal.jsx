@@ -13,6 +13,7 @@ import {
     InputLabel,
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
+import FramestockAjusmentModel from "./FramestockAjusmentModel";
 
 const style = {
     position: "absolute",
@@ -25,7 +26,12 @@ const style = {
     width: "auto",
 };
 
-export default function ImageModal({ open, handleClose, imgFullVIew }) {
+export default function ImageModal({
+    open,
+    handleClose,
+    imgFullVIew,
+    selectedframeIDs,
+}) {
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
     const isMediumScreen = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -38,6 +44,8 @@ export default function ImageModal({ open, handleClose, imgFullVIew }) {
         console.log("Selected branch:", branch);
         handleClose();
     };
+    console.log("selectedframeIDs", selectedframeIDs);
+
     return (
         <div>
             <Modal
@@ -72,55 +80,9 @@ export default function ImageModal({ open, handleClose, imgFullVIew }) {
                             alt="Full View"
                         />
                     ) : (
-                        <form
-                            onSubmit={handleSubmic}
-                            style={{ display: "flex", flexDirection: "column" }}
-                        >
-                            {/* Add TextField for reducing stock */}
-                            <TextField
-                                label="Reduce Stock Amount"
-                                type="number"
-                                fullWidth
-                                required
-                                margin="normal"
-                                value={stock}
-                                onChange={(e) => setStock(e.target.value)}
-                                sx={{ marginTop: 3, width: 300 }}
-                            />
-
-                            {/* Add Select for selecting branch */}
-                            <FormControl
-                                fullWidth
-                                margin="normal"
-                                sx={{ marginTop: 2, width: 300 }}
-                                required
-                            >
-                                <InputLabel>Select Branch</InputLabel>
-                                <Select
-                                    value={branch}
-                                    onChange={(e) => setBranch(e.target.value)}
-                                    label="Select Branch"
-                                >
-                                    <MenuItem value="Mathugama">
-                                        Mathugama
-                                    </MenuItem>
-                                    <MenuItem value="Aluthgama">
-                                        Aluthgama
-                                    </MenuItem>
-                                    <MenuItem value="Colombo">Colombo</MenuItem>
-                                </Select>
-                            </FormControl>
-
-                            {/* You can add a button to submit or confirm actions */}
-                            <Button
-                                variant="contained"
-                                type="submit"
-                                color="primary"
-                                sx={{ marginTop: 2, display: "block" }}
-                            >
-                                Tranfer Stock
-                            </Button>
-                        </form>
+                        <FramestockAjusmentModel
+                            selectedframeIDs={selectedframeIDs}
+                        />
                     )}
                 </Box>
             </Modal>

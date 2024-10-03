@@ -169,8 +169,8 @@ export default function FrameHistory() {
                                                                 {change.branch ||
                                                                     "None"}{" "}
                                                                 {change.branch ===
-                                                                "initial stock"
-                                                                    ? ""
+                                                                "stock"
+                                                                    ? "Updated"
                                                                     : "Branch"}
                                                             </Typography>
 
