@@ -40,11 +40,8 @@ export default function ImageModal({
     const [stock, setStock] = React.useState("");
     const [branch, setBranch] = React.useState("");
     const handleSubmic = () => {
-        console.log("Stock reduced:", stock);
-        console.log("Selected branch:", branch);
         handleClose();
     };
-    console.log("selectedframeIDs", selectedframeIDs);
 
     return (
         <div>

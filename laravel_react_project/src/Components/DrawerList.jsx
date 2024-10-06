@@ -17,7 +17,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 
 const drawerWidth = 240;
 
-export default function DrawerList({ NavData }) {
+export default function DrawerList({ NavData, toggleDrawer }) {
     const { setUser, setToken } = useStateContext();
     const navigate = useNavigate();
     const location = useLocation();
@@ -46,6 +46,7 @@ export default function DrawerList({ NavData }) {
                         }
                     >
                         <ListItemButton
+                            onClick={toggleDrawer}
                             sx={{
                                 minHeight: 48,
                                 justifyContent: open ? "initial" : "center",

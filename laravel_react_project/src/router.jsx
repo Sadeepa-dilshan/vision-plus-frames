@@ -21,6 +21,7 @@ import FrameEdit from "./views/FrameEdit.jsx";
 import AnimatedPage from "./Components/PageLoadAnimation.jsx";
 import Dashboard from "./views/Dashboard.jsx";
 import FrameHistory from "./views/FrameHistory.jsx";
+import FrameCountIndex from "./views/FrameCountIndex.jsx";
 
 const router = createBrowserRouter([
     {
@@ -144,6 +145,14 @@ const router = createBrowserRouter([
                 element: (
                     <AnimatedPage>
                         <FrameIndex />
+                    </AnimatedPage>
+                ),
+            },
+            {
+                path: "/frames-store",
+                element: (
+                    <AnimatedPage>
+                        <FrameCountIndex />
                     </AnimatedPage>
                 ),
             },

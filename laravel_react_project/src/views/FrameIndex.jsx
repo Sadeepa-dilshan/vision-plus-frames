@@ -4,7 +4,13 @@ import { useNavigate } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
 import { MaterialReactTable } from "material-react-table";
-import { Box, IconButton, Skeleton } from "@mui/material";
+import {
+    Box,
+    IconButton,
+    Skeleton,
+    useMediaQuery,
+    useTheme,
+} from "@mui/material";
 import { Delete, Edit, History, LocalShipping } from "@mui/icons-material";
 import ImageModal from "../Components/ImageModal";
 import FrameStockManageModel from "../Components/FrameStockManageModel";
@@ -18,9 +24,24 @@ export default function FrameIndex() {
     const [openStockManageModel, setOpenStockManageModel] = useState(false);
     const [selectedframeIDs, setSelectedframeIDs] = useState(false);
     const [handleRefresh, setHandleRefresh] = useState(false);
+    const theme = useTheme();
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
     const handleOpen = () => {
         setOpen(true);
     };
+    const outputData = frames.reduce((acc, curr) => {
+        if (!acc[curr.code_id]) {
+            acc[curr.code_id] = [];
+        }
+        acc[curr.code_id].push(curr);
+        return acc;
+    }, {});
+
+    const mappedOutput = Object.keys(outputData).map((key) => ({
+        code_id: key,
+        frames: outputData[key],
+    }));
+    console.log(mappedOutput);
 
     const handleClose = () => {
         setOpen(false);
@@ -200,35 +221,35 @@ export default function FrameIndex() {
                 overflowX: "auto", // Allow horizontal scroll if needed
             }}
         >
-            <h2>Frames</h2>
-
-            <MaterialReactTable
-                columns={columns}
-                data={frames}
-                enableRowSelection={false}
-                enablePagination
-                enableColumnFilters
-                enableSorting
-                enableToolbarInternalActions
-                initialState={{ pagination: { pageSize: 20 } }}
-                muiToolbarAlertBannerProps={{
-                    color: "primary",
-                }}
-                muiTableContainerProps={{
-                    sx: { maxHeight: "calc(100vh - 200px)" },
-                }}
-                state={{ isLoading: loading }}
-                muiTableProps={{
-                    sx: {
-                        "& .MuiTableCell-root": {
-                            padding: ".5rem", // Reduce padding for smaller density
+            <Box sx={{ width: isSmallScreen ? "96vw" : "100%" }}>
+                <MaterialReactTable
+                    columns={columns}
+                    data={frames}
+                    enableRowSelection={false}
+                    enablePagination
+                    enableColumnFilters
+                    enableSorting
+                    enableToolbarInternalActions
+                    initialState={{ pagination: { pageSize: 20 } }}
+                    muiToolbarAlertBannerProps={{
+                        color: "primary",
+                    }}
+                    muiTableContainerProps={{
+                        sx: { maxHeight: "calc(100vh - 200px)" },
+                    }}
+                    state={{ isLoading: loading }}
+                    muiTableProps={{
+                        sx: {
+                            "& .MuiTableCell-root": {
+                                padding: ".5rem", // Reduce padding for smaller density
+                            },
+                            "& .MuiTableRow-root": {
+                                height: ".5rem", // Reduce row height for smaller density
+                            },
                         },
-                        "& .MuiTableRow-root": {
-                            height: ".5rem", // Reduce row height for smaller density
-                        },
-                    },
-                }}
-            />
+                    }}
+                />
+            </Box>
             <ImageModal
                 open={open}
                 imgFullVIew={imgFullVIew}

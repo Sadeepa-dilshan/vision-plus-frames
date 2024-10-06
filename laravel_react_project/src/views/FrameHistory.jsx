@@ -14,12 +14,13 @@ import {
 } from "@mui/material";
 import { Add, Remove } from "@mui/icons-material";
 import { motion } from "framer-motion";
-import InfiniteScroll from "react-infinite-scroll-component";
+
 export default function FrameHistory() {
     const { id } = useParams(); // Get frame ID from the URL
     const [history, setHistory] = useState([]);
 
     const [loading, setLoading] = useState(true);
+
     //DATE FILTER
 
     useEffect(() => {
@@ -87,12 +88,12 @@ export default function FrameHistory() {
                         <Divider />
 
                         {history.changes.length > 0 ? (
-                            <Grid container spacing={2} sx={{ marginTop: 2 }}>
+                            <Grid container spacing={2}>
                                 {history.changes
                                     .slice()
                                     .reverse()
                                     .map((change, index) => (
-                                        <Grid item xs={12} md={6} key={index}>
+                                        <Grid item xs={12} key={index}>
                                             <motion.div
                                                 initial={{
                                                     scale: 0.9,

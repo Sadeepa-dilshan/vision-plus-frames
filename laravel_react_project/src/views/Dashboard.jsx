@@ -78,9 +78,11 @@ export default function Dashboard() {
                     sx={{
                         display: "flex",
                         flexDirection: "row",
+                        justifyContent: "center",
                         flexWrap: "wrap",
                         gap: 2,
                         width: "100%",
+                        marginTop: 2,
                     }}
                 >
                     {frames.map((frame, index) => (

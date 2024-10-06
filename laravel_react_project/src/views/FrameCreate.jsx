@@ -50,6 +50,7 @@ export default function FrameCreate() {
     const [frameSpecies, setFrameSpecies] = useState("");
     const [image, setImage] = useState(null); // Frame image
     const [quantity, setQuantity] = useState(""); // Frame quantity
+
     const [errors, setErrors] = useState(null);
     const { token } = useStateContext(); // To handle the auth token
     const [filteredCodes, setfilterdCodes] = useState([]);
@@ -151,13 +152,9 @@ export default function FrameCreate() {
     };
 
     useEffect(() => {
-        // Assuming frames is an array of objects
-        const frameCodeIds = frames.map((frame) => frame.code_id); // Extract code_id values
-
         setfilterdCodes(
             codes.filter(
-                (code) =>
-                    code.brand_id === brandId && !frameCodeIds.includes(code.id) // Properly filter codes
+                (code) => code.brand_id === brandId // Properly filter codes
             )
         );
     }, [brandId, frames, codes]); // Include dependencies
@@ -179,12 +176,15 @@ export default function FrameCreate() {
                                 id="brandId"
                                 value={brandId}
                                 label="Select Brand"
-                                onChange={(e) => setBrandId(e.target.value)}
+                                onChange={(e) => {
+                                    setBrandId(e.target.value);
+                                    const selectedBrand = brands.filter(
+                                        (brand) => brand.id === e.target.value
+                                    );
+                                    setPrice(selectedBrand[0].price);
+                                }}
                                 required
                             >
-                                <MenuItem value="">
-                                    <em>-- Select a Brand --</em>
-                                </MenuItem>
                                 {brands.map((brand) => (
                                     <MenuItem key={brand.id} value={brand.id}>
                                         {brand.brand_name}
@@ -206,9 +206,6 @@ export default function FrameCreate() {
                                 onChange={(e) => setCodeId(e.target.value)}
                                 required
                             >
-                                <MenuItem value="">
-                                    <em>-- Select a Available Code --</em>
-                                </MenuItem>
                                 {filteredCodes.map((code) => (
                                     <MenuItem key={code.id} value={code.id}>
                                         {code.code_name}

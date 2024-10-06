@@ -82,7 +82,6 @@ export default function FrameStockManageModel({
             });
         }
     }, [selectedframeIDs]);
-    console.log(frame);
 
     const handleInputChange = (e) => {
         setBranch(e.target.value);

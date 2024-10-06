@@ -41,6 +41,11 @@ export default function MiniDrawer() {
             icon: <FormatColorFillIcon />,
         },
         { path: "/frames", text: "Frames", icon: <RemoveRedEyeIcon /> },
+        {
+            path: "/frames-store",
+            text: "Frames Store",
+            icon: <RemoveRedEyeIcon />,
+        },
         { path: "/frames/new", text: "New Frames", icon: <QueueIcon /> },
     ];
 

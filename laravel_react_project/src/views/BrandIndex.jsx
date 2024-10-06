@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
 import {
     Button,
     CircularProgress,
-    Container,
     Grid,
     IconButton,
     Paper,
@@ -26,7 +25,6 @@ export default function BrandIndex() {
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState(""); // New state for search term
     const { token } = useStateContext(); // Get the auth token
-    const navigate = useNavigate();
 
     useEffect(() => {
         getBrands();
