@@ -45,8 +45,20 @@ export default function FrameStockManageModel({
     const [value, setValue] = React.useState("add");
     const [inputStockCount, setInputStockCount] = React.useState(0);
     const [branch, setBranch] = React.useState("");
+    const [color, setColor] = React.useState("");
     const [loading, setLoading] = React.useState(false);
     const [frame, setFrame] = React.useState({
+        brand_id: "",
+        code_id: "",
+        color_id: "",
+        price: "",
+        size: "",
+        species: "",
+        image: "",
+        quantity: "",
+        branch: "",
+    });
+    const [selectedFrame, setSelectedFrame] = React.useState({
         brand_id: "",
         code_id: "",
         color_id: "",
@@ -63,62 +75,65 @@ export default function FrameStockManageModel({
         }
         setValue(newValue);
     };
-    React.useEffect(() => {
-        // getFrameDetails();
+    // React.useEffect(() => {
+    //     // getFrameDetails();
 
-        if (selectedframeIDs) {
-            setFrame({
-                brand_id: selectedframeIDs.brand_id,
-                code_id: selectedframeIDs.code_id,
-                color_id: selectedframeIDs.color_id,
-                price: selectedframeIDs.price,
-                size: selectedframeIDs.size,
-                species: selectedframeIDs.species,
-                image: selectedframeIDs.image,
-                quantity: selectedframeIDs.stocks.length
-                    ? selectedframeIDs.stocks[0].qty
-                    : "",
-                branch: "",
-            });
-        }
-    }, [selectedframeIDs]);
+    //     if (selectedframeIDs) {
+    //         setFrame({
+    //             brand_id: selectedframeIDs.brand_id,
+    //             code_id: selectedframeIDs.code_id,
+    //             color_id: selectedframeIDs.color_id,
+    //             price: selectedframeIDs.price,
+    //             size: selectedframeIDs.size,
+    //             species: selectedframeIDs.species,
+    //             image: selectedframeIDs.image,
+    //             quantity: 0,
+    //             branch: "",
+    //         });
+    //     }
+    // }, [selectedframeIDs]);
+    // console.log(selectedframeIDs);
 
     const handleInputChange = (e) => {
         setBranch(e.target.value);
     };
-    const hadleStockSave = async () => {
-        try {
-            setLoading(true);
-            const defaltQuantity =
-                parseInt(selectedframeIDs.stocks[0].qty) || null; // Use 0 if quantity is NaN
-            const inputQuantity = parseInt(inputStockCount) || null; // Use 0 if NaN
+    const handleInputChangecolor = (e) => {
+        setColor(e.target.value);
+        const findframe = selectedframeIDs?.frames.filter(
+            (frame) => frame.color_id === e.target.value
+        );
+        setFrame({
+            brand_id: findframe[0].brand_id,
+            code_id: findframe[0].code_id,
+            color_id: findframe[0].color_id,
+            price: findframe[0].price,
+            size: findframe[0].size,
+            species: findframe[0].species,
+            image: findframe[0].image,
+            quantity: findframe[0].stocks.length
+                ? findframe[0].stocks[0].qty
+                : "",
+            branch: "",
+        });
+        setSelectedFrame(findframe[0]);
+    };
+    console.log(frame);
 
-            if (value === "add") {
-                await axiosClient.post(
-                    `/frames/${selectedframeIDs.id}`,
-                    {
-                        ...frame,
-                        quantity: defaltQuantity + inputQuantity,
-                        branch: "stock",
-                    },
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            "Content-Type": "multipart/form-data",
-                        },
-                    }
-                );
-                showAlert("Stock Updated sucessfully", "sucess");
-                handleRefreshTable();
-                handleClose();
-            } else {
-                if (branch) {
+    const hadleStockSave = async () => {
+        if (inputStockCount && color) {
+            try {
+                setLoading(true);
+                const defaltQuantity =
+                    parseInt(selectedFrame.stocks[0].qty) || null; // Use 0 if quantity is NaN
+                const inputQuantity = parseInt(inputStockCount) || null; // Use 0 if NaN
+
+                if (value === "add") {
                     await axiosClient.post(
-                        `/frames/${selectedframeIDs.id}`,
+                        `/frames/${selectedFrame.id}`,
                         {
                             ...frame,
-                            quantity: defaltQuantity - inputQuantity,
-                            branch: branch,
+                            quantity: defaltQuantity + inputQuantity,
+                            branch: "stock",
                         },
                         {
                             headers: {
@@ -131,13 +146,38 @@ export default function FrameStockManageModel({
                     handleRefreshTable();
                     handleClose();
                 } else {
-                    showAlert("Select A branch Before Saving", "error");
+                    if (branch) {
+                        await axiosClient.post(
+                            `/frames/${selectedFrame.id}`,
+                            {
+                                ...frame,
+                                quantity: defaltQuantity - inputQuantity,
+                                branch: branch,
+                            },
+                            {
+                                headers: {
+                                    Authorization: `Bearer ${token}`,
+                                    "Content-Type": "multipart/form-data",
+                                },
+                            }
+                        );
+                        showAlert("Stock Updated sucessfully", "sucess");
+                        setInputStockCount(0);
+                        handleRefreshTable();
+                        handleClose();
+                    } else {
+                        showAlert("Select A branch Before Saving", "error");
+                    }
                 }
+            } catch (error) {
+                showAlert("Something went wrong", "error");
+                setInputStockCount(0);
+            } finally {
+                setLoading(false);
+                setInputStockCount(0);
             }
-        } catch (error) {
-            showAlert("Something went wrong", "error");
-        } finally {
-            setLoading(false);
+        } else {
+            showAlert("Fill The Input", "error");
         }
     };
     //TODO
@@ -171,6 +211,7 @@ export default function FrameStockManageModel({
                             <Tab value="remove" label="remove" />
                         </Tabs>
                         <TextField
+                            value={inputStockCount}
                             sx={{ marginTop: 3 }}
                             onChange={(e) => {
                                 setInputStockCount(e.target.value);
@@ -180,7 +221,24 @@ export default function FrameStockManageModel({
                             label="Quantity"
                             variant="outlined"
                         />
-
+                        <Box>
+                            <FormControl fullWidth margin="normal" required>
+                                <InputLabel>Select Color</InputLabel>
+                                <Select
+                                    id="color"
+                                    name="color"
+                                    value={color}
+                                    onChange={handleInputChangecolor}
+                                    label="Select Color"
+                                >
+                                    {selectedframeIDs.frames?.map((frame) => (
+                                        <MenuItem value={frame.color_id}>
+                                            {frame.color.color_name}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Box>
                         {value === "add" ? (
                             <div>
                                 <Box></Box>

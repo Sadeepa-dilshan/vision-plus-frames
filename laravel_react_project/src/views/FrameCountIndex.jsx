@@ -5,8 +5,18 @@ import { useEffect, useState } from "react";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
 import { MaterialReactTable } from "material-react-table";
-import { Box, Typography, Divider } from "@mui/material";
+import { Box, Typography, Divider, IconButton } from "@mui/material";
 import ImageModal from "../Components/ImageModal";
+import {
+    Add,
+    AddRounded,
+    Delete,
+    Edit,
+    History,
+    LocalShipping,
+} from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import FrameStockManageModel from "../Components/FrameStockManageModel";
 
 export default function FrameCountIndex() {
     const [frames, setFrames] = useState([]);
@@ -16,13 +26,17 @@ export default function FrameCountIndex() {
     const [open, setOpen] = useState(false);
 
     const [selectedframeIDs, setSelectedframeIDs] = useState(false);
+    const [openStockManageModel, setOpenStockManageModel] = useState(false);
 
     const [handleRefresh, setHandleRefresh] = useState(false);
+    const navigate = useNavigate();
 
     const handleOpen = () => {
         setOpen(true);
     };
-
+    const CloseStockManage = () => {
+        setOpenStockManageModel(false);
+    };
     const outputData = frames.reduce((acc, curr) => {
         const conbineIDS = `${curr.brand_id}_${curr.code_id}`;
 
@@ -37,12 +51,7 @@ export default function FrameCountIndex() {
         }
 
         acc[conbineIDS].totalQty += curr.stocks[0]["qty"];
-        acc[conbineIDS].frames.push({
-            code: curr.code.code_name,
-            color: curr.color.color_name,
-            image: curr.image,
-            stocks: curr.stocks[0]["qty"],
-        });
+        acc[conbineIDS].frames.push(curr);
 
         return acc;
     }, {});
@@ -51,15 +60,19 @@ export default function FrameCountIndex() {
         code_id: key,
         code_name: outputData[key].code_name,
         brand_name: outputData[key].brand_name,
+        image: outputData[key]["frames"][0].image,
         totalQty: outputData[key].totalQty,
-        frames: outputData[key]["frames"], // Ensure this is the right field name
+        frames: outputData[key]["frames"],
     }));
+    console.log(outputData);
 
     const handleClose = () => {
         setOpen(false);
         setImgFullView("");
     };
-
+    const handleRefreshTable = () => {
+        setHandleRefresh(!handleRefresh);
+    };
     useEffect(() => {
         getFrames();
     }, [handleRefresh]);
@@ -83,13 +96,75 @@ export default function FrameCountIndex() {
 
     const columns = [
         {
+            accessorKey: "actions",
+            header: "Actions",
+            size: 25,
+            Cell: ({ row }) => (
+                <>
+                    <IconButton
+                        variant="contained"
+                        color="info"
+                        size="small"
+                        // onClick={() => handleOpen()}
+                        onClick={() => {
+                            setSelectedframeIDs(row.original);
+                            setOpenStockManageModel(true);
+                        }}
+                    >
+                        <AddRounded color="info" />
+                    </IconButton>
+                    <IconButton
+                        variant="contained"
+                        color="info"
+                        size="small"
+                        // onClick={() => handleOpen()}
+                        onClick={() => {
+                            setSelectedframeIDs(row.original);
+                            setOpenStockManageModel(true);
+                        }}
+                    >
+                        <LocalShipping color="info" />
+                    </IconButton>
+                </>
+            ),
+        },
+        {
             accessorKey: "brand_name",
             header: "Brand Name",
             size: 50,
         },
         {
+            accessorKey: "image",
+            header: "Image",
+            size: 100,
+            Cell: ({ cell }) =>
+                cell.getValue() ? (
+                    <img
+                        onClick={() => {
+                            handleOpen();
+                            setImgFullView(cell.getValue());
+                        }}
+                        src={cell.getValue()}
+                        alt="Frame"
+                        style={{
+                            width: 100,
+                            height: 100,
+                            objectFit: "contain",
+                            cursor: "pointer",
+                        }}
+                    />
+                ) : (
+                    <Skeleton
+                        animation="pulse"
+                        variant="rectangular"
+                        width={50}
+                        height={50}
+                    />
+                ),
+        },
+        {
             accessorKey: "code_name",
-            header: "Code Name",
+            header: "Frame Code",
             size: 50,
         },
 
@@ -103,13 +178,29 @@ export default function FrameCountIndex() {
     // Define the detail panel rendering logic
     const renderDetailPanel = ({ row }) => (
         <Box sx={{ padding: 2 }}>
-            <Typography variant="h6">Frame Details:</Typography>
             {row.original.frames.map((frame, index) => (
-                <Box key={index} sx={{ marginBottom: 1 }}>
+                <Box
+                    key={index}
+                    sx={{
+                        marginBottom: 1,
+                        display: "flex",
+
+                        alignItems: "center",
+                    }}
+                >
+                    <IconButton
+                        variant="contained"
+                        color="info"
+                        size="small"
+                        onClick={() => navigate(`/frames/history/${frame.id}`)}
+                    >
+                        <History color="info" />
+                    </IconButton>
                     <Typography variant="body2">
-                        Frame Code: {frame.code} | Color: {frame.color} |
-                        Stocks: {frame.stocks}
+                        Frame Code: {frame.code.code_name} | Color:{" "}
+                        {frame.color.color_name} | Stocks: {frame.stocks[0].qty}
                     </Typography>
+
                     {frame.image && (
                         <img
                             onClick={() => {
@@ -117,7 +208,7 @@ export default function FrameCountIndex() {
                                 handleOpen();
                             }}
                             src={frame.image}
-                            alt={frame.color}
+                            alt={frame.color.code_name}
                             style={{
                                 width: 50,
                                 height: "auto",
@@ -125,6 +216,7 @@ export default function FrameCountIndex() {
                             }}
                         />
                     )}
+
                     <Divider />
                 </Box>
             ))}
@@ -169,6 +261,12 @@ export default function FrameCountIndex() {
                 imgFullVIew={imgFullView}
                 handleClose={handleClose}
                 selectedframeIDs={selectedframeIDs}
+            />
+            <FrameStockManageModel
+                open={openStockManageModel}
+                handleClose={CloseStockManage}
+                selectedframeIDs={selectedframeIDs}
+                handleRefreshTable={handleRefreshTable}
             />
         </Box>
     );
