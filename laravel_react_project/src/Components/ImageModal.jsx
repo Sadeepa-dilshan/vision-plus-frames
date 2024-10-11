@@ -11,9 +11,13 @@ import {
     Select,
     FormControl,
     InputLabel,
+    Grid,
+    Typography,
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
-import FramestockAjusmentModel from "./FramestockAjusmentModel";
+import FramestockAjusmentModel from "./FrameAddByTable";
+import { useStateContext } from "../contexts/contextprovider";
+import axiosClient from "../axiosClient";
 
 const style = {
     position: "absolute",
@@ -31,6 +35,7 @@ export default function ImageModal({
     handleClose,
     imgFullVIew,
     selectedframeIDs,
+    modelType,
 }) {
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -39,10 +44,41 @@ export default function ImageModal({
     // State to handle stock reduction and selected branch
     const [stock, setStock] = React.useState("");
     const [branch, setBranch] = React.useState("");
+    const [colors, setColors] = React.useState("");
+    const { token } = useStateContext();
+    const [frame, setFrame] = React.useState({
+        brand_id: "",
+        code_id: "",
+        color_id: "",
+        price: "",
+        size: "",
+        species: "",
+        image: "",
+        quantity: "",
+        branch: "",
+    });
     const handleSubmic = () => {
         handleClose();
     };
-
+    const hadlesubmit = () => {};
+    React.useEffect(() => {
+        getColors();
+    }, []);
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFrame({ ...frame, [name]: value });
+    };
+    const getColors = () => {
+        axiosClient
+            .get("/colors", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            .then(({ data }) => {
+                setColors(data);
+            });
+    };
     return (
         <div>
             <Modal
@@ -77,9 +113,54 @@ export default function ImageModal({
                             alt="Full View"
                         />
                     ) : (
-                        <FramestockAjusmentModel
-                            selectedframeIDs={selectedframeIDs}
-                        />
+                        <></>
+                    )}
+                    {modelType === "add" && (
+                        <>
+                            <Box
+                                sx={{
+                                    padding: 2,
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                }}
+                            >
+                                <Typography variant="h5">
+                                    Add New Color
+                                </Typography>
+                                <FormControl fullWidth margin="normal">
+                                    <InputLabel id="color-label">
+                                        Select Color
+                                    </InputLabel>
+                                    <Select
+                                        sx={{ width: 200 }}
+                                        labelId="color-label"
+                                        id="color_id"
+                                        name="color_id"
+                                        label="Select Color"
+                                        value={frame.color_id}
+                                        onChange={handleInputChange}
+                                        required
+                                    >
+                                        {colors.map((color) => (
+                                            <MenuItem
+                                                key={color.id}
+                                                value={color.id}
+                                            >
+                                                {color.color_name}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                                <Button
+                                    onClick={hadlesubmit}
+                                    variant="contained"
+                                >
+                                    Add Color
+                                </Button>
+                            </Box>
+                        </>
                     )}
                 </Box>
             </Modal>

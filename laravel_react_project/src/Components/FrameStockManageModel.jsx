@@ -117,7 +117,6 @@ export default function FrameStockManageModel({
         });
         setSelectedFrame(findframe[0]);
     };
-    console.log(frame);
 
     const hadleStockSave = async () => {
         if (inputStockCount && color) {
@@ -231,11 +230,16 @@ export default function FrameStockManageModel({
                                     onChange={handleInputChangecolor}
                                     label="Select Color"
                                 >
-                                    {selectedframeIDs.frames?.map((frame) => (
-                                        <MenuItem value={frame.color_id}>
-                                            {frame.color.color_name}
-                                        </MenuItem>
-                                    ))}
+                                    {selectedframeIDs.frames?.map(
+                                        (frame, index) => (
+                                            <MenuItem
+                                                key={index}
+                                                value={frame.color_id}
+                                            >
+                                                {frame.color.color_name}
+                                            </MenuItem>
+                                        )
+                                    )}
                                 </Select>
                             </FormControl>
                         </Box>

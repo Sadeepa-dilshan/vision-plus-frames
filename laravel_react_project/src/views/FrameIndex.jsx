@@ -118,7 +118,7 @@ export default function FrameIndex() {
                         <Delete color="error" />
                     </IconButton>
                     {/* Add History Button */}
-                    <IconButton
+                    {/* <IconButton
                         variant="contained"
                         color="info"
                         size="small"
@@ -139,7 +139,7 @@ export default function FrameIndex() {
                         }}
                     >
                         <LocalShipping color="info" />
-                    </IconButton>
+                    </IconButton> */}
                 </>
             ),
         },
@@ -182,11 +182,7 @@ export default function FrameIndex() {
             header: "Code",
             size: 50,
         },
-        {
-            accessorKey: "color.color_name",
-            header: "Color",
-            size: 50,
-        },
+
         {
             accessorKey: "price",
             header: "Price",
@@ -201,15 +197,6 @@ export default function FrameIndex() {
             accessorKey: "size",
             header: "Shape",
             size: 50,
-        },
-        {
-            accessorKey: "stocks",
-            header: "Quantity",
-            size: 50,
-            Cell: ({ row }) => {
-                const stock = row.original.stocks?.[0]; // Access the first element of the stocks array
-                return stock ? stock.qty : "N/A"; // Return the qty or "N/A" if stocks is empty
-            },
         },
     ];
 

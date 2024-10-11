@@ -17,6 +17,7 @@ import {
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import FrameStockManageModel from "../Components/FrameStockManageModel";
+import FrameAddByTable from "../Components/FrameAddByTable";
 
 export default function FrameCountIndex() {
     const [frames, setFrames] = useState([]);
@@ -24,6 +25,8 @@ export default function FrameCountIndex() {
     const [imgFullView, setImgFullView] = useState("");
     const { token } = useStateContext(); // To handle the auth token
     const [open, setOpen] = useState(false);
+    const [openAddByTable, setOpenAddByTable] = useState(false);
+    const [modelType, setModelType] = useState("");
 
     const [selectedframeIDs, setSelectedframeIDs] = useState(false);
     const [openStockManageModel, setOpenStockManageModel] = useState(false);
@@ -64,11 +67,14 @@ export default function FrameCountIndex() {
         totalQty: outputData[key].totalQty,
         frames: outputData[key]["frames"],
     }));
-    console.log(outputData);
 
     const handleClose = () => {
         setOpen(false);
         setImgFullView("");
+        setModelType("");
+    };
+    const handleCloseAddFrame = () => {
+        setOpenAddByTable(false);
     };
     const handleRefreshTable = () => {
         setHandleRefresh(!handleRefresh);
@@ -107,8 +113,9 @@ export default function FrameCountIndex() {
                         size="small"
                         // onClick={() => handleOpen()}
                         onClick={() => {
-                            setSelectedframeIDs(row.original);
-                            setOpenStockManageModel(true);
+                            setSelectedframeIDs(row.original["frames"][0]);
+                            setOpen(true);
+                            setModelType("add");
                         }}
                     >
                         <AddRounded color="info" />
@@ -206,6 +213,7 @@ export default function FrameCountIndex() {
                             onClick={() => {
                                 setImgFullView(frame.image);
                                 handleOpen();
+                                setModelType("img");
                             }}
                             src={frame.image}
                             alt={frame.color.code_name}
@@ -261,6 +269,7 @@ export default function FrameCountIndex() {
                 imgFullVIew={imgFullView}
                 handleClose={handleClose}
                 selectedframeIDs={selectedframeIDs}
+                modelType={modelType}
             />
             <FrameStockManageModel
                 open={openStockManageModel}
