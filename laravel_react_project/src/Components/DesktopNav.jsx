@@ -30,9 +30,9 @@ export default function DesktopNav({ NavData }) {
                 ) : null}
                 <IconButton onClick={handleDrawerOpen}>
                     {open ? (
-                        <ChevronRightIcon style={{ color: "white" }} />
-                    ) : (
                         <ChevronLeftIcon style={{ color: "white" }} />
+                    ) : (
+                        <ChevronRightIcon style={{ color: "white" }} />
                     )}
                 </IconButton>
             </DrawerHeader>

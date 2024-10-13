@@ -8,71 +8,38 @@ import {
     Box,
     IconButton,
     Skeleton,
+    Typography,
     useMediaQuery,
     useTheme,
 } from "@mui/material";
 import { Delete, Edit, History, LocalShipping } from "@mui/icons-material";
 import ImageModal from "../Components/ImageModal";
 import FrameStockManageModel from "../Components/FrameStockManageModel";
+import useFrameList from "../hooks/useFrameList";
 
 export default function FrameIndex() {
-    const [frames, setFrames] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [imgFullVIew, setImgFullView] = useState("");
-    const { token } = useStateContext(); // To handle the auth token
-    const [open, setOpen] = useState(false);
-    const [openStockManageModel, setOpenStockManageModel] = useState(false);
-    const [selectedframeIDs, setSelectedframeIDs] = useState(false);
-    const [handleRefresh, setHandleRefresh] = useState(false);
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+    //Image Popup state hadles
+    const [imgFullVIew, setImgFullView] = useState("");
+    const { token } = useStateContext(); // To handle the auth token
+    const navigate = useNavigate();
+
+    //Modal Open state
+    const [open, setOpen] = useState(false);
+
+    const { frameDataList, loadingFrameList, refreshFrameList } =
+        useFrameList();
+
+    //Modal Open Handler
     const handleOpen = () => {
         setOpen(true);
     };
-    const outputData = frames.reduce((acc, curr) => {
-        if (!acc[curr.code_id]) {
-            acc[curr.code_id] = [];
-        }
-        acc[curr.code_id].push(curr);
-        return acc;
-    }, {});
-
-    const mappedOutput = Object.keys(outputData).map((key) => ({
-        code_id: key,
-        frames: outputData[key],
-    }));
-    console.log(mappedOutput);
-
+    //Modal close Handler
     const handleClose = () => {
         setOpen(false);
         setImgFullView("");
-    };
-    const CloseStockManage = () => {
-        setOpenStockManageModel(false);
-    };
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        getFrames();
-    }, [handleRefresh]);
-    const handleRefreshTable = () => {
-        setHandleRefresh(!handleRefresh);
-    };
-    const getFrames = () => {
-        setLoading(true);
-        axiosClient
-            .get("/frames", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then(({ data }) => {
-                setLoading(false);
-                setFrames(data);
-            })
-            .catch(() => {
-                setLoading(false);
-            });
     };
 
     const handleDelete = (frameId) => {
@@ -87,7 +54,7 @@ export default function FrameIndex() {
                 },
             })
             .then(() => {
-                getFrames(); // Refresh the frame list after deletion
+                refreshFrameList(); // Refresh the frame list after deletion
             });
     };
 
@@ -117,29 +84,6 @@ export default function FrameIndex() {
                     >
                         <Delete color="error" />
                     </IconButton>
-                    {/* Add History Button */}
-                    {/* <IconButton
-                        variant="contained"
-                        color="info"
-                        size="small"
-                        onClick={() =>
-                            navigate(`/frames/history/${row.original.id}`)
-                        }
-                    >
-                        <History color="info" />
-                    </IconButton>
-                    <IconButton
-                        variant="contained"
-                        color="info"
-                        size="small"
-                        // onClick={() => handleOpen()}
-                        onClick={() => {
-                            setSelectedframeIDs(row.original);
-                            setOpenStockManageModel(true);
-                        }}
-                    >
-                        <LocalShipping color="info" />
-                    </IconButton> */}
                 </>
             ),
         },
@@ -206,12 +150,13 @@ export default function FrameIndex() {
                 height: "100%",
                 width: "100%",
                 overflowX: "auto", // Allow horizontal scroll if needed
+                marginTop: 2,
             }}
         >
             <Box sx={{ width: isSmallScreen ? "96vw" : "100%" }}>
                 <MaterialReactTable
                     columns={columns}
-                    data={frames}
+                    data={frameDataList}
                     enableRowSelection={false}
                     enablePagination
                     enableColumnFilters
@@ -224,7 +169,7 @@ export default function FrameIndex() {
                     muiTableContainerProps={{
                         sx: { maxHeight: "calc(100vh - 200px)" },
                     }}
-                    state={{ isLoading: loading }}
+                    state={{ isLoading: loadingFrameList }}
                     muiTableProps={{
                         sx: {
                             "& .MuiTableCell-root": {
@@ -235,19 +180,21 @@ export default function FrameIndex() {
                             },
                         },
                     }}
+                    renderTopToolbarCustomActions={() => (
+                        <Typography
+                            variant="h6"
+                            sx={{ fontWeight: 600, color: "#5b08a7" }}
+                        >
+                            All Frames
+                        </Typography>
+                    )}
                 />
             </Box>
             <ImageModal
                 open={open}
                 imgFullVIew={imgFullVIew}
                 handleClose={handleClose}
-                selectedframeIDs={selectedframeIDs}
-            />
-            <FrameStockManageModel
-                open={openStockManageModel}
-                handleClose={CloseStockManage}
-                selectedframeIDs={selectedframeIDs}
-                handleRefreshTable={handleRefreshTable}
+                selectedframeIDs={false}
             />
         </Box>
     );

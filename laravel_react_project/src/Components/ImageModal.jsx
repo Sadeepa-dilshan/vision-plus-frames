@@ -11,14 +11,15 @@ import {
     Select,
     FormControl,
     InputLabel,
-    Grid,
     Typography,
+    CircularProgress,
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
-import FramestockAjusmentModel from "./FrameAddByTable";
 import { useStateContext } from "../contexts/contextprovider";
 import axiosClient from "../axiosClient";
-
+import { useAlert } from "../contexts/AlertContext";
+import useColorList from "../hooks/useColorList";
+import DropdownInput from "../Components/DropdownInput";
 const style = {
     position: "absolute",
     top: "50%",
@@ -36,15 +37,19 @@ export default function ImageModal({
     imgFullVIew,
     selectedframeIDs,
     modelType,
+    colorList,
+    handleRefreshTable,
 }) {
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
     const isMediumScreen = useMediaQuery(theme.breakpoints.between("sm", "md"));
+    const { showAlert } = useAlert();
+    const { colorDataList, loadingColorList, refreshColorList } =
+        useColorList();
+    // State to handle frame data
 
-    // State to handle stock reduction and selected branch
-    const [stock, setStock] = React.useState("");
-    const [branch, setBranch] = React.useState("");
-    const [colors, setColors] = React.useState("");
+    const [loading, setLoading] = React.useState(false);
+    const [colorsAvilable, setColorsAvilable] = React.useState([]);
     const { token } = useStateContext();
     const [frame, setFrame] = React.useState({
         brand_id: "",
@@ -54,30 +59,63 @@ export default function ImageModal({
         size: "",
         species: "",
         image: "",
-        quantity: "",
+        quantity: 0, // Default initial quantity
         branch: "",
     });
-    const handleSubmic = () => {
-        handleClose();
-    };
-    const hadlesubmit = () => {};
+    const [colorId, setColorId] = React.useState("");
+
+    // Update frame with selected frame IDs and form data
     React.useEffect(() => {
-        getColors();
-    }, []);
+        if (selectedframeIDs) {
+            setFrame((prevFrame) => ({
+                ...prevFrame,
+                brand_id: selectedframeIDs.brand_id,
+                code_id: selectedframeIDs.code_id,
+                price: selectedframeIDs.price,
+                size: selectedframeIDs.size,
+                species: selectedframeIDs.species,
+                image: selectedframeIDs.image,
+            }));
+        }
+    }, [selectedframeIDs]);
+    React.useEffect(() => {
+        setColorsAvilable(
+            colorDataList.filter((value) => !colorList.includes(value.id))
+        );
+    }, [colorList]);
+
+    // Handle input change
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFrame({ ...frame, [name]: value });
+        setFrame((prevFrame) => ({ ...prevFrame, [name]: value }));
     };
-    const getColors = () => {
-        axiosClient
-            .get("/colors", {
+
+    // Handle form submission
+    const handleSubmit = async () => {
+        try {
+            setLoading(true);
+            await axiosClient.post("/frames", frame, {
                 headers: {
                     Authorization: `Bearer ${token}`,
+                    "Content-Type": "multipart/form-data",
                 },
-            })
-            .then(({ data }) => {
-                setColors(data);
             });
+            showAlert("New Frame Color added successfully", "success");
+            handleRefreshTable();
+            handleClose(); // Close modal after successful submission
+        } catch (err) {
+            if (err.response && err.response.status === 422) {
+                // Handle validation errors
+                // setErrors(err.response.data.errors);
+            } else {
+                console.error(err);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+    const handleBrandListSelectionChange = (selectedValue) => {
+        setColorId(selectedValue);
     };
     return (
         <div>
@@ -124,40 +162,36 @@ export default function ImageModal({
                                     flexDirection: "column",
                                     alignItems: "center",
                                     justifyContent: "space-between",
+                                    width: 400,
                                 }}
                             >
                                 <Typography variant="h5">
-                                    Add New Color
+                                    Add New Frame
                                 </Typography>
-                                <FormControl fullWidth margin="normal">
-                                    <InputLabel id="color-label">
-                                        Select Color
-                                    </InputLabel>
-                                    <Select
-                                        sx={{ width: 200 }}
-                                        labelId="color-label"
-                                        id="color_id"
-                                        name="color_id"
-                                        label="Select Color"
-                                        value={frame.color_id}
-                                        onChange={handleInputChange}
-                                        required
-                                    >
-                                        {colors.map((color) => (
-                                            <MenuItem
-                                                key={color.id}
-                                                value={color.id}
-                                            >
-                                                {color.color_name}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
+
+                                <DropdownInput
+                                    //pass array list [{name: "Brand 1", id: 1}]
+                                    options={colorsAvilable.map((color) => ({
+                                        name: color.color_name,
+                                        id: color.id,
+                                    }))}
+                                    onChange={handleBrandListSelectionChange} // Will receive the selected brand's id
+                                    loading={loadingColorList}
+                                    labelName="Select Brand"
+                                    defaultId={colorId} // Pass the Defalt value
+                                />
+
                                 <Button
-                                    onClick={hadlesubmit}
+                                    sx={{ margin: 2 }}
+                                    disabled={loading}
+                                    onClick={handleSubmit}
                                     variant="contained"
                                 >
-                                    Add Color
+                                    {loading ? (
+                                        <CircularProgress size={24} />
+                                    ) : (
+                                        "Save Changes"
+                                    )}
                                 </Button>
                             </Box>
                         </>

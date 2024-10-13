@@ -1,4 +1,3 @@
-import * as React from "react";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import { Outlet } from "react-router-dom";
@@ -15,6 +14,7 @@ import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import QueueIcon from "@mui/icons-material/Queue";
 import DesktopNav from "./DesktopNav";
 import MobileNav from "./MobileNav";
+import { AddHome, Home } from "@mui/icons-material";
 
 export default function MiniDrawer() {
     const theme = useTheme();
@@ -27,6 +27,7 @@ export default function MiniDrawer() {
     const NavData = [
         { path: "/dashboard", text: "Dashboard", icon: <DashboardIcon /> },
         { path: "/brands", text: "Brands", icon: <FolderCopyIcon /> },
+
         {
             path: "/brands/new",
             text: "New Brand",
@@ -47,6 +48,11 @@ export default function MiniDrawer() {
             icon: <RemoveRedEyeIcon />,
         },
         { path: "/frames/new", text: "New Frames", icon: <QueueIcon /> },
+
+        { path: "/branches", text: "Branch", icon: <Home /> },
+        // { path: "/branches/new", text: "New Branch", icon: <AddHome /> },
+
+        { path: "/users", text: "Users", icon: <Home /> },
     ];
 
     return (

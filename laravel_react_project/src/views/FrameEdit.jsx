@@ -24,13 +24,26 @@ import {
 import { storage } from "../firebaseConfig";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import EditLoading from "../Components/EditLoading";
+import useFrame from "../hooks/useFrame";
+import useColorList from "../hooks/useColorList";
+import useBrandList from "../hooks/useBrandList";
+import useCodeList from "../hooks/useCodeList";
+import DropdownInput from "../Components/DropdownInput";
+import useFrameList from "../hooks/useFrameList";
 
 export default function FrameEdit() {
+    const { id } = useParams();
+
+    //Hooks
+    const { frameData, loadingFrame } = useFrame(id);
+    const { brandDataList, loadingBrandList } = useBrandList();
+    const { colorDataList, loadingColorList } = useColorList();
+    const { codeDataList, loadingCodeList } = useCodeList();
+
+    //TODO
     const { showAlert } = useAlert();
     const [loading, setLoading] = useState(false);
-    const [loadinginitial, setLoadinginitial] = useState(true);
 
-    const { id } = useParams();
     const navigate = useNavigate();
     const { token } = useStateContext();
     const [frame, setFrame] = useState({
@@ -44,32 +57,10 @@ export default function FrameEdit() {
         quantity: "",
         branch: "",
     });
-    const [defaltQuantity, setDefaltQuantity] = useState(0);
-    const [brands, setBrands] = useState([]);
 
-    const [codes, setCodes] = useState([]);
-    const [colors, setColors] = useState([]);
     const [imagePreview, setImagePreview] = useState(null);
-    const [errors, setErrors] = useState({});
 
     const [filterCode, setFilterCode] = useState([]);
-    useEffect(() => {
-        const loadData = async () => {
-            try {
-                await Promise.all([
-                    getFrameDetails(),
-                    getBrands(),
-                    getCodes(),
-                    getColors(),
-                ]);
-            } catch (error) {
-                console.error("Error loading data", error);
-            } finally {
-                setLoadinginitial(false); // Set loading to false once data is fetched
-            }
-        };
-        loadData();
-    }, [id]);
 
     const uploadSingleImages = async (ID, image, index) => {
         try {
@@ -84,64 +75,8 @@ export default function FrameEdit() {
 
             return { success: true, downloadURL: downloadURL };
         } catch (error) {
-            console.error("Error uploading image:", error);
             return { success: false, error: error.message };
         }
-    };
-    const getFrameDetails = () => {
-        axiosClient
-            .get(`/frames/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then(({ data }) => {
-                setFrame({
-                    ...data,
-                    quantity: data.stocks.length ? data.stocks[0].qty : "",
-                });
-                setImagePreview(data.image);
-                setDefaltQuantity(data.stocks.length ? data.stocks[0].qty : 0);
-            })
-            .catch(() => {
-                console.error("Failed to fetch frame details");
-            });
-    };
-
-    const getBrands = () => {
-        axiosClient
-            .get("/brands", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then(({ data }) => {
-                setBrands(data);
-            });
-    };
-
-    const getCodes = () => {
-        axiosClient
-            .get("/codes", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then(({ data }) => {
-                setCodes(data);
-            });
-    };
-
-    const getColors = () => {
-        axiosClient
-            .get("/colors", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then(({ data }) => {
-                setColors(data);
-            });
     };
 
     const handleInputChange = (e) => {
@@ -207,14 +142,16 @@ export default function FrameEdit() {
                                 "Content-Type": "multipart/form-data",
                             },
                         });
+                        showAlert("Frame updated successfully", "success");
+
                         navigate("/frames");
                     }
                 }
             } catch (err) {
                 if (err.response && err.response.status === 422) {
-                    setErrors(err.response.data.errors);
+                    showAlert("Frame update error refresh the page", "error");
                 } else {
-                    console.error(err);
+                    showAlert("Frame update error refresh the page", "error");
                 }
             } finally {
                 setLoading(false);
@@ -222,104 +159,95 @@ export default function FrameEdit() {
         }
     };
     useEffect(() => {
-        if (frame.brand_id) {
+        if (frameData) {
+            setFrame({
+                ...frame,
+                brand_id: frameData.brand_id,
+                code_id: frameData.code_id,
+                color_id: frameData.color_id,
+                price: frameData.price,
+                size: frameData.size,
+                species: frameData.species,
+                quantity: frameData.stocks[0]["qty"],
+                branch: frameData.branch,
+                image: frameData.image,
+            });
+        }
+    }, [codeDataList, frameData]);
+    useEffect(() => {
+        if (frameData) {
             setFilterCode(
-                codes.filter((code) => code.brand_id === frame.brand_id)
+                codeDataList.filter(
+                    (code) => code.brand_id === parseInt(frame.brand_id)
+                )
             );
         }
-    }, [frame.brand_id, codes]);
+    }, [frame.brand_id]);
+
+    //HADLE DROPDOWN INPUTS
+    const handleDropdownBrandChange = (selectedValue) => {
+        setFrame({ ...frame, brand_id: selectedValue });
+    };
+    const handleDropdowColorChange = (selectedValue) => {
+        setFrame({ ...frame, color_id: selectedValue });
+    };
+    const handleDropdownCodeChange = (selectedValue) => {
+        setFrame({ ...frame, code_id: selectedValue });
+    };
     return (
         <Card>
             <CardHeader title="Edit Frame" />
             <CardContent>
-                {loadinginitial ? (
-                    <EditLoading />
-                ) : (
+                {
                     <form onSubmit={handleSubmit}>
                         <Grid container spacing={2}>
                             {/* Brand Selection */}
                             <Grid item xs={12} md={6}>
-                                <FormControl fullWidth margin="normal">
-                                    <InputLabel id="brand-label">
-                                        Select Brand
-                                    </InputLabel>
-                                    <Select
-                                        labelId="brand-label"
-                                        id="brand_id"
-                                        name="brand_id"
-                                        label="Select Brand"
-                                        value={frame.brand_id}
-                                        onChange={handleInputChange}
-                                        required
-                                    >
-                                        {brands.map((brand) => (
-                                            <MenuItem
-                                                key={brand.id}
-                                                value={brand.id}
-                                            >
-                                                {brand.brand_name}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
+                                <DropdownInput
+                                    //pass array list [{name: "Brand 1", id: 1}]
+                                    options={brandDataList.map((brand) => ({
+                                        name: brand.brand_name,
+                                        id: brand.id,
+                                    }))}
+                                    onChange={handleDropdownBrandChange} // Will receive the selected brand's id
+                                    loading={loadingBrandList}
+                                    labelName="Select Brand"
+                                    defaultId={frame.brand_id} // Pass the Defalt value
+                                />
                             </Grid>
                             {/* Code Selection */}
 
                             <Grid item xs={12} md={6}>
-                                <FormControl fullWidth margin="normal">
-                                    <InputLabel id="code-label">
-                                        Select Code
-                                    </InputLabel>
-                                    <Select
-                                        labelId="code-label"
-                                        id="code_id"
-                                        label="Select Code"
-                                        name="code_id"
-                                        value={frame.code_id}
-                                        onChange={handleInputChange}
-                                        required
-                                    >
-                                        {filterCode.map((code) => (
-                                            <MenuItem
-                                                key={code.id}
-                                                value={code.id}
-                                            >
-                                                {code.code_name}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
+                                <DropdownInput
+                                    //pass array list [{name: "Brand 1", id: 1}]
+                                    options={filterCode.map((code) => ({
+                                        name: code.code_name,
+                                        id: code.id,
+                                    }))}
+                                    onChange={handleDropdownCodeChange} // Will receive the selected brand's id
+                                    loading={loadingCodeList}
+                                    labelName="Select Code"
+                                    defaultId={frame.code_id} // Pass the Defalt value
+                                />
                             </Grid>
 
                             {/* Color Selection */}
                             <Grid item xs={12} md={6}>
-                                <FormControl fullWidth margin="normal">
-                                    <InputLabel id="color-label">
-                                        Select Color
-                                    </InputLabel>
-                                    <Select
-                                        labelId="color-label"
-                                        id="color_id"
-                                        name="color_id"
-                                        label="Select Color"
-                                        value={frame.color_id}
-                                        onChange={handleInputChange}
-                                        required
-                                    >
-                                        {colors.map((color) => (
-                                            <MenuItem
-                                                key={color.id}
-                                                value={color.id}
-                                            >
-                                                {color.color_name}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
+                                <DropdownInput
+                                    options={colorDataList.map((color) => ({
+                                        name: color.color_name,
+                                        id: color.id,
+                                    }))}
+                                    onChange={handleDropdowColorChange} // Will receive the selected brand's id
+                                    loading={loadingCodeList}
+                                    labelName="Select Color"
+                                    defaultId={frame.color_id} // Pass the Defalt value
+                                />
                             </Grid>
                             {/* Price Input */}
                             <Grid item xs={12} md={6}>
                                 <TextField
+                                    sx={{ marginTop: 0 }}
                                     fullWidth
                                     margin="normal"
                                     id="price"
@@ -329,6 +257,12 @@ export default function FrameEdit() {
                                     value={frame.price}
                                     onChange={handleInputChange}
                                     required
+                                    InputProps={{
+                                        endAdornment: loadingFrame ? (
+                                            <CircularProgress size={24} />
+                                        ) : null, // Show spinner when loading
+                                    }}
+                                    disabled={loadingFrame}
                                 />
                             </Grid>
                             {/* Frame Shape Selection */}
@@ -345,6 +279,7 @@ export default function FrameEdit() {
                                         value={frame.size}
                                         onChange={handleInputChange}
                                         required
+                                        disabled={loadingFrame}
                                     >
                                         <MenuItem value="Full">Full</MenuItem>
                                         <MenuItem value="Half">Half</MenuItem>
@@ -365,10 +300,8 @@ export default function FrameEdit() {
                                         value={frame.species}
                                         onChange={handleInputChange}
                                         required
+                                        disabled={loadingFrame}
                                     >
-                                        <MenuItem value="">
-                                            -- Select Frame Species --
-                                        </MenuItem>
                                         <MenuItem value="Plastic">
                                             Plastic
                                         </MenuItem>
@@ -376,23 +309,6 @@ export default function FrameEdit() {
                                     </Select>
                                 </FormControl>
                             </Grid>
-                            {/* Quantity Input */}
-                            <Grid item xs={12} md={6}>
-                                <TextField
-                                    fullWidth
-                                    margin="normal"
-                                    id="quantity"
-                                    name="quantity"
-                                    label="Quantity"
-                                    type="number"
-                                    value={frame.quantity}
-                                    onChange={handleInputChange}
-                                    required
-                                    disabled
-                                />
-                            </Grid>
-
-                            {/* Add Select for selecting branch */}
 
                             {/* Image Upload */}
                             <Grid item xs={12}>
@@ -439,7 +355,7 @@ export default function FrameEdit() {
                             </Grid>
                         </Grid>
                     </form>
-                )}
+                }
             </CardContent>
         </Card>
     );

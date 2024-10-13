@@ -2,31 +2,32 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
+
 import { useAlert } from "../contexts/AlertContext";
-import { fetchData } from "../hooks/useFetchData";
 import {
-    Card,
-    TextField,
     Button,
     CircularProgress,
+    TextField,
+    Card,
     Typography,
     Box,
 } from "@mui/material";
-import useColorList from "../hooks/useColorList";
+import useBranchList from "../hooks/useBranchList";
 
-export default function ColorCreate() {
+export default function BranchCreate() {
     const navigate = useNavigate();
 
-    const { token } = useStateContext(); // To handle the auth token
+    // Context Alert Bar + Auth Token
     const { showAlert } = useAlert();
+    const { token } = useStateContext();
 
-    //hadle Inputs
+    //User Input
+    const [branchName, setBranchName] = useState("");
+
+    //Submite Stats
     const [loading, setLoading] = useState(false);
-    const [colorName, setColorName] = useState(""); // Name of the color
     const [errors, setErrors] = useState(null);
-
-    //Hook
-    const { colorDataList } = useColorList();
+    const { branchDataList } = useBranchList();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -34,18 +35,17 @@ export default function ColorCreate() {
         try {
             setLoading(true);
 
-            if (colorDataList.length > 0) {
-                const exists = colorDataList.some(
-                    (item) => item.color_name === colorName
+            if (branchDataList) {
+                const exists = branchDataList.some(
+                    (item) => item.branch_name === branchName
                 );
-
                 if (exists) {
-                    showAlert("Color already exists", "error");
+                    showAlert("Branch already exists", "error");
                 } else {
                     await axiosClient.post(
-                        "/colors",
+                        "/branches",
                         {
-                            color_name: colorName,
+                            branche_name: branchName,
                         },
                         {
                             headers: {
@@ -53,7 +53,8 @@ export default function ColorCreate() {
                             },
                         }
                     );
-                    navigate("/colors"); // Redirect to the color list after creation
+                    showAlert("Branch created successfully", "success");
+                    navigate("/branches"); // Redirect to the branch list after creation
                 }
             }
         } catch (err) {
@@ -70,31 +71,30 @@ export default function ColorCreate() {
     return (
         <Card sx={{ padding: 4, maxWidth: 500, margin: "auto", marginTop: 5 }}>
             <Typography variant="h4" gutterBottom>
-                Create New Color
+                Create New Branch
             </Typography>
             <form onSubmit={handleSubmit}>
                 <Box sx={{ marginBottom: 3 }}>
                     <TextField
                         fullWidth
-                        label="Color Name"
-                        value={colorName}
-                        onChange={(e) => setColorName(e.target.value)}
+                        label="Branch Name"
+                        value={branchName}
+                        onChange={(e) => setBranchName(e.target.value)}
                         variant="outlined"
                         error={!!errors}
-                        helperText={errors ? errors.color_name : ""}
+                        helperText={errors ? errors.branch_name : ""}
                         required
-                        disabled={loading}
                     />
                 </Box>
+
                 <Button
+                    disabled={loading}
                     type="submit"
                     variant="contained"
                     color="primary"
-                    disabled={loading}
-                    startIcon={loading && <CircularProgress size={24} />}
-                    fullWidth
+                    startIcon={loading ? <CircularProgress size={24} /> : null}
                 >
-                    {loading ? "Creating..." : "Create Color"}
+                    {loading ? "Creating..." : "Create Branch"}
                 </Button>
             </form>
         </Card>

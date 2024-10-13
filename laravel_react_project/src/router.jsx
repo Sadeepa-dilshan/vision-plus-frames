@@ -3,7 +3,7 @@ import Login from "./views/login.jsx";
 import Register from "./views/register.jsx";
 import DefaultLayout from "./Components/DefaultLayout.jsx";
 import GuestLayout from "./Components/GuestLayout.jsx";
-import Users from "./views/users.jsx";
+
 import UserForm from "./views/UserForm.jsx";
 import BrandCreate from "./views/BrandCreate.jsx";
 import BrandIndex from "./views/BrandIndex.jsx";
@@ -22,6 +22,10 @@ import AnimatedPage from "./Components/PageLoadAnimation.jsx";
 import Dashboard from "./views/Dashboard.jsx";
 import FrameHistory from "./views/FrameHistory.jsx";
 import FrameCountIndex from "./views/FrameCountIndex.jsx";
+import BrancheIndex from "./views/BranchIndex.jsx";
+import BranchCreate from "./views/BrancheCreate.jsx";
+import BranchEdit from "./views/branchEdit.jsx";
+import UsersIndex from "./views/UsersIndex.jsx";
 
 const router = createBrowserRouter([
     {
@@ -40,7 +44,7 @@ const router = createBrowserRouter([
                 path: "/users",
                 element: (
                     <AnimatedPage>
-                        <Users />
+                        <UsersIndex />
                     </AnimatedPage>
                 ),
             },
@@ -85,10 +89,26 @@ const router = createBrowserRouter([
                 ),
             },
             {
-                path: "/brands/show/:id",
+                path: "/branches",
                 element: (
                     <AnimatedPage>
-                        <BrandShow />
+                        <BrancheIndex />
+                    </AnimatedPage>
+                ),
+            },
+            {
+                path: "/branches/new",
+                element: (
+                    <AnimatedPage>
+                        <BranchCreate />
+                    </AnimatedPage>
+                ),
+            },
+            {
+                path: "/branches/edit/:id",
+                element: (
+                    <AnimatedPage>
+                        <BranchEdit />
                     </AnimatedPage>
                 ),
             },

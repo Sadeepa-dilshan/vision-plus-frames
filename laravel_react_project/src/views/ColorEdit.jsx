@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
-import { fetchData } from "../hooks/useFetchData";
 import { useAlert } from "../contexts/AlertContext";
 import {
     Card,
@@ -12,41 +11,38 @@ import {
     Typography,
     Box,
 } from "@mui/material";
+import useColorList from "../hooks/useColorList";
+import useColor from "../hooks/useColor";
 
 export default function ColorEdit() {
     const { showAlert } = useAlert();
-    const [loading, setLoading] = useState(false);
     const { id } = useParams(); // Get the color ID from the URL
-    const [colorName, setColorName] = useState(""); // Name of the color
-    const [errors, setErrors] = useState(null);
     const { token } = useStateContext(); // To handle the auth token
+
     const navigate = useNavigate();
+    //Hooks
+    const { colorDataList } = useColorList();
+    const { colorData, loadingColor } = useColor(id);
+
+    //Handle Input Change
+    const [loading, setLoading] = useState(false);
+    const [colorName, setColorName] = useState("");
+    const [errors, setErrors] = useState(null);
 
     useEffect(() => {
-        // Fetch the color details to pre-fill the form
-        axiosClient
-            .get(`/colors/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then(({ data }) => {
-                setColorName(data.color_name);
-            })
-            .catch((err) => {
-                console.error(err);
-            });
-    }, [id, token]);
+        if (colorData) {
+            setColorName(colorData.color_name);
+        }
+    }, [id, token, colorData]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
             setLoading(true);
-            const getData = await fetchData("/colors", token);
 
-            if (getData.state) {
-                const exists = getData["data"].some(
+            if (colorDataList.length > 0) {
+                const exists = colorDataList.some(
                     (item) => item.color_name === colorName
                 );
 
@@ -98,6 +94,12 @@ export default function ColorEdit() {
                         error={!!errors}
                         helperText={errors ? errors.color_name : ""}
                         required
+                        InputProps={{
+                            endAdornment: loadingColor ? (
+                                <CircularProgress size={24} />
+                            ) : null, // Show spinner when loading
+                        }}
+                        disabled={loadingColor}
                     />
                 </Box>
                 <Button

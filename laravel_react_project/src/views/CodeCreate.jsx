@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
@@ -9,39 +9,28 @@ import {
     TextField,
     Button,
     CircularProgress,
-    MenuItem,
-    Select,
-    InputLabel,
-    FormControl,
     Typography,
     Box,
 } from "@mui/material";
 
+import useBrandList from "../hooks/useBrandList";
+import DropdownInput from "../Components/DropdownInput";
+
 export default function CodeCreate() {
+    const navigate = useNavigate();
+
+    //Context
     const { showAlert } = useAlert();
-    const [brands, setBrands] = useState([]);
+    const { token } = useStateContext();
+
+    //Hooks
+    const { brandDataList, loadingBrandList } = useBrandList();
+
+    //User Inputs
     const [loading, setLoading] = useState(false);
     const [brandId, setBrandId] = useState("");
     const [codeName, setCodeName] = useState("");
     const [errors, setErrors] = useState(null);
-    const { token } = useStateContext();
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        // Fetch all brands to populate the dropdown
-        axiosClient
-            .get("/brands", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then(({ data }) => {
-                setBrands(data);
-            })
-            .catch((err) => {
-                console.error(err);
-            });
-    }, [token]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -82,7 +71,10 @@ export default function CodeCreate() {
             setLoading(false);
         }
     };
-
+    //TODO Dropdown List Selection Hadle
+    const handleDropdownSelectionChange = (selectedValue) => {
+        setBrandId(selectedValue);
+    };
     return (
         <Card sx={{ padding: 4, maxWidth: 500, margin: "auto", marginTop: 5 }}>
             <Typography variant="h4" gutterBottom>
@@ -90,28 +82,17 @@ export default function CodeCreate() {
             </Typography>
             <form onSubmit={handleSubmit}>
                 <Box sx={{ marginBottom: 3 }}>
-                    <FormControl fullWidth>
-                        <InputLabel>Select Brand</InputLabel>
-                        <Select
-                            label="Select Brand"
-                            value={brandId}
-                            onChange={(e) => setBrandId(e.target.value)}
-                            required
-                        >
-                            <MenuItem value="">
-                                <em>-- Select a Brand --</em>
-                            </MenuItem>
-                            {brands.map((brand) => (
-                                <MenuItem
-                                    sx={{ textTransform: "capitalize" }}
-                                    key={brand.id}
-                                    value={brand.id}
-                                >
-                                    {brand.brand_name}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
+                    <DropdownInput
+                        //pass array list [{name: "Brand 1", id: 1}]
+                        options={brandDataList.map((brand) => ({
+                            name: brand.brand_name,
+                            id: brand.id,
+                        }))}
+                        onChange={handleDropdownSelectionChange} // Will receive the selected brand's id
+                        loading={loadingBrandList}
+                        labelName="Select Brand"
+                        defaultId={brandId} // Pass the Defalt value
+                    />
                 </Box>
                 <Box sx={{ marginBottom: 3 }}>
                     <TextField

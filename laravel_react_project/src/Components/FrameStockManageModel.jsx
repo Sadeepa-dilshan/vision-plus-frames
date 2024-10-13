@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -37,6 +38,8 @@ export default function FrameStockManageModel({
     handleClose,
     selectedframeIDs,
     handleRefreshTable,
+    frameQtyManage,
+    colorList,
 }) {
     //TODO
     const { token } = useStateContext(); // To handle the auth token
@@ -75,62 +78,31 @@ export default function FrameStockManageModel({
         }
         setValue(newValue);
     };
-    // React.useEffect(() => {
-    //     // getFrameDetails();
-
-    //     if (selectedframeIDs) {
-    //         setFrame({
-    //             brand_id: selectedframeIDs.brand_id,
-    //             code_id: selectedframeIDs.code_id,
-    //             color_id: selectedframeIDs.color_id,
-    //             price: selectedframeIDs.price,
-    //             size: selectedframeIDs.size,
-    //             species: selectedframeIDs.species,
-    //             image: selectedframeIDs.image,
-    //             quantity: 0,
-    //             branch: "",
-    //         });
-    //     }
-    // }, [selectedframeIDs]);
-    // console.log(selectedframeIDs);
 
     const handleInputChange = (e) => {
         setBranch(e.target.value);
     };
-    const handleInputChangecolor = (e) => {
-        setColor(e.target.value);
-        const findframe = selectedframeIDs?.frames.filter(
-            (frame) => frame.color_id === e.target.value
-        );
-        setFrame({
-            brand_id: findframe[0].brand_id,
-            code_id: findframe[0].code_id,
-            color_id: findframe[0].color_id,
-            price: findframe[0].price,
-            size: findframe[0].size,
-            species: findframe[0].species,
-            image: findframe[0].image,
-            quantity: findframe[0].stocks.length
-                ? findframe[0].stocks[0].qty
-                : "",
-            branch: "",
-        });
-        setSelectedFrame(findframe[0]);
-    };
 
     const hadleStockSave = async () => {
-        if (inputStockCount && color) {
+        if (inputStockCount && parseInt(inputStockCount) > 0) {
             try {
                 setLoading(true);
+
                 const defaltQuantity =
-                    parseInt(selectedFrame.stocks[0].qty) || null; // Use 0 if quantity is NaN
+                    parseInt(selectedframeIDs.stocks[0].qty) || null; // Use 0 if quantity is NaN
                 const inputQuantity = parseInt(inputStockCount) || null; // Use 0 if NaN
 
-                if (value === "add") {
+                if (frameQtyManage === "add") {
                     await axiosClient.post(
-                        `/frames/${selectedFrame.id}`,
+                        `/frames/${selectedframeIDs.id}`,
                         {
-                            ...frame,
+                            brand_id: selectedframeIDs.brand_id,
+                            code_id: selectedframeIDs.code_id,
+                            color_id: selectedframeIDs.color_id,
+                            price: selectedframeIDs.price,
+                            size: selectedframeIDs.size,
+                            species: selectedframeIDs.species,
+                            image: selectedframeIDs.image,
                             quantity: defaltQuantity + inputQuantity,
                             branch: "stock",
                         },
@@ -144,32 +116,48 @@ export default function FrameStockManageModel({
                     showAlert("Stock Updated sucessfully", "sucess");
                     handleRefreshTable();
                     handleClose();
-                } else {
+                } else if (frameQtyManage === "remove") {
                     if (branch) {
-                        await axiosClient.post(
-                            `/frames/${selectedFrame.id}`,
-                            {
-                                ...frame,
-                                quantity: defaltQuantity - inputQuantity,
-                                branch: branch,
-                            },
-                            {
-                                headers: {
-                                    Authorization: `Bearer ${token}`,
-                                    "Content-Type": "multipart/form-data",
+                        if (defaltQuantity - inputQuantity >= 0) {
+                            await axiosClient.post(
+                                `/frames/${selectedframeIDs.id}`,
+                                {
+                                    brand_id: selectedframeIDs.brand_id,
+                                    code_id: selectedframeIDs.code_id,
+                                    color_id: selectedframeIDs.color_id,
+                                    price: selectedframeIDs.price,
+                                    size: selectedframeIDs.size,
+                                    species: selectedframeIDs.species,
+                                    image: selectedframeIDs.image,
+
+                                    quantity: defaltQuantity - inputQuantity,
+                                    branch: branch,
                                 },
-                            }
-                        );
-                        showAlert("Stock Updated sucessfully", "sucess");
-                        setInputStockCount(0);
-                        handleRefreshTable();
-                        handleClose();
+                                {
+                                    headers: {
+                                        Authorization: `Bearer ${token}`,
+                                        "Content-Type": "multipart/form-data",
+                                    },
+                                }
+                            );
+                            showAlert("Stock Updated sucessfully", "sucess");
+                            setInputStockCount(0);
+                            handleRefreshTable();
+                            handleClose();
+                        } else {
+                            showAlert(
+                                "Only aviable " + defaltQuantity,
+                                "error"
+                            );
+                        }
                     } else {
                         showAlert("Select A branch Before Saving", "error");
                     }
                 }
             } catch (error) {
                 showAlert("Something went wrong", "error");
+                console.log(error);
+
                 setInputStockCount(0);
             } finally {
                 setLoading(false);
@@ -201,14 +189,6 @@ export default function FrameStockManageModel({
                         <Close />
                     </IconButton>
                     <Box sx={{ width: "100%" }}>
-                        <Tabs
-                            value={value}
-                            onChange={handleChange}
-                            aria-label="wrapped label tabs example"
-                        >
-                            <Tab value="add" label="Add" wrapped />
-                            <Tab value="remove" label="remove" />
-                        </Tabs>
                         <TextField
                             value={inputStockCount}
                             sx={{ marginTop: 3 }}
@@ -220,30 +200,8 @@ export default function FrameStockManageModel({
                             label="Quantity"
                             variant="outlined"
                         />
-                        <Box>
-                            <FormControl fullWidth margin="normal" required>
-                                <InputLabel>Select Color</InputLabel>
-                                <Select
-                                    id="color"
-                                    name="color"
-                                    value={color}
-                                    onChange={handleInputChangecolor}
-                                    label="Select Color"
-                                >
-                                    {selectedframeIDs.frames?.map(
-                                        (frame, index) => (
-                                            <MenuItem
-                                                key={index}
-                                                value={frame.color_id}
-                                            >
-                                                {frame.color.color_name}
-                                            </MenuItem>
-                                        )
-                                    )}
-                                </Select>
-                            </FormControl>
-                        </Box>
-                        {value === "add" ? (
+
+                        {frameQtyManage === "add" ? (
                             <div>
                                 <Box></Box>
                             </div>

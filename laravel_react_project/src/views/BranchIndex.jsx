@@ -6,6 +6,8 @@ import { CircularProgress, IconButton, Paper, Typography } from "@mui/material";
 import { Delete, Edit } from "@mui/icons-material";
 import useBrandList from "../hooks/useBrandList";
 import { MaterialReactTable } from "material-react-table";
+import useBranch from "../hooks/useBranch";
+import useBranchList from "../hooks/useBranchList";
 
 // ActionButtons Component
 const ActionButtons = ({ brandId, onDelete, deletingId }) => (
@@ -36,10 +38,10 @@ const ActionButtons = ({ brandId, onDelete, deletingId }) => (
     </>
 );
 
-export default function BrandIndex() {
+export default function BrancheIndex() {
     const { token } = useStateContext(); // Get the auth token
-    const { brandDataList, loadingBrandList, refreshBrandList } =
-        useBrandList();
+    const { branchDataList, loadingBranchList, refreshBranchList } =
+        useBranchList();
 
     const [deletingId, setDeletingId] = useState(null); // Track the ID of the brand being deleted
 
@@ -52,13 +54,13 @@ export default function BrandIndex() {
         setDeletingId(brandId);
 
         axiosClient
-            .delete(`/brands/${brandId}`, {
+            .delete(`/branches/${brandId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             })
             .then(() => {
-                refreshBrandList();
+                refreshBranchList();
             })
             .finally(() => {
                 // Clear the deleting ID when done
@@ -98,7 +100,7 @@ export default function BrandIndex() {
         <Paper elevation={3} sx={{ padding: 2, marginTop: 3 }}>
             <MaterialReactTable
                 columns={columns}
-                data={brandDataList || []}
+                data={branchDataList || []}
                 enablePagination
                 enableColumnFilters
                 enableRowSelection={false}
@@ -111,7 +113,7 @@ export default function BrandIndex() {
                 muiTableContainerProps={{
                     sx: { maxHeight: "calc(100vh - 210px)" },
                 }}
-                state={{ isLoading: loadingBrandList }}
+                state={{ isLoading: loadingBranchList }}
                 muiTableProps={{
                     sx: {
                         "& .MuiTableCell-root": {

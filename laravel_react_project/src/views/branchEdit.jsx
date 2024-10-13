@@ -13,59 +13,58 @@ import {
     Box,
 } from "@mui/material";
 
-import useBrand from "../hooks/useBrand";
-import useBrandList from "../hooks/useBrandList";
-// import useBrand from "../hooks/useBrand";
+import useBranch from "../hooks/useBranch";
+import useBranchList from "../hooks/useBranchList";
 
-export default function BrandEdit() {
+export default function BranchEdit() {
     const navigate = useNavigate();
-    const { id } = useParams(); // Get the brand ID from the URL
+    const { id } = useParams(); // Get the branch ID from the URL
 
     //Hooks
     const { showAlert } = useAlert();
-    const { brandDataList } = useBrandList();
-    const { brandData, loadingBrand } = useBrand(id);
+    const { branchDataList } = useBranchList();
+    const { branchData, loadingBranch } = useBranch(id);
     const { token } = useStateContext(); // Get the auth token
 
     //User Input Handlers
-    const [brandName, setBrandName] = useState("");
+    const [branchName, setBranchName] = useState("");
     const [price, setPrice] = useState("");
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState(null);
 
     useEffect(() => {
-        if (brandData) {
-            setBrandName(brandData.brand_name);
-            setPrice(brandData.price);
+        if (branchData) {
+            setBranchName(branchData.branch_name);
+            setPrice(branchData.price);
         }
-    }, [brandData, loadingBrand]);
+    }, [branchData, loadingBranch]);
 
-    //Update Brand Name,Price
+    //Update Branch Name,Price
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             setLoading(true);
 
-            if (brandDataList) {
-                const exists = brandDataList.some(
+            if (branchDataList) {
+                const exists = branchDataList.some(
                     (item) =>
-                        item.brand_name === brandName &&
+                        item.branch_name === branchName &&
                         parseInt(item.price) == parseInt(price)
                 );
 
                 if (exists) {
-                    showAlert("Brand is already exists", "error");
+                    showAlert("Branch is already exists", "error");
                 } else {
                     await axiosClient.put(
-                        `/brands/${id}`,
-                        { brand_name: brandName, price: price },
+                        `/branchs/${id}`,
+                        { branch_name: branchName, price: price },
                         {
                             headers: { Authorization: `Bearer ${token}` },
                         }
                     );
 
-                    showAlert("Brand updated successfully", "success");
-                    navigate("/brands"); // Redirect to the brand list after updating
+                    showAlert("Branch updated successfully", "success");
+                    navigate("/branchs"); // Redirect to the branch list after updating
                 }
             }
         } catch (err) {
@@ -80,22 +79,22 @@ export default function BrandEdit() {
     return (
         <Card sx={{ padding: 4, maxWidth: 500, margin: "auto", marginTop: 5 }}>
             <Typography variant="h4" gutterBottom>
-                Edit Brand
+                Edit Branch
             </Typography>
             <form onSubmit={handleSubmit}>
-                {loadingBrand ? (
+                {loadingBranch ? (
                     <CircularProgress />
                 ) : (
                     <div>
                         <Box sx={{ marginBottom: 3 }}>
                             <TextField
                                 fullWidth
-                                label="Brand Name"
-                                value={brandName}
-                                onChange={(e) => setBrandName(e.target.value)}
+                                label="Branch Name"
+                                value={branchName}
+                                onChange={(e) => setBranchName(e.target.value)}
                                 variant="outlined"
                                 error={!!errors}
-                                helperText={errors ? errors.brand_name : ""}
+                                helperText={errors ? errors.branch_name : ""}
                                 required
                             />
                         </Box>
@@ -127,7 +126,7 @@ export default function BrandEdit() {
                                 loading ? <CircularProgress size={24} /> : null
                             }
                         >
-                            {loading ? "Updating..." : "Update Brand"}
+                            {loading ? "Updating..." : "Update Branch"}
                         </Button>
                     </div>
                 )}
