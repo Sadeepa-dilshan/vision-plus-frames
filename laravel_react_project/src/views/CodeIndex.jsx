@@ -1,55 +1,25 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useMemo, useEffect } from "react";
+import { Link } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
-import {
-    Button,
-    CircularProgress,
-    IconButton,
-    Paper,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Typography,
-    TextField, // Import TextField for search input
-} from "@mui/material";
+import { IconButton, Paper, Typography, CircularProgress } from "@mui/material";
 import { Delete, Edit } from "@mui/icons-material";
 import { MaterialReactTable } from "material-react-table";
+import useCodeList from "../hooks/useCodeList";
 
 export default function CodeIndex() {
-    const [codes, setCodes] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [searchTerm, setSearchTerm] = useState(""); // New state for search term
     const { token } = useStateContext(); // To handle the auth token
+    const { codeDataList, loadingCodeList, refreshCodeList } = useCodeList();
 
-    useEffect(() => {
-        getCodes();
-    }, []);
-
-    const getCodes = () => {
-        setLoading(true);
-        axiosClient
-            .get("/codes", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then(({ data }) => {
-                setLoading(false);
-                setCodes(data);
-            })
-            .catch(() => {
-                setLoading(false);
-            });
-    };
+    const [deletingId, setDeletingId] = useState(null); // Track which code is being deleted
 
     const handleDelete = (codeId) => {
         if (!window.confirm("Are you sure you want to delete this code?")) {
             return;
         }
+
+        // Set the current deleting code's ID
+        setDeletingId(codeId);
 
         axiosClient
             .delete(`/codes/${codeId}`, {
@@ -58,71 +28,68 @@ export default function CodeIndex() {
                 },
             })
             .then(() => {
-                getCodes(); // Refresh the code list after deletion
+                refreshCodeList(); // Refresh the code list after deletion
+            })
+            .finally(() => {
+                // Reset the deleting state
+                setDeletingId(null);
             });
     };
 
-    const handleSearch = (event) => {
-        setSearchTerm(event.target.value);
-    };
-
-    // Filter codes based on the search term
-    const filteredCodes = codes.filter(
-        (code) =>
-            code.code_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            code.brand.brand_name
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase())
+    // Define table columns
+    const columns = useMemo(
+        () => [
+            {
+                accessorKey: "actions",
+                header: "Actions",
+                size: 200,
+                Cell: ({ row }) => (
+                    <>
+                        <IconButton
+                            component={Link}
+                            to={`/codes/edit/${row.original.id}`}
+                            variant="outlined"
+                            size="small"
+                            sx={{ marginRight: 1 }}
+                            disabled={deletingId === row.original.id} // Disable while deleting
+                        >
+                            <Edit color="primary" />
+                        </IconButton>
+                        <IconButton
+                            onClick={() => handleDelete(row.original.id)}
+                            variant="contained"
+                            color="error"
+                            size="small"
+                            disabled={deletingId === row.original.id} // Disable while deleting
+                        >
+                            {deletingId === row.original.id ? (
+                                <CircularProgress size={20} color="inherit" />
+                            ) : (
+                                <Delete />
+                            )}
+                        </IconButton>
+                    </>
+                ),
+            },
+            {
+                accessorKey: "brand.brand_name",
+                header: "Brand",
+                size: 150,
+            },
+            {
+                accessorKey: "code_name",
+                header: "Frame Code",
+                size: 150,
+            },
+        ],
+        [deletingId]
     );
 
-    const columns = [
-        {
-            accessorKey: "actions",
-            header: "Actions",
-            size: 200,
-            Cell: ({ row }) => (
-                <>
-                    <IconButton
-                        component={Link}
-                        to={`/codes/edit/${row.original.id}`}
-                        variant="outlined"
-                        size="small"
-                        sx={{ marginRight: 1 }}
-                    >
-                        <Edit color="primary" />
-                    </IconButton>
-                    <IconButton
-                        onClick={() => handleDelete(row.original.id)}
-                        variant="contained"
-                        color="error"
-                        size="small"
-                    >
-                        <Delete />
-                    </IconButton>
-                </>
-            ),
-        },
-
-        {
-            accessorKey: "brand.brand_name",
-            header: "brand_name",
-            size: 150,
-        },
-        {
-            accessorKey: "code_name",
-            header: "code_name",
-            size: 150,
-        },
-    ];
     return (
-        <Paper elevation={3} sx={{ padding: 2, marginTop: 3 }}>
-            <Typography variant="h4" component="h2" gutterBottom>
-                Codes
-            </Typography>
-
+        <Paper elevation={3} sx={{ padding: 1, marginTop: 3 }}>
             <MaterialReactTable
                 columns={columns}
-                data={codes}
+                data={codeDataList}
                 enablePagination
                 enableColumnFilters
                 enableRowSelection={false}
@@ -135,17 +102,25 @@ export default function CodeIndex() {
                 muiTableContainerProps={{
                     sx: { maxHeight: "calc(100vh - 210px)" },
                 }}
-                state={{ isLoading: loading }}
+                state={{ isLoading: loadingCodeList }}
                 muiTableProps={{
                     sx: {
                         "& .MuiTableCell-root": {
-                            padding: ".5rem", // Reduce padding for smaller density
+                            padding: ".5rem",
                         },
                         "& .MuiTableRow-root": {
-                            height: ".5rem", // Reduce row height for smaller density
+                            height: ".5rem",
                         },
                     },
                 }}
+                renderTopToolbarCustomActions={() => (
+                    <Typography
+                        variant="h6"
+                        sx={{ fontWeight: 600, color: "#5b08a7" }}
+                    >
+                        Frame Codes
+                    </Typography>
+                )}
             />
         </Paper>
     );

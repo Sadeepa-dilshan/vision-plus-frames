@@ -3,70 +3,51 @@ import { useParams, useNavigate } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
 import { useAlert } from "../contexts/AlertContext";
-import { fetchData } from "../hooks/useFetchData";
 import {
     Card,
     TextField,
     Button,
     CircularProgress,
-    MenuItem,
-    Select,
-    InputLabel,
-    FormControl,
     Typography,
     Box,
 } from "@mui/material";
+import useCodeList from "../hooks/useCodeList";
+import useBrandList from "../hooks/useBrandList";
+import useCode from "../hooks/useCode";
+import DropdownInput from "../Components/DropdownInput";
 
 export default function CodeEdit() {
+    const navigate = useNavigate();
+
     const { showAlert } = useAlert();
     const [loading, setLoading] = useState(false);
     const { id } = useParams(); // Get the code ID from the URL
-    const [brands, setBrands] = useState([]); // For storing the list of brands
+
     const [brandId, setBrandId] = useState(""); // Selected brand ID
     const [codeName, setCodeName] = useState(""); // Name of the code
     const [errors, setErrors] = useState(null);
     const { token } = useStateContext(); // To handle the auth token
-    const navigate = useNavigate();
+
+    const { brandDataList, loadingBrandList } = useBrandList();
+    const { codeDataList } = useCodeList();
+    const { codeData, loadingCode } = useCode(id);
 
     useEffect(() => {
-        // Fetch all brands to populate the dropdown
-        axiosClient
-            .get("/brands", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then(({ data }) => {
-                setBrands(data);
-            })
-            .catch((err) => {
-                console.error(err);
-            });
-
-        // Fetch the code details to pre-fill the form
-        axiosClient
-            .get(`/codes/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then(({ data }) => {
-                setBrandId(data.brand_id);
-                setCodeName(data.code_name);
-                console.log(data);
-            })
-            .catch((err) => {
-                console.error(err);
-            });
-    }, [id, token]);
-
+        if (codeData) {
+            setBrandId(codeData.brand_id);
+            setCodeName(codeData.code_name);
+        }
+    }, [id, token, codeData]);
+    const handleBrandListSelectionChange = (selectedValue) => {
+        setBrandId(selectedValue);
+    };
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+        setErrors(null);
         try {
-            const getData = await fetchData("/codes", token);
-            if (getData.state) {
-                const exists = getData["data"].some(
+            if (codeDataList) {
+                const exists = codeDataList?.some(
                     (item) =>
                         item.brand_id === brandId && item.code_name === codeName
                 );
@@ -108,24 +89,17 @@ export default function CodeEdit() {
             </Typography>
             <form onSubmit={handleSubmit}>
                 <Box sx={{ marginBottom: 3 }}>
-                    <FormControl fullWidth>
-                        <InputLabel>Select Brand</InputLabel>
-                        <Select
-                            label="Select Brand"
-                            value={brandId}
-                            onChange={(e) => setBrandId(e.target.value)}
-                            required
-                        >
-                            <MenuItem value="">
-                                <em>-- Select a Brand --</em>
-                            </MenuItem>
-                            {brands.map((brand) => (
-                                <MenuItem key={brand.id} value={brand.id}>
-                                    {brand.brand_name}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
+                    <DropdownInput
+                        //pass array list [{name: "Brand 1", id: 1}]
+                        options={brandDataList.map((brand) => ({
+                            name: brand.brand_name,
+                            id: brand.id,
+                        }))}
+                        onChange={handleBrandListSelectionChange} // Will receive the selected brand's id
+                        loading={loadingBrandList}
+                        labelName="Select Brand"
+                        defaultId={brandId} // Pass the Defalt value
+                    />
                 </Box>
                 <Box sx={{ marginBottom: 3 }}>
                     <TextField
@@ -137,6 +111,12 @@ export default function CodeEdit() {
                         error={!!errors}
                         helperText={errors ? errors.code_name : ""}
                         required
+                        InputProps={{
+                            endAdornment: loadingCode ? (
+                                <CircularProgress size={24} />
+                            ) : null, // Show spinner when loading
+                        }}
+                        disabled={loadingCode}
                     />
                 </Box>
                 <Box

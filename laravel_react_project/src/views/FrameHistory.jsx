@@ -17,8 +17,11 @@ import { motion } from "framer-motion";
 
 export default function FrameHistory() {
     const { id } = useParams(); // Get frame ID from the URL
-    const [history, setHistory] = useState(null);
+    const [history, setHistory] = useState([]);
+
     const [loading, setLoading] = useState(true);
+
+    //DATE FILTER
 
     useEffect(() => {
         fetchHistory();
@@ -69,9 +72,7 @@ export default function FrameHistory() {
                                 Stock History for Frame:{" "}
                                 {history.frame.code.code_name}
                             </Typography>
-                            <Typography variant="body1" color="textSecondary">
-                                Initial Stock Count: {history.initial_count}
-                            </Typography>
+
                             <Typography variant="body2" color="textSecondary">
                                 Created At:{" "}
                                 {new Date(
@@ -87,12 +88,12 @@ export default function FrameHistory() {
                         <Divider />
 
                         {history.changes.length > 0 ? (
-                            <Grid container spacing={2} sx={{ marginTop: 2 }}>
+                            <Grid container spacing={2}>
                                 {history.changes
                                     .slice()
                                     .reverse()
                                     .map((change, index) => (
-                                        <Grid item xs={12} md={6} key={index}>
+                                        <Grid item xs={12} key={index}>
                                             <motion.div
                                                 initial={{
                                                     scale: 0.9,
@@ -144,7 +145,13 @@ export default function FrameHistory() {
                                                             )}
                                                         </Avatar>
                                                         <Box>
-                                                            <Typography variant="body1">
+                                                            <Typography
+                                                                variant="body1"
+                                                                sx={{
+                                                                    fontWeight:
+                                                                        "bold",
+                                                                }}
+                                                            >
                                                                 {change.status ===
                                                                 "plus"
                                                                     ? "Added"
@@ -155,10 +162,24 @@ export default function FrameHistory() {
                                                                 units
                                                             </Typography>
                                                             <Typography
+                                                                textTransform={
+                                                                    "capitalize"
+                                                                }
+                                                                variant="body1"
+                                                            >
+                                                                {change.branch ||
+                                                                    "None"}{" "}
+                                                                {change.branch ===
+                                                                "stock"
+                                                                    ? "Updated"
+                                                                    : "Branch"}
+                                                            </Typography>
+
+                                                            <Typography
                                                                 variant="body2"
                                                                 color="textSecondary"
                                                             >
-                                                                Change Date:{" "}
+                                                                Date:{" "}
                                                                 {new Date(
                                                                     change.change_date
                                                                 ).toLocaleString()}

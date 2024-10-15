@@ -4,46 +4,42 @@ import { useNavigate } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
 import { MaterialReactTable } from "material-react-table";
-import { Box, IconButton, Skeleton } from "@mui/material";
-import { Delete, Edit, History } from "@mui/icons-material";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import {
+    Box,
+    IconButton,
+    Skeleton,
+    Typography,
+    useMediaQuery,
+    useTheme,
+} from "@mui/material";
+import { Delete, Edit, History, LocalShipping } from "@mui/icons-material";
 import ImageModal from "../Components/ImageModal";
+import FrameStockManageModel from "../Components/FrameStockManageModel";
+import useFrameList from "../hooks/useFrameList";
 
 export default function FrameIndex() {
-    const [frames, setFrames] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const theme = useTheme();
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+    //Image Popup state hadles
     const [imgFullVIew, setImgFullView] = useState("");
     const { token } = useStateContext(); // To handle the auth token
+    const navigate = useNavigate();
+
+    //Modal Open state
     const [open, setOpen] = useState(false);
-    const [selectedframeIDs, setSelectedframeIDs] = useState(false);
+
+    const { frameDataList, loadingFrameList, refreshFrameList } =
+        useFrameList();
+
+    //Modal Open Handler
     const handleOpen = () => {
         setOpen(true);
     };
+    //Modal close Handler
     const handleClose = () => {
         setOpen(false);
         setImgFullView("");
-    };
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        getFrames();
-    }, []);
-
-    const getFrames = () => {
-        setLoading(true);
-        axiosClient
-            .get("/frames", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then(({ data }) => {
-                setLoading(false);
-                setFrames(data);
-            })
-            .catch(() => {
-                setLoading(false);
-            });
     };
 
     const handleDelete = (frameId) => {
@@ -58,7 +54,7 @@ export default function FrameIndex() {
                 },
             })
             .then(() => {
-                getFrames(); // Refresh the frame list after deletion
+                refreshFrameList(); // Refresh the frame list after deletion
             });
     };
 
@@ -88,29 +84,6 @@ export default function FrameIndex() {
                     >
                         <Delete color="error" />
                     </IconButton>
-                    {/* Add History Button */}
-                    <IconButton
-                        variant="contained"
-                        color="info"
-                        size="small"
-                        onClick={() =>
-                            navigate(`/frames/history/${row.original.id}`)
-                        }
-                    >
-                        <History color="info" />
-                    </IconButton>
-                    {/* <IconButton
-                        variant="contained"
-                        color="info"
-                        size="small"
-                        // onClick={() => handleOpen()}
-                        onClick={() => {
-                            setSelectedframeIDs(row.original);
-                            handleOpen();
-                        }}
-                    >
-                        <LocalShippingIcon color="info" />
-                    </IconButton> */}
                 </>
             ),
         },
@@ -153,11 +126,7 @@ export default function FrameIndex() {
             header: "Code",
             size: 50,
         },
-        {
-            accessorKey: "color.color_name",
-            header: "Color",
-            size: 50,
-        },
+
         {
             accessorKey: "price",
             header: "Price",
@@ -173,15 +142,6 @@ export default function FrameIndex() {
             header: "Shape",
             size: 50,
         },
-        {
-            accessorKey: "stocks",
-            header: "Quantity",
-            size: 50,
-            Cell: ({ row }) => {
-                const stock = row.original.stocks?.[0]; // Access the first element of the stocks array
-                return stock ? stock.qty : "N/A"; // Return the qty or "N/A" if stocks is empty
-            },
-        },
     ];
 
     return (
@@ -190,42 +150,51 @@ export default function FrameIndex() {
                 height: "100%",
                 width: "100%",
                 overflowX: "auto", // Allow horizontal scroll if needed
+                marginTop: 2,
             }}
         >
-            <h2>Frames</h2>
-
-            <MaterialReactTable
-                columns={columns}
-                data={frames}
-                enableRowSelection={false}
-                enablePagination
-                enableColumnFilters
-                enableSorting
-                enableToolbarInternalActions
-                initialState={{ pagination: { pageSize: 20 } }}
-                muiToolbarAlertBannerProps={{
-                    color: "primary",
-                }}
-                muiTableContainerProps={{
-                    sx: { maxHeight: "calc(100vh - 200px)" },
-                }}
-                state={{ isLoading: loading }}
-                muiTableProps={{
-                    sx: {
-                        "& .MuiTableCell-root": {
-                            padding: ".5rem", // Reduce padding for smaller density
+            <Box sx={{ width: isSmallScreen ? "96vw" : "100%" }}>
+                <MaterialReactTable
+                    columns={columns}
+                    data={frameDataList}
+                    enableRowSelection={false}
+                    enablePagination
+                    enableColumnFilters
+                    enableSorting
+                    enableToolbarInternalActions
+                    initialState={{ pagination: { pageSize: 20 } }}
+                    muiToolbarAlertBannerProps={{
+                        color: "primary",
+                    }}
+                    muiTableContainerProps={{
+                        sx: { maxHeight: "calc(100vh - 200px)" },
+                    }}
+                    state={{ isLoading: loadingFrameList }}
+                    muiTableProps={{
+                        sx: {
+                            "& .MuiTableCell-root": {
+                                padding: ".5rem", // Reduce padding for smaller density
+                            },
+                            "& .MuiTableRow-root": {
+                                height: ".5rem", // Reduce row height for smaller density
+                            },
                         },
-                        "& .MuiTableRow-root": {
-                            height: ".5rem", // Reduce row height for smaller density
-                        },
-                    },
-                }}
-            />
+                    }}
+                    renderTopToolbarCustomActions={() => (
+                        <Typography
+                            variant="h6"
+                            sx={{ fontWeight: 600, color: "#5b08a7" }}
+                        >
+                            All Frames
+                        </Typography>
+                    )}
+                />
+            </Box>
             <ImageModal
                 open={open}
                 imgFullVIew={imgFullVIew}
                 handleClose={handleClose}
-                selectedframeIDs={selectedframeIDs}
+                selectedframeIDs={false}
             />
         </Box>
     );

@@ -35,6 +35,7 @@ export default function MobileNav({ NavData }) {
                 </IconButton>
             )}
             <Drawer
+                onClose={toggleDrawer(false)}
                 sx={{
                     width: drawerWidth,
                     flexShrink: 0,
@@ -65,7 +66,10 @@ export default function MobileNav({ NavData }) {
                     </IconButton>
                 </Box>
                 <Divider />
-                <DrawerList NavData={NavData} />
+                <DrawerList
+                    toggleDrawer={toggleDrawer(!open)}
+                    NavData={NavData}
+                />
             </Drawer>
         </Box>
     );

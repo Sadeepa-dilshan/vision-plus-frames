@@ -10,10 +10,6 @@ import {
     useMediaQuery,
     useTheme,
     Tooltip,
-    MenuItem,
-    Select,
-    FormControl,
-    InputLabel,
 } from "@mui/material";
 import ResponsiveDatePicker from "../Components/ResponsiveDatePicker";
 import dayjs from "dayjs";
@@ -29,7 +25,6 @@ export default function Dashboard() {
     const { token } = useStateContext(); // Get the auth token
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-    const [sortOption, setSortOption] = useState("reduction");
 
     // Default to last 30 days
     const [fromDate, setFromDate] = useState(dayjs().subtract(30, "day"));
@@ -37,8 +32,7 @@ export default function Dashboard() {
 
     useEffect(() => {
         fetchTopFrames();
-    }, [fromDate, toDate, sortOption]); // Fetch data when date range or sort option changes
-    console.log(frames);
+    }, [fromDate, toDate]); // Fetch data when date range or sort option changes
 
     // Fetch top 5 frames with most stock reductions based on selected date range
     const fetchTopFrames = async () => {
@@ -64,10 +58,6 @@ export default function Dashboard() {
         }
     };
 
-    const handleSortChange = (event) => {
-        setSortOption(event.target.value);
-    };
-
     return (
         <Box sx={{ marginTop: 3 }}>
             {/* Date Range Picker */}
@@ -77,24 +67,6 @@ export default function Dashboard() {
                 setFromDate={setFromDate}
                 setToDate={setToDate}
             />
-
-            <Box sx={{ marginTop: 2, marginBottom: 2 }}>
-                <FormControl fullWidth>
-                    <InputLabel>Sort By</InputLabel>
-                    <Select value={sortOption} onChange={handleSortChange}>
-                        <MenuItem value="reduction">Stock Reduction</MenuItem>
-                        <MenuItem value="price">Price</MenuItem>
-                        <MenuItem value="brand">Brand</MenuItem>
-                    </Select>
-                </FormControl>
-            </Box>
-
-            <Typography margin={2} variant="h5" gutterBottom>
-                Top 5 Frames by{" "}
-                {sortOption === "reduction"
-                    ? "Stock Reduction"
-                    : sortOption.charAt(0).toUpperCase() + sortOption.slice(1)}
-            </Typography>
 
             {loading ? (
                 <Box>
@@ -106,9 +78,11 @@ export default function Dashboard() {
                     sx={{
                         display: "flex",
                         flexDirection: "row",
+                        justifyContent: "center",
                         flexWrap: "wrap",
                         gap: 2,
                         width: "100%",
+                        marginTop: 2,
                     }}
                 >
                     {frames.map((frame, index) => (
@@ -254,6 +228,7 @@ export default function Dashboard() {
                                         >
                                             RS {frame.frame.price}
                                         </Typography>
+
                                         <Box
                                             sx={{
                                                 display: "flex",
@@ -269,6 +244,36 @@ export default function Dashboard() {
                                             />
                                             <Typography
                                                 color={"seagreen"}
+                                                variant="h6"
+                                                fontWeight="bold"
+                                            >
+                                                {frame.current_qty}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "space-between",
+                                        }}
+                                    >
+                                        <Typography>Reduction Count</Typography>
+                                        <Box
+                                            sx={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "space-between",
+                                            }}
+                                        >
+                                            <ShoppingCartIcon
+                                                sx={{
+                                                    color: "red",
+                                                    marginRight: 0.5,
+                                                }}
+                                            />
+                                            <Typography
+                                                color={"red"}
                                                 variant="h6"
                                                 fontWeight="bold"
                                             >

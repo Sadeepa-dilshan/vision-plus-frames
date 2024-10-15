@@ -14,10 +14,12 @@ import { useNavigate, useLocation } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
 import LogoutIcon from "@mui/icons-material/Logout";
+import { IconButton } from "@mui/material";
+import { OpenInNew } from "@mui/icons-material";
 
 const drawerWidth = 240;
 
-export default function DrawerList({ NavData }) {
+export default function DrawerList({ NavData, toggleDrawer }) {
     const { setUser, setToken } = useStateContext();
     const navigate = useNavigate();
     const location = useLocation();
@@ -29,7 +31,9 @@ export default function DrawerList({ NavData }) {
             setToken(null);
         });
     };
-
+    const handleOpenInNewTab = (path) => {
+        window.open(path, "_blank", "noopener,noreferrer");
+    };
     return (
         <Box>
             <Divider />
@@ -46,6 +50,7 @@ export default function DrawerList({ NavData }) {
                         }
                     >
                         <ListItemButton
+                            onClick={toggleDrawer}
                             sx={{
                                 minHeight: 48,
                                 justifyContent: open ? "initial" : "center",
@@ -90,6 +95,28 @@ export default function DrawerList({ NavData }) {
                                             : "white", // Black text if active
                                 }}
                             />
+                            <IconButton
+                                sx={{
+                                    minHeight: 48,
+                                    justifyContent: open ? "initial" : "center",
+                                    px: 2.5,
+                                    color: "gray",
+                                    backgroundColor:
+                                        location.pathname === item.path
+                                            ? "yellow"
+                                            : "transparent", // Yellow background if active
+                                    "&:hover": {
+                                        backgroundColor: "yellow", // Yellow background on hover
+                                        color: "black", // Text color on hover
+                                        "& .MuiListItemIcon-root": {
+                                            color: "black", // Icon color on hover
+                                        },
+                                    },
+                                }}
+                                onClick={() => handleOpenInNewTab(item.path)}
+                            >
+                                <OpenInNew />
+                            </IconButton>
                         </ListItemButton>
                     </ListItem>
                 ))}

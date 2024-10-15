@@ -39,7 +39,7 @@ export default function Login() {
             setUser(data.user);
             setToken(data.token);
             setLoading(false); // Stop loading
-            console.log(data);
+
             if (data.user) {
                 showAlert(
                     data.user.name + " logged in successfully",
@@ -49,11 +49,8 @@ export default function Login() {
                 showAlert(data.message, "error");
             }
         } catch (err) {
-            console.log("Error:", err);
-
             setLoading(false); // Stop loading
             const response = err.response;
-            console.log("Error response:", err.response); // Log the error response
 
             if (response && response.status === 422) {
                 setError(response.data.message);

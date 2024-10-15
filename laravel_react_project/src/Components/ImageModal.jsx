@@ -1,7 +1,6 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import {
     IconButton,
@@ -12,9 +11,15 @@ import {
     Select,
     FormControl,
     InputLabel,
+    Typography,
+    CircularProgress,
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
-
+import { useStateContext } from "../contexts/contextprovider";
+import axiosClient from "../axiosClient";
+import { useAlert } from "../contexts/AlertContext";
+import useColorList from "../hooks/useColorList";
+import DropdownInput from "../Components/DropdownInput";
 const style = {
     position: "absolute",
     top: "50%",
@@ -31,20 +36,86 @@ export default function ImageModal({
     handleClose,
     imgFullVIew,
     selectedframeIDs,
+    modelType,
+    colorList,
+    handleRefreshTable,
 }) {
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
     const isMediumScreen = useMediaQuery(theme.breakpoints.between("sm", "md"));
-    const isLargeScreen = useMediaQuery(theme.breakpoints.up("md"));
-    console.log(selectedframeIDs);
+    const { showAlert } = useAlert();
+    const { colorDataList, loadingColorList, refreshColorList } =
+        useColorList();
+    // State to handle frame data
 
-    // State to handle stock reduction and selected branch
-    const [stock, setStock] = React.useState("");
-    const [branch, setBranch] = React.useState("");
-    const handleSubmic = () => {
-        console.log("Stock reduced:", stock);
-        console.log("Selected branch:", branch);
-        handleClose();
+    const [loading, setLoading] = React.useState(false);
+    const [colorsAvilable, setColorsAvilable] = React.useState([]);
+    const { token } = useStateContext();
+    const [frame, setFrame] = React.useState({
+        brand_id: "",
+        code_id: "",
+        color_id: "",
+        price: "",
+        size: "",
+        species: "",
+        image: "",
+        quantity: 0, // Default initial quantity
+        branch: "",
+    });
+    const [colorId, setColorId] = React.useState("");
+
+    // Update frame with selected frame IDs and form data
+    React.useEffect(() => {
+        if (selectedframeIDs) {
+            setFrame((prevFrame) => ({
+                ...prevFrame,
+                brand_id: selectedframeIDs.brand_id,
+                code_id: selectedframeIDs.code_id,
+                price: selectedframeIDs.price,
+                size: selectedframeIDs.size,
+                species: selectedframeIDs.species,
+                image: selectedframeIDs.image,
+            }));
+        }
+    }, [selectedframeIDs]);
+    React.useEffect(() => {
+        setColorsAvilable(
+            colorDataList.filter((value) => !colorList.includes(value.id))
+        );
+    }, [colorList]);
+
+    // Handle input change
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFrame((prevFrame) => ({ ...prevFrame, [name]: value }));
+    };
+
+    // Handle form submission
+    const handleSubmit = async () => {
+        try {
+            setLoading(true);
+            await axiosClient.post("/frames", frame, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+            showAlert("New Frame Color added successfully", "success");
+            handleRefreshTable();
+            handleClose(); // Close modal after successful submission
+        } catch (err) {
+            if (err.response && err.response.status === 422) {
+                // Handle validation errors
+                // setErrors(err.response.data.errors);
+            } else {
+                console.error(err);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+    const handleBrandListSelectionChange = (selectedValue) => {
+        setColorId(selectedValue);
     };
     return (
         <div>
@@ -80,55 +151,50 @@ export default function ImageModal({
                             alt="Full View"
                         />
                     ) : (
-                        <form
-                            onSubmit={handleSubmic}
-                            style={{ display: "flex", flexDirection: "column" }}
-                        >
-                            {/* Add TextField for reducing stock */}
-                            <TextField
-                                label="Reduce Stock Amount"
-                                type="number"
-                                fullWidth
-                                required
-                                margin="normal"
-                                value={stock}
-                                onChange={(e) => setStock(e.target.value)}
-                                sx={{ marginTop: 3, width: 300 }}
-                            />
-
-                            {/* Add Select for selecting branch */}
-                            <FormControl
-                                fullWidth
-                                margin="normal"
-                                sx={{ marginTop: 2, width: 300 }}
-                                required
+                        <></>
+                    )}
+                    {modelType === "add" && (
+                        <>
+                            <Box
+                                sx={{
+                                    padding: 2,
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                    width: 400,
+                                }}
                             >
-                                <InputLabel>Select Branch</InputLabel>
-                                <Select
-                                    value={branch}
-                                    onChange={(e) => setBranch(e.target.value)}
-                                    label="Select Branch"
+                                <Typography variant="h5">
+                                    Add New Frame
+                                </Typography>
+
+                                <DropdownInput
+                                    //pass array list [{name: "Brand 1", id: 1}]
+                                    options={colorsAvilable.map((color) => ({
+                                        name: color.color_name,
+                                        id: color.id,
+                                    }))}
+                                    onChange={handleBrandListSelectionChange} // Will receive the selected brand's id
+                                    loading={loadingColorList}
+                                    labelName="Select Brand"
+                                    defaultId={colorId} // Pass the Defalt value
+                                />
+
+                                <Button
+                                    sx={{ margin: 2 }}
+                                    disabled={loading}
+                                    onClick={handleSubmit}
+                                    variant="contained"
                                 >
-                                    <MenuItem value="Mathugama">
-                                        Mathugama
-                                    </MenuItem>
-                                    <MenuItem value="Aluthgama">
-                                        Aluthgama
-                                    </MenuItem>
-                                    <MenuItem value="Colombo">Colombo</MenuItem>
-                                </Select>
-                            </FormControl>
-
-                            {/* You can add a button to submit or confirm actions */}
-                            <Button
-                                variant="contained"
-                                type="submit"
-                                color="primary"
-                                sx={{ marginTop: 2, display: "block" }}
-                            >
-                                Tranfer Stock
-                            </Button>
-                        </form>
+                                    {loading ? (
+                                        <CircularProgress size={24} />
+                                    ) : (
+                                        "Save Changes"
+                                    )}
+                                </Button>
+                            </Box>
+                        </>
                     )}
                 </Box>
             </Modal>

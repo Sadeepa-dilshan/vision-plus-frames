@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
-import { fetchData } from "../hooks/useFetchData";
+
 import { useAlert } from "../contexts/AlertContext";
 import {
     Button,
@@ -12,26 +12,32 @@ import {
     Typography,
     Box,
 } from "@mui/material";
+import useBrandList from "../hooks/useBrandList";
 
 export default function BrandCreate() {
+    const navigate = useNavigate();
+
+    // Context Alert Bar + Auth Token
+    const { showAlert } = useAlert();
+    const { token } = useStateContext();
+
+    //User Input
     const [brandName, setBrandName] = useState("");
     const [price, setPrice] = useState("");
-    const { showAlert } = useAlert();
-    const [loading, setLoading] = useState(false);
 
+    //Submite Stats
+    const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState(null);
-    const { token } = useStateContext(); // To handle the auth token
-    const navigate = useNavigate();
+    const { brandDataList } = useBrandList();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
             setLoading(true);
-            const getData = await fetchData("/brands", token);
 
-            if (getData.state) {
-                const exists = getData["data"].some(
+            if (brandDataList) {
+                const exists = brandDataList.some(
                     (item) => item.brand_name === brandName
                 );
                 if (exists) {
@@ -85,13 +91,20 @@ export default function BrandCreate() {
                 <Box sx={{ marginBottom: 3 }}>
                     <TextField
                         fullWidth
+                        type="number"
                         label="Price"
                         value={price}
-                        onChange={(e) => setPrice(e.target.value)}
                         variant="outlined"
                         error={!!errors}
                         helperText={errors ? errors.price : ""}
                         required
+                        onChange={(e) => {
+                            const inputValue = e.target.value;
+                            // Prevent entering negative numbers
+                            if (inputValue >= 0) {
+                                setPrice(inputValue);
+                            }
+                        }}
                     />
                 </Box>
 
