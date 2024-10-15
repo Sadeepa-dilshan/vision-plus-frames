@@ -64,6 +64,7 @@ class FrameController extends Controller
             'image' => 'nullable|url',
             'quantity' => 'required|integer',
             'branch' => 'required|string|max:255',
+            'branch_id' => 'exists:branches,id',
         ]);
 
         $frameData = $request->only(['brand_id', 'code_id', 'color_id', 'price', 'size','species','image']);
@@ -114,6 +115,7 @@ class FrameController extends Controller
                     'change_qty' => $changeQty,
                     'status' => $status,
                     'branch' => $request->branch,
+                    'branch_id' => $request->branch_id,
                 ]);
             }
         } else {
@@ -132,6 +134,7 @@ class FrameController extends Controller
                     'change_qty' => $request->quantity, // The first quantity added
                     'status' => 'plus',
                     'branch' => $request->branch,
+                    'branch_id' => $request->branch_id,
                 ]);
             }
         }

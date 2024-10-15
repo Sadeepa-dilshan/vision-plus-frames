@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Branch;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class StockChange extends Model
 {
@@ -20,6 +21,7 @@ class StockChange extends Model
         'change_qty',
         'status',
         'branch',
+        'branch_id',
     ];
 
     /**
@@ -38,5 +40,10 @@ class StockChange extends Model
     public function frame()
     {
         return $this->belongsTo(Frame::class);
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
     }
 }

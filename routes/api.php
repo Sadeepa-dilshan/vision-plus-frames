@@ -9,6 +9,7 @@ use App\Http\Controllers\BrandController;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\FrameController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\BranchController;
 
 /*
 |--------------------------------------------------------------------------
@@ -80,7 +81,6 @@ Route::middleware(['auth:sanctum'])->group(function() {
 
 });
 
-
 Route::post('login',[AuthController::class,'login']);
 Route::post('register',[AuthController::class,'register']);
 Route::get('hello', function () {
@@ -88,3 +88,6 @@ Route::get('hello', function () {
 });
 Route::get('top-frames-by-stock-reduction', [FrameController::class, 'topFramesByStockReduction']);
 Route::get('/frames/{frameId}/stock-history', [StockController::class, 'getStockHistory']);
+
+//branches
+Route::apiResource('branches', BranchController::class);
