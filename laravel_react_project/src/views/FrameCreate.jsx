@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
-import { storage } from "../firebaseConfig";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import {
     Container,
     Typography,
@@ -14,34 +11,30 @@ import {
     InputLabel,
     FormControl,
     Select,
-    Alert,
     Skeleton,
     Card,
+    CircularProgress,
 } from "@mui/material";
+import useBrandList from "../hooks/useBrandList";
+import useColorList from "../hooks/useColorList";
+import useCodeList from "../hooks/useCodeList";
+import DropdownInput from "../Components/DropdownInput";
+import { useAlert } from "../contexts/AlertContext";
+import { uploadSingleImages } from "../api/apiService";
 export default function FrameCreate() {
-    //! TODO SAVE IMG  INSIDE FIREBASE
-    const uploadSingleImages = async (ID, image, index) => {
-        try {
-            // Create a reference to the storage location
-            const storageRef = ref(storage, `images/${ID}/${index}`);
+    const { showAlert } = useAlert();
+    const { token } = useStateContext(); // To handle the auth token
 
-            // Upload the image file to Firebase Storage
-            await uploadBytes(storageRef, image);
+    //HOOKS
+    const { brandDataList, loadingBrandList, refreshBrandList } =
+        useBrandList();
+    const { colorDataList, loadingColorList, refreshColorList } =
+        useColorList();
+    const { codeDataList, loadingCodeList, refreshCodeList } = useCodeList();
 
-            // Get the download URL for the uploaded file
-            const downloadURL = await getDownloadURL(storageRef);
+    const [loading, setLoading] = useState(false);
 
-            return { success: true, downloadURL };
-        } catch (error) {
-            console.error("Error uploading image:", error);
-            return { success: false, error: error.message };
-        }
-    };
-
-    //! TODO SAVE IMG  INSIDE FIREBASE
-    const [brands, setBrands] = useState([]); // For storing the list of brands
-    const [codes, setCodes] = useState([]); // For storing the list of codes
-    const [colors, setColors] = useState([]); // For storing the list of colors
+    //Handle inputs
     const [brandId, setBrandId] = useState(""); // Selected brand ID
     const [codeId, setCodeId] = useState(""); // Selected code ID
     const [colorId, setColorId] = useState(""); // Selected color ID
@@ -52,67 +45,21 @@ export default function FrameCreate() {
     const [quantity, setQuantity] = useState(""); // Frame quantity
 
     const [errors, setErrors] = useState(null);
-    const { token } = useStateContext(); // To handle the auth token
     const [filteredCodes, setfilterdCodes] = useState([]);
-    const [frames, setFrames] = useState([]);
-    const navigate = useNavigate();
 
-    useEffect(() => {
-        // Fetch all brands, codes, and colors to populate the dropdowns
-        axiosClient
-            .get("/brands", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then(({ data }) => {
-                setBrands(data);
-            })
-            .catch((err) => {
-                console.error(err);
-            });
-
-        axiosClient
-            .get("/codes", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then(({ data }) => {
-                setCodes(data);
-            })
-            .catch((err) => {
-                console.error(err);
-            });
-
-        axiosClient
-            .get("/colors", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then(({ data }) => {
-                setColors(data);
-            })
-            .catch((err) => {
-                console.error(err);
-            });
-
-        axiosClient
-            .get("/frames", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then(({ data }) => {
-                setFrames(data);
-            })
-            .catch(() => {});
-    }, [token]);
+    const handleBrandListSelectionChange = (selectedValue) => {
+        setBrandId(selectedValue);
+    };
+    const handleColorListSelectionChange = (selectedValue) => {
+        setColorId(selectedValue);
+    };
+    const handleCodeListSelectionChange = (selectedValue) => {
+        setCodeId(selectedValue);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+        setLoading(true);
         const formData = new FormData();
         formData.append("brand_id", brandId);
         formData.append("code_id", codeId);
@@ -141,23 +88,33 @@ export default function FrameCreate() {
                 },
             });
 
-            navigate("/frames"); // Redirect to the frame list after creation
+            setBrandId(null);
+            setCodeId(null);
+            setColorId(null);
+            setPrice("");
+            setQuantity("");
+            setFrameShape("");
+            setFrameSpecies("");
+            setImage(null);
         } catch (err) {
             if (err.response && err.response.status === 422) {
                 setErrors(err.response.data.errors);
+                showAlert("Fill All the frame details", "error");
             } else {
-                console.error(err);
+                showAlert("Refresh the page & try again", "error");
             }
+        } finally {
+            setLoading(false);
         }
     };
 
     useEffect(() => {
         setfilterdCodes(
-            codes.filter(
+            codeDataList.filter(
                 (code) => code.brand_id === brandId // Properly filter codes
             )
         );
-    }, [brandId, frames, codes]); // Include dependencies
+    }, [brandId, codeDataList]); // Include dependencies frameDataList
 
     return (
         <Container sx={{ mt: 2 }} maxWidth="sm">
@@ -166,77 +123,43 @@ export default function FrameCreate() {
             </Typography>
             <form onSubmit={handleSubmit}>
                 <Grid container spacing={2}>
+                    {/* Brand Dropdown */}
                     <Grid item xs={12}>
-                        <FormControl fullWidth>
-                            <InputLabel id="brandId-label">
-                                Select Brand
-                            </InputLabel>
-                            <Select
-                                labelId="brandId-label"
-                                id="brandId"
-                                value={brandId}
-                                label="Select Brand"
-                                onChange={(e) => {
-                                    setBrandId(e.target.value);
-                                    const selectedBrand = brands.filter(
-                                        (brand) => brand.id === e.target.value
-                                    );
-                                    setPrice(selectedBrand[0].price);
-                                }}
-                                required
-                            >
-                                {brands.map((brand) => (
-                                    <MenuItem key={brand.id} value={brand.id}>
-                                        {brand.brand_name}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
+                        <DropdownInput
+                            //pass array list [{name: "Brand 1", id: 1}]
+                            options={brandDataList.map((brand) => ({
+                                name: brand.brand_name,
+                                id: brand.id,
+                            }))}
+                            onChange={handleBrandListSelectionChange} // Will receive the selected brand's id
+                            loading={loadingBrandList}
+                            labelName="Select Brand"
+                            defaultId={brandId} // Pass the Defalt value
+                        />
                     </Grid>
                     <Grid item xs={12}>
-                        <FormControl fullWidth>
-                            <InputLabel id="codeId-label">
-                                Select Code
-                            </InputLabel>
-                            <Select
-                                labelId="codeId-label"
-                                id="codeId"
-                                value={codeId}
-                                label="Select Code"
-                                onChange={(e) => setCodeId(e.target.value)}
-                                required
-                            >
-                                {filteredCodes.map((code) => (
-                                    <MenuItem key={code.id} value={code.id}>
-                                        {code.code_name}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
+                        <DropdownInput
+                            options={filteredCodes.map((code) => ({
+                                name: code.code_name,
+                                id: code.id,
+                            }))}
+                            onChange={handleCodeListSelectionChange} // Will receive the selected brand's id
+                            loading={loadingCodeList}
+                            labelName="Select Code"
+                            defaultId={codeId} // Pass the Defalt value
+                        />
                     </Grid>
                     <Grid item xs={12}>
-                        <FormControl fullWidth>
-                            <InputLabel id="colorId-label">
-                                Select Color
-                            </InputLabel>
-                            <Select
-                                labelId="colorId-label"
-                                id="colorId"
-                                value={colorId}
-                                label="Select Color"
-                                onChange={(e) => setColorId(e.target.value)}
-                                required
-                            >
-                                <MenuItem value="">
-                                    <em>-- Select a Color --</em>
-                                </MenuItem>
-                                {colors.map((color) => (
-                                    <MenuItem key={color.id} value={color.id}>
-                                        {color.color_name}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
+                        <DropdownInput
+                            options={colorDataList.map((color) => ({
+                                name: color.color_name,
+                                id: color.id,
+                            }))}
+                            onChange={handleColorListSelectionChange} // Will receive the selected brand's id
+                            loading={loadingColorList}
+                            labelName="Select Color"
+                            defaultId={colorId} // Pass the Defalt value
+                        />
                     </Grid>
                     <Grid item xs={12}>
                         <TextField
@@ -245,7 +168,11 @@ export default function FrameCreate() {
                             label="Price"
                             type="number"
                             value={price}
-                            onChange={(e) => setPrice(e.target.value)}
+                            onChange={(e) => {
+                                if (e.target.value >= 0) {
+                                    setPrice(e.target.value);
+                                }
+                            }}
                             required
                         />
                     </Grid>
@@ -262,9 +189,6 @@ export default function FrameCreate() {
                                 onChange={(e) => setFrameShape(e.target.value)}
                                 required
                             >
-                                <MenuItem value="">
-                                    <em>-- Select Frame Shape --</em>
-                                </MenuItem>
                                 <MenuItem value="Full">Full</MenuItem>
                                 <MenuItem value="Half">Half</MenuItem>
                             </Select>
@@ -285,9 +209,6 @@ export default function FrameCreate() {
                                 }
                                 required
                             >
-                                <MenuItem value="">
-                                    <em>-- Select Frame Species --</em>
-                                </MenuItem>
                                 <MenuItem value="Plastic">Plastic</MenuItem>
                                 <MenuItem value="Metal">Metal</MenuItem>
                             </Select>
@@ -300,7 +221,11 @@ export default function FrameCreate() {
                             label="Quantity"
                             type="number"
                             value={quantity}
-                            onChange={(e) => setQuantity(e.target.value)}
+                            onChange={(e) => {
+                                if (e.target.value >= 0) {
+                                    setQuantity(e.target.value);
+                                }
+                            }}
                             required
                         />
                     </Grid>
@@ -341,19 +266,22 @@ export default function FrameCreate() {
                             </Button>
                         </Card>
                     </Grid>
-                    {errors && (
-                        <Grid item xs={12}>
-                            <Alert severity="error">{errors.message}</Alert>
-                        </Grid>
-                    )}
+
                     <Grid item xs={12}>
                         <Button
                             type="submit"
                             variant="contained"
                             color="primary"
                             fullWidth
+                            disabled={loading}
                         >
-                            Create Frame
+                            {loading ? (
+                                <>
+                                    <CircularProgress size={20} /> creating...
+                                </>
+                            ) : (
+                                "Create Frame"
+                            )}
                         </Button>
                     </Grid>
                 </Grid>

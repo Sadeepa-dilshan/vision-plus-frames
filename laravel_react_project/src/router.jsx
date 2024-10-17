@@ -26,6 +26,8 @@ import BrancheIndex from "./views/BranchIndex.jsx";
 import BranchCreate from "./views/BrancheCreate.jsx";
 import BranchEdit from "./views/branchEdit.jsx";
 import UsersIndex from "./views/UsersIndex.jsx";
+import UserCreate from "./views/UserCreate.jsx";
+import UserEdit from "./views/UserEdit.jsx";
 
 const router = createBrowserRouter([
     {
@@ -52,7 +54,7 @@ const router = createBrowserRouter([
                 path: "/users/new",
                 element: (
                     <AnimatedPage>
-                        <UserForm key="userCreate" />
+                        <UserCreate key="userCreate" />
                     </AnimatedPage>
                 ),
             },
@@ -60,7 +62,7 @@ const router = createBrowserRouter([
                 path: "/users/:id",
                 element: (
                     <AnimatedPage>
-                        <UserForm key="userUpdate" />
+                        <UserEdit key="userUpdate" />
                     </AnimatedPage>
                 ),
             },

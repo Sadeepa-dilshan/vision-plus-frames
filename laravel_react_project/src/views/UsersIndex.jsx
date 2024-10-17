@@ -67,7 +67,9 @@ export default function UsersIndex() {
                             <Edit color="primary" />
                         </IconButton>
                         <IconButton
-                            onClick={() => handleDelete}
+                            onClick={() => {
+                                handleDelete(row.original.id);
+                            }}
                             variant="contained"
                             color="error"
                             size="small"
@@ -82,11 +84,7 @@ export default function UsersIndex() {
                     </Box>
                 ),
             },
-            {
-                accessorKey: "id",
-                header: "ID",
-                size: 50,
-            },
+
             {
                 accessorKey: "name",
                 header: "Name",
@@ -135,13 +133,13 @@ export default function UsersIndex() {
                             variant="h6"
                             sx={{ fontWeight: 600, color: "#5b08a7" }}
                         >
-                            Users List
+                            Users Management
                         </Typography>
                         <Button
                             onClick={() => navigate("/users/new")}
                             variant="contained"
                         >
-                            New User
+                            Add User
                         </Button>
                     </Box>
                 )}

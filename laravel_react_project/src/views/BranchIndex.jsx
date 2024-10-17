@@ -1,8 +1,15 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
-import { CircularProgress, IconButton, Paper, Typography } from "@mui/material";
+import {
+    Box,
+    Button,
+    CircularProgress,
+    IconButton,
+    Paper,
+    Typography,
+} from "@mui/material";
 import { Delete, Edit } from "@mui/icons-material";
 import useBrandList from "../hooks/useBrandList";
 import { MaterialReactTable } from "material-react-table";
@@ -14,7 +21,7 @@ const ActionButtons = ({ brandId, onDelete, deletingId }) => (
     <>
         <IconButton
             component={Link}
-            to={`/brands/edit/${brandId}`}
+            to={`/branches/edit/${brandId}`}
             variant="outlined"
             size="small"
             sx={{ marginRight: 1 }}
@@ -39,6 +46,7 @@ const ActionButtons = ({ brandId, onDelete, deletingId }) => (
 );
 
 export default function BrancheIndex() {
+    const navigate = useNavigate();
     const { token } = useStateContext(); // Get the auth token
     const { branchDataList, loadingBranchList, refreshBranchList } =
         useBranchList();
@@ -83,12 +91,17 @@ export default function BrancheIndex() {
                 ),
             },
             {
-                accessorKey: "brand_name",
+                accessorKey: "id",
                 header: "Brand Name",
                 size: 150,
             },
             {
-                accessorKey: "price",
+                accessorKey: "name",
+                header: "Brand Name",
+                size: 150,
+            },
+            {
+                accessorKey: "location",
                 header: "Price",
                 size: 150,
             },
@@ -125,12 +138,20 @@ export default function BrancheIndex() {
                     },
                 }}
                 renderTopToolbarCustomActions={() => (
-                    <Typography
-                        variant="h6"
-                        sx={{ fontWeight: 600, color: "#5b08a7" }}
-                    >
-                        Frame Brands
-                    </Typography>
+                    <Box>
+                        <Typography
+                            variant="h6"
+                            sx={{ fontWeight: 600, color: "#5b08a7" }}
+                        >
+                            Branches Management
+                        </Typography>
+                        <Button
+                            onClick={() => navigate("/users/new")}
+                            variant="contained"
+                        >
+                            Add Branch
+                        </Button>
+                    </Box>
                 )}
             />
         </Paper>

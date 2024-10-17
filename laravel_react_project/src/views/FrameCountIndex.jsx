@@ -39,22 +39,29 @@ import { useNavigate } from "react-router-dom";
 import FrameStockManageModel from "../Components/FrameStockManageModel";
 import FrameAddByTable from "../Components/FrameAddByTable";
 import useFrameList from "../hooks/useFrameList";
+import useFrameListByBrand from "../hooks/useFrameListByBrand";
 
 export default function FrameCountIndex() {
-    const [frames, setFrames] = useState([]);
-    const [loading, setLoading] = useState(false);
     const [imgFullView, setImgFullView] = useState("");
-    const { token } = useStateContext(); // To handle the auth token
+
+    //PGINATION TABLE
+    const [pageIndex, setPageIndex] = useState(0);
+    const [pageSize, setPageSize] = useState(10); // Define how many rows per page
+
     const [open, setOpen] = useState(false);
     const [frameQtyManage, setFrameQtyManage] = useState("add");
     const [modelType, setModelType] = useState("");
     const [colorList, setColorList] = useState([]);
     const [selectedframeIDs, setSelectedframeIDs] = useState(false);
     const [openStockManageModel, setOpenStockManageModel] = useState(false);
-    const [expandedRow, setExpandedRow] = useState(null);
+    const [expandedRowId, setExpandedRowId] = useState(null);
 
-    const { frameDataList, loadingFrameList, refreshFrameList } =
-        useFrameList();
+    const {
+        frameListByBrand,
+        loadingFrameListByBrand,
+        refreshFrameListByBrand,
+    } = useFrameListByBrand();
+
     const [handleRefresh, setHandleRefresh] = useState(false);
     const navigate = useNavigate();
 
@@ -64,33 +71,6 @@ export default function FrameCountIndex() {
     const CloseStockManage = () => {
         setOpenStockManageModel(false);
     };
-    const outputData = frames.reduce((acc, curr) => {
-        const conbineIDS = `${curr.brand_id}_${curr.code_id}`;
-
-        if (!acc[conbineIDS]) {
-            acc[conbineIDS] = {
-                code_name: curr.code.code_name,
-                code_id: curr.code_id,
-                brand_name: curr.brand.brand_name,
-                totalQty: 0,
-                frames: [],
-            };
-        }
-
-        acc[conbineIDS].totalQty += curr.stocks[0]["qty"];
-        acc[conbineIDS].frames.push(curr);
-
-        return acc;
-    }, {});
-
-    const mappedOutput = Object.keys(outputData).map((key) => ({
-        code_id: key,
-        code_name: outputData[key].code_name,
-        brand_name: outputData[key].brand_name,
-        image: outputData[key]["frames"][0].image,
-        totalQty: outputData[key].totalQty,
-        frames: outputData[key]["frames"],
-    }));
 
     const handleClose = () => {
         setOpen(false);
@@ -100,26 +80,6 @@ export default function FrameCountIndex() {
 
     const handleRefreshTable = () => {
         setHandleRefresh(!handleRefresh);
-    };
-    useEffect(() => {
-        getFrames();
-    }, [handleRefresh]);
-
-    const getFrames = () => {
-        setLoading(true);
-        axiosClient
-            .get("/frames", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then(({ data }) => {
-                setLoading(false);
-                setFrames(data);
-            })
-            .catch(() => {
-                setLoading(false);
-            });
     };
 
     const columns = useMemo(
@@ -362,18 +322,16 @@ export default function FrameCountIndex() {
         >
             <MaterialReactTable
                 columns={columns}
-                data={mappedOutput}
+                data={frameListByBrand}
                 enablePagination
                 enableColumnFilters
                 enableSorting
                 enableExpandAll={false}
                 enableExpanding={false}
                 enableToolbarInternalActions
-                initialState={{ pagination: { pageSize: 20 } }}
                 muiTableContainerProps={{
                     sx: { maxHeight: "calc(100vh - 200px)" },
                 }}
-                state={{ isLoading: loading }}
                 renderDetailPanel={renderDetailPanel} // Add the detail panel function here
                 muiTableProps={{
                     sx: {
@@ -393,7 +351,31 @@ export default function FrameCountIndex() {
                         Frame Store
                     </Typography>
                 )}
+                manualPagination // Enable manual (server-side) pagination
+                pageCount={Math.ceil(frameListByBrand.length / pageSize)} // Total number of pages
+                state={{
+                    isLoading: loadingFrameListByBrand, // Use your custom loading state
+                }}
+                initialState={{ pagination: { pageSize: 10, pageIndex: 0 } }}
+                muiPaginationProps={{
+                    color: "primary", // Customize pagination button color
+                    shape: "rounded", // Change button shape to rounded
+                    showRowsPerPage: true, // Hide rows per page selector
+                    variant: "outlined", // Set button variant to outlined
+                }}
+                paginateExpandedRows={false}
+                // onExpandedChange={(expandedRows) => {
+                //     const expandedRowIds = Array.from(expandedRows);
+                //     console.log(expandedRowIds);
+
+                //     if (expandedRowIds.length > 0) {
+                //         setExpandedRowId(expandedRowIds[0]); // Get the first expanded row ID (if multiple rows can be expanded)
+                //     } else {
+                //         setExpandedRowId(null); // No rows are expanded
+                //     }
+                // }}
             />
+
             <ImageModal
                 open={open}
                 imgFullVIew={imgFullView}

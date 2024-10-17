@@ -194,6 +194,8 @@ export default function FrameEdit() {
     const handleDropdownCodeChange = (selectedValue) => {
         setFrame({ ...frame, code_id: selectedValue });
     };
+    console.log(frameData);
+
     return (
         <Card>
             <CardHeader title="Edit Frame" />

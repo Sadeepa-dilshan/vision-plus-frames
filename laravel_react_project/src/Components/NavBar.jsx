@@ -14,7 +14,7 @@ import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import QueueIcon from "@mui/icons-material/Queue";
 import DesktopNav from "./DesktopNav";
 import MobileNav from "./MobileNav";
-import { AddHome, Home } from "@mui/icons-material";
+import { AddHome, Home, People } from "@mui/icons-material";
 
 export default function MiniDrawer() {
     const theme = useTheme();
@@ -52,7 +52,7 @@ export default function MiniDrawer() {
         { path: "/branches", text: "Branch", icon: <Home /> },
         // { path: "/branches/new", text: "New Branch", icon: <AddHome /> },
 
-        { path: "/users", text: "Users", icon: <Home /> },
+        { path: "/users", text: "Users", icon: <People /> },
     ];
 
     return (

@@ -23,11 +23,13 @@ export default function BranchCreate() {
 
     //User Input
     const [branchName, setBranchName] = useState("");
+    const [locationName, setLocationName] = useState("");
 
     //Submite Stats
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState(null);
     const { branchDataList } = useBranchList();
+    console.log(branchDataList);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -37,7 +39,7 @@ export default function BranchCreate() {
 
             if (branchDataList) {
                 const exists = branchDataList.some(
-                    (item) => item.branch_name === branchName
+                    (item) => item.name === branchName
                 );
                 if (exists) {
                     showAlert("Branch already exists", "error");
@@ -45,7 +47,8 @@ export default function BranchCreate() {
                     await axiosClient.post(
                         "/branches",
                         {
-                            branche_name: branchName,
+                            name: branchName,
+                            location: locationName,
                         },
                         {
                             headers: {
@@ -82,7 +85,17 @@ export default function BranchCreate() {
                         onChange={(e) => setBranchName(e.target.value)}
                         variant="outlined"
                         error={!!errors}
-                        helperText={errors ? errors.branch_name : ""}
+                        helperText={errors ? errors.name : ""}
+                        required
+                    />
+                    <TextField
+                        fullWidth
+                        label="Location Name"
+                        value={locationName}
+                        onChange={(e) => setLocationName(e.target.value)}
+                        variant="outlined"
+                        error={!!errors}
+                        helperText={errors ? errors.location : ""}
                         required
                     />
                 </Box>

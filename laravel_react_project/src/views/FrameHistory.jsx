@@ -11,22 +11,31 @@ import {
     Divider,
     Avatar,
     Paper,
+    Chip,
 } from "@mui/material";
 import { Add, Remove } from "@mui/icons-material";
-import { motion } from "framer-motion";
-
+import { color, motion } from "framer-motion";
+import useColor from "../hooks/useColor";
+import { useStateContext } from "../contexts/contextprovider";
+import useBranch from "../hooks/useBranch";
+import { useAlert } from "../contexts/AlertContext";
 export default function FrameHistory() {
     const { id } = useParams(); // Get frame ID from the URL
     const [history, setHistory] = useState([]);
 
     const [loading, setLoading] = useState(true);
+    const { token } = useStateContext(); // To handle the auth token
 
+    const [colorData, setColorData] = useState(null);
+    const [loadingColor, setLoadingColor] = useState(true);
+    const [brandData, setBrandData] = useState(null);
+    const [loadingBrand, setLoadingBrand] = useState(true);
+    const { showAlert } = useAlert();
     //DATE FILTER
 
     useEffect(() => {
         fetchHistory();
     }, []);
-    console.log(history);
 
     const fetchHistory = async () => {
         try {
@@ -34,8 +43,34 @@ export default function FrameHistory() {
                 `/frames/${id}/stock-history`
             );
             setHistory(response.data);
+            axiosClient
+                .get(`/colors/${response.data.frame.color_id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                })
+                .then(({ data }) => {
+                    setColorData(data);
+                })
+                .catch((err) => {
+                    throw err;
+                });
+
+            axiosClient
+                .get(`/brands/${response.data.frame.brand_id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                })
+                .then(({ data }) => {
+                    setBrandData(data);
+                })
+                .catch((err) => {
+                    throw err;
+                });
         } catch (error) {
             console.error("Failed to fetch history:", error);
+            showAlert("An unexpected error occurred. Please try again.", error);
         } finally {
             setLoading(false);
         }
@@ -64,15 +99,63 @@ export default function FrameHistory() {
                             elevation={3}
                             sx={{ padding: 3, marginBottom: 4 }}
                         >
-                            <Typography
-                                variant="h4"
-                                color="primary"
-                                gutterBottom
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    flexWrap: "wrap",
+                                }}
                             >
-                                Stock History for Frame:{" "}
-                                {history.frame.code.code_name}
-                            </Typography>
+                                <Typography
+                                    marginRight={1}
+                                    variant="h5"
+                                    gutterBottom
+                                >
+                                    Stock History{" "}
+                                </Typography>
+                                <Box sx={{ display: "flex", gap: 1 }}>
+                                    <Chip
+                                        color="primary"
+                                        sx={{
+                                            textTransform: "capitalize",
+                                            fontWeight: "bold",
+                                        }}
+                                        label={
+                                            brandData
+                                                ? brandData.brand_name
+                                                : "loading.."
+                                        }
+                                    />
 
+                                    <Chip
+                                        color="primary"
+                                        sx={{
+                                            textTransform: "capitalize",
+                                            fontWeight: "bold",
+                                        }}
+                                        label={history.frame.code.code_name}
+                                    />
+                                    <Chip
+                                        color="primary"
+                                        sx={{
+                                            textTransform: "capitalize",
+                                            fontWeight: "bold",
+                                        }}
+                                        label={
+                                            colorData
+                                                ? colorData.color_name
+                                                : "loading.."
+                                        }
+                                    />
+                                </Box>
+                            </Box>
+                            <Typography
+                                variant="subtitle1"
+                                color="textSecondary"
+                                fontWeight={"bold"}
+                            >
+                                Total Stock: {history.initial_count}
+                            </Typography>
                             <Typography variant="body2" color="textSecondary">
                                 Created At:{" "}
                                 {new Date(
@@ -179,7 +262,7 @@ export default function FrameHistory() {
                                                                 variant="body2"
                                                                 color="textSecondary"
                                                             >
-                                                                Date:{" "}
+                                                                Date:
                                                                 {new Date(
                                                                     change.change_date
                                                                 ).toLocaleString()}

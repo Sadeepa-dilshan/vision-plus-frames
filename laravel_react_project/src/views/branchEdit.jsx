@@ -27,15 +27,17 @@ export default function BranchEdit() {
     const { token } = useStateContext(); // Get the auth token
 
     //User Input Handlers
+    //User Input
     const [branchName, setBranchName] = useState("");
-    const [price, setPrice] = useState("");
+    const [locationName, setLocationName] = useState("");
+
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState(null);
 
     useEffect(() => {
         if (branchData) {
-            setBranchName(branchData.branch_name);
-            setPrice(branchData.price);
+            setBranchName(branchData.name);
+            setLocationName(branchData.location);
         }
     }, [branchData, loadingBranch]);
 
@@ -47,24 +49,22 @@ export default function BranchEdit() {
 
             if (branchDataList) {
                 const exists = branchDataList.some(
-                    (item) =>
-                        item.branch_name === branchName &&
-                        parseInt(item.price) == parseInt(price)
+                    (item) => item.name === branchName
                 );
 
                 if (exists) {
                     showAlert("Branch is already exists", "error");
                 } else {
                     await axiosClient.put(
-                        `/branchs/${id}`,
-                        { branch_name: branchName, price: price },
+                        `/branches/${id}`,
+                        { name: branchName, location: locationName },
                         {
                             headers: { Authorization: `Bearer ${token}` },
                         }
                     );
 
                     showAlert("Branch updated successfully", "success");
-                    navigate("/branchs"); // Redirect to the branch list after updating
+                    navigate("/branches"); // Redirect to the branch list after updating
                 }
             }
         } catch (err) {
@@ -91,32 +91,35 @@ export default function BranchEdit() {
                                 fullWidth
                                 label="Branch Name"
                                 value={branchName}
-                                onChange={(e) => setBranchName(e.target.value)}
-                                variant="outlined"
-                                error={!!errors}
-                                helperText={errors ? errors.branch_name : ""}
-                                required
-                            />
-                        </Box>
-                        <Box sx={{ marginBottom: 3 }}>
-                            <TextField
-                                fullWidth
-                                label="Price"
-                                value={price}
-                                type="number"
+                                type="text"
                                 onChange={(e) => {
                                     const inputValue = e.target.value;
-                                    // Prevent entering negative numbers
-                                    if (inputValue >= 0) {
-                                        setPrice(inputValue);
-                                    }
+
+                                    setBranchName(inputValue);
                                 }}
                                 variant="outlined"
                                 error={!!errors}
-                                helperText={errors ? errors.price : ""}
+                                helperText={errors ? errors.locationName : ""}
+                                required
+                            />
+                            <TextField
+                                sx={{ marginY: 2 }}
+                                fullWidth
+                                label="Location Name"
+                                value={locationName}
+                                type="text"
+                                onChange={(e) => {
+                                    const inputValue = e.target.value;
+
+                                    setLocationName(inputValue);
+                                }}
+                                variant="outlined"
+                                error={!!errors}
+                                helperText={errors ? errors.locationName : ""}
                                 required
                             />
                         </Box>
+
                         <Button
                             disabled={loading}
                             type="submit"

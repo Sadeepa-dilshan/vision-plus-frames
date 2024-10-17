@@ -16,13 +16,13 @@ const useBranch = (id) => {
     useEffect(() => {
         setLoadingBranch(true);
         axiosClient
-            .get(`/branchs/${id}`, {
+            .get(`/branches/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             })
             .then(({ data }) => {
-                setBranchData(data);
+                setBranchData(data.data);
             })
             .catch((err) => {
                 showAlert(

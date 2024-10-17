@@ -162,7 +162,15 @@ export default function FrameIndex() {
                     enableColumnFilters
                     enableSorting
                     enableToolbarInternalActions
-                    initialState={{ pagination: { pageSize: 20 } }}
+                    initialState={{
+                        pagination: { pageSize: 10, pageIndex: 0 },
+                    }}
+                    muiPaginationProps={{
+                        color: "primary", // Customize pagination button color
+                        shape: "rounded", // Change button shape to rounded
+                        showRowsPerPage: true, // Hide rows per page selector
+                        variant: "outlined", // Set button variant to outlined
+                    }}
                     muiToolbarAlertBannerProps={{
                         color: "primary",
                     }}

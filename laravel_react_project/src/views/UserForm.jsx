@@ -22,6 +22,7 @@ export default function UserForm() {
                 .then(({ data }) => {
                     setLoading(false);
                     setUsers(data);
+                    console.log(data);
                 })
                 .catch(() => {
                     setLoading(false);

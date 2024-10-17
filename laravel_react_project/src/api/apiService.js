@@ -1,54 +1,19 @@
-import axiosClient from "../axiosClient";
-
-export const getBrandWithID = async (id, token) => {
+import { storage } from "../firebaseConfig";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+export const uploadSingleImages = async (ID, image, index) => {
     try {
-        const response = await axiosClient.get(`/brands/${id}`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
+        // Create a reference to the storage location
+        const storageRef = ref(storage, `images/${ID}/${index}`);
 
-        return response.data;
-    } catch (error) {
-        throw error.response ? error.response.data : error;
-    }
-};
-export const getBrandList = async (id, token) => {
-    try {
-        const response = await axiosClient.get(`/brands`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
+        // Upload the image file to Firebase Storage
+        await uploadBytes(storageRef, image);
 
-        return response.data;
-    } catch (error) {
-        throw error.response ? error.response.data : error;
-    }
-};
-export const getCodeWithID = async (id, token) => {
-    try {
-        const response = await axiosClient.get(`/codes/${id}`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
+        // Get the download URL for the uploaded file
+        const downloadURL = await getDownloadURL(storageRef);
 
-        return response.data;
+        return { success: true, downloadURL };
     } catch (error) {
-        throw error.response ? error.response.data : error;
-    }
-};
-export const getCodeList = async (id, token) => {
-    try {
-        const response = await axiosClient.get(`/codes`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
-
-        return response.data;
-    } catch (error) {
-        throw error.response ? error.response.data : error;
+        console.error("Error uploading image:", error);
+        return { success: false, error: error.message };
     }
 };

@@ -55,6 +55,8 @@ export default function DrawerList({ NavData, toggleDrawer }) {
                                 minHeight: 48,
                                 justifyContent: open ? "initial" : "center",
                                 px: 2.5,
+                                py: 0,
+                                my: 0.5,
                                 color: "white",
                                 backgroundColor:
                                     location.pathname === item.path

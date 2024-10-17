@@ -17,7 +17,7 @@ const useBranchList = () => {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            setBranchDataList(response.data);
+            setBranchDataList(response.data.data);
         } catch (err) {
             showAlert(err.response?.data?.message || "Network Error", "error");
         } finally {

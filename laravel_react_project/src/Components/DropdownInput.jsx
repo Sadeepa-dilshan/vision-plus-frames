@@ -18,6 +18,8 @@ const AutocompleteInputFiled = ({
                 (option) => option.id === defaultId
             );
             setSelectedOption(defaultOption || null);
+        } else {
+            setSelectedOption(null);
         }
     }, [defaultId, options]);
 

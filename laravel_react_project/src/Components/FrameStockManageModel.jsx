@@ -5,8 +5,6 @@ import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
 import {
     IconButton,
-    useMediaQuery,
-    useTheme,
     TextField,
     MenuItem,
     Select,
@@ -16,11 +14,10 @@ import {
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
 
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
 import { useStateContext } from "../contexts/contextprovider";
 import axiosClient from "../axiosClient";
 import { useAlert } from "../contexts/AlertContext";
+import useBranchList from "../hooks/useBranchList";
 
 const style = {
     position: "absolute",
@@ -39,49 +36,28 @@ export default function FrameStockManageModel({
     selectedframeIDs,
     handleRefreshTable,
     frameQtyManage,
-    colorList,
 }) {
     //TODO
     const { token } = useStateContext(); // To handle the auth token
     const { showAlert } = useAlert();
 
-    const [value, setValue] = React.useState("add");
     const [inputStockCount, setInputStockCount] = React.useState(0);
+    const { branchDataList, loadingBranchList } = useBranchList();
+
     const [branch, setBranch] = React.useState("");
-    const [color, setColor] = React.useState("");
+
     const [loading, setLoading] = React.useState(false);
-    const [frame, setFrame] = React.useState({
-        brand_id: "",
-        code_id: "",
-        color_id: "",
-        price: "",
-        size: "",
-        species: "",
-        image: "",
-        quantity: "",
-        branch: "",
-    });
-    const [selectedFrame, setSelectedFrame] = React.useState({
-        brand_id: "",
-        code_id: "",
-        color_id: "",
-        price: "",
-        size: "",
-        species: "",
-        image: "",
-        quantity: "",
-        branch: "",
-    });
-    const handleChange = (event, newValue) => {
-        if (newValue === "add") {
-            setBranch("");
-        }
-        setValue(newValue);
-    };
 
     const handleInputChange = (e) => {
         setBranch(e.target.value);
     };
+    React.useEffect(() => {
+        if (!open) {
+            setInputStockCount(0);
+            setBranch("");
+            setLoading(false);
+        }
+    }, [open]);
 
     const hadleStockSave = async () => {
         if (inputStockCount && parseInt(inputStockCount) > 0) {
@@ -129,9 +105,9 @@ export default function FrameStockManageModel({
                                     size: selectedframeIDs.size,
                                     species: selectedframeIDs.species,
                                     image: selectedframeIDs.image,
-
                                     quantity: defaltQuantity - inputQuantity,
-                                    branch: branch,
+                                    branch_id: branch.id,
+                                    branch: branch.name,
                                 },
                                 {
                                     headers: {
@@ -221,15 +197,17 @@ export default function FrameStockManageModel({
                                             onChange={handleInputChange}
                                             label="Select Branch"
                                         >
-                                            <MenuItem value="mathugama">
-                                                Mathugama
-                                            </MenuItem>
-                                            <MenuItem value="aluthgama">
-                                                Aluthgama
-                                            </MenuItem>
-                                            <MenuItem value="colombo">
-                                                Kaluthara
-                                            </MenuItem>
+                                            {branchDataList.map((branch) => (
+                                                <MenuItem
+                                                    key={branch.id}
+                                                    value={{
+                                                        id: branch.id,
+                                                        name: branch.name,
+                                                    }}
+                                                >
+                                                    {branch.name}
+                                                </MenuItem>
+                                            ))}
                                         </Select>
                                     </FormControl>
                                 </Box>

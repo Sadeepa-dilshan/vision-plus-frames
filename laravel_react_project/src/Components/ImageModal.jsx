@@ -67,17 +67,18 @@ export default function ImageModal({
     // Update frame with selected frame IDs and form data
     React.useEffect(() => {
         if (selectedframeIDs) {
-            setFrame((prevFrame) => ({
-                ...prevFrame,
+            setFrame({
+                ...frame,
                 brand_id: selectedframeIDs.brand_id,
                 code_id: selectedframeIDs.code_id,
+                color_id: colorId,
                 price: selectedframeIDs.price,
                 size: selectedframeIDs.size,
                 species: selectedframeIDs.species,
                 image: selectedframeIDs.image,
-            }));
+            });
         }
-    }, [selectedframeIDs]);
+    }, [selectedframeIDs, colorId]);
     React.useEffect(() => {
         setColorsAvilable(
             colorDataList.filter((value) => !colorList.includes(value.id))
@@ -94,6 +95,7 @@ export default function ImageModal({
     const handleSubmit = async () => {
         try {
             setLoading(true);
+
             await axiosClient.post("/frames", frame, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -102,6 +104,7 @@ export default function ImageModal({
             });
             showAlert("New Frame Color added successfully", "success");
             handleRefreshTable();
+            setColorId("");
             handleClose(); // Close modal after successful submission
         } catch (err) {
             if (err.response && err.response.status === 422) {
@@ -177,7 +180,7 @@ export default function ImageModal({
                                     }))}
                                     onChange={handleBrandListSelectionChange} // Will receive the selected brand's id
                                     loading={loadingColorList}
-                                    labelName="Select Brand"
+                                    labelName="Select Color"
                                     defaultId={colorId} // Pass the Defalt value
                                 />
 
