@@ -56,7 +56,7 @@ export default function UsersIndex() {
                 size: 30,
                 Cell: ({ row }) => (
                     <Box>
-                        <IconButton
+                        {/* <IconButton
                             component={Link}
                             to={`/users/${row.original.id}`}
                             variant="outlined"
@@ -65,7 +65,7 @@ export default function UsersIndex() {
                             disabled={deletingId === row.original.id} // Disable if deleting this user
                         >
                             <Edit color="primary" />
-                        </IconButton>
+                        </IconButton> */}
                         <IconButton
                             onClick={() => {
                                 handleDelete(row.original.id);

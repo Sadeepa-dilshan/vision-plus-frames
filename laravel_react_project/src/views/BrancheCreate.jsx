@@ -29,7 +29,6 @@ export default function BranchCreate() {
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState(null);
     const { branchDataList } = useBranchList();
-    console.log(branchDataList);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -79,6 +78,7 @@ export default function BranchCreate() {
             <form onSubmit={handleSubmit}>
                 <Box sx={{ marginBottom: 3 }}>
                     <TextField
+                        sx={{ marginY: 3 }}
                         fullWidth
                         label="Branch Name"
                         value={branchName}

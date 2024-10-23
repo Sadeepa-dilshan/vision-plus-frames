@@ -56,6 +56,15 @@ export default function FrameCreate() {
     const handleCodeListSelectionChange = (selectedValue) => {
         setCodeId(selectedValue);
     };
+    useEffect(() => {
+        if (!loadingBrandList && brandDataList.length > 0) {
+            brandDataList.map((brand) => {
+                if (brandId === brand.id) {
+                    setPrice(brand.price);
+                }
+            });
+        }
+    }, [brandDataList, brandId, loadingBrandList]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

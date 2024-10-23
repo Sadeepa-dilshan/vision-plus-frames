@@ -1,73 +1,60 @@
-/* eslint-disable no-unused-vars */
-
-import { useEffect, useMemo, useState } from "react";
-
-import axiosClient from "../axiosClient";
-import { useStateContext } from "../contexts/contextprovider";
-import { MaterialReactTable } from "material-react-table";
+import React, { useState } from "react";
+import useFrameListByBrand from "../hooks/useFrameListByBrand";
+import { LazyLoadImage } from "react-lazy-load-image-component";
+import "react-lazy-load-image-component/src/effects/blur.css"; // For lazy loading effects
 import {
-    Box,
+    Paper,
     Typography,
-    Divider,
-    IconButton,
+    Box,
     Button,
-    Skeleton,
-    Grid,
+    IconButton,
+    TextField,
+    Pagination,
 } from "@mui/material";
-import ImageModal from "../Components/ImageModal";
 import {
     Add,
-    AddRounded,
-    ArrowForward,
-    ColorLens,
-    Delete,
-    Edit,
-    Fullscreen,
+    ArrowDownward,
+    ArrowUpward,
     History,
-    Image,
-    Inventory,
-    LocalShipping,
-    Preview,
-    PreviewRounded,
     RemoveTwoTone,
-    SailingSharp,
-    ShoppingCart,
-    ShoppingCartCheckout,
-    Storage,
 } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+import ImageModal from "../Components/ImageModal";
 import FrameStockManageModel from "../Components/FrameStockManageModel";
-import FrameAddByTable from "../Components/FrameAddByTable";
-import useFrameList from "../hooks/useFrameList";
-import useFrameListByBrand from "../hooks/useFrameListByBrand";
+import { useNavigate } from "react-router-dom";
+import CoustomPagination from "../Components/CoustomPagination";
 
-export default function FrameCountIndex() {
-    const [imgFullView, setImgFullView] = useState("");
+const FrameCountIndex = () => {
+    const [expandedRow, setExpandedRow] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
 
-    //PGINATION TABLE
-    const [pageIndex, setPageIndex] = useState(0);
-    const [pageSize, setPageSize] = useState(10); // Define how many rows per page
-
-    const [open, setOpen] = useState(false);
-    const [frameQtyManage, setFrameQtyManage] = useState("add");
-    const [modelType, setModelType] = useState("");
-    const [colorList, setColorList] = useState([]);
-    const [selectedframeIDs, setSelectedframeIDs] = useState(false);
-    const [openStockManageModel, setOpenStockManageModel] = useState(false);
-    const [expandedRowId, setExpandedRowId] = useState(null);
-
+    // Fetch data using the custom hook
     const {
         frameListByBrand,
         loadingFrameListByBrand,
         refreshFrameListByBrand,
     } = useFrameListByBrand();
 
+    const handleRowExpand = (codeId) => {
+        setExpandedRow(expandedRow === codeId ? null : codeId);
+    };
+
+    const [filter, setFilter] = useState("");
+
+    const [imgFullView, setImgFullView] = useState("");
+    const [open, setOpen] = useState(false);
+    const [frameQtyManage, setFrameQtyManage] = useState("add");
+    const [modelType, setModelType] = useState("");
+    const [colorList, setColorList] = useState([]);
+    const [selectedframeIDs, setSelectedframeIDs] = useState(false);
+    const [openStockManageModel, setOpenStockManageModel] = useState(false);
     const [handleRefresh, setHandleRefresh] = useState(false);
+
     const navigate = useNavigate();
 
     const handleOpen = () => {
         setOpen(true);
     };
+
     const CloseStockManage = () => {
         setOpenStockManageModel(false);
     };
@@ -82,300 +69,354 @@ export default function FrameCountIndex() {
         setHandleRefresh(!handleRefresh);
     };
 
-    const columns = useMemo(
-        () => [
-            {
-                accessorKey: "actions",
-                header: "Actions",
-                size: 25,
-                Cell: ({ row }) => (
-                    <>
-                        <Button
-                            variant="contained"
-                            color="info"
-                            size="small"
-                            // onClick={() => handleOpen()}
-                            onClick={() => {
-                                setSelectedframeIDs(row.original["frames"][0]);
-                                setOpen(true);
-                                setModelType("add");
-                                setColorList(
-                                    row.original["frames"].map(
-                                        (item) => item.color_id
-                                    )
-                                );
-                            }}
-                        >
-                            <AddRounded />
-                        </Button>
-                        {/* <IconButton
-                        variant="contained"
-                        color="info"
-                        size="small"
-                        // onClick={() => handleOpen()}
-                        onClick={() => {
-                            setSelectedframeIDs(row.original);
-                            setOpenStockManageModel(true);
-                        }}
-                    >
-                        <LocalShipping color="info" />
-                    </IconButton> */}
-                    </>
-                ),
-            },
-            {
-                accessorKey: "brand_name",
-                header: "Brand Name",
-                size: 50,
-            },
-            {
-                accessorKey: "image",
-                header: "Image",
-                size: 100,
-                Cell: ({ cell }) =>
-                    cell.getValue() ? (
-                        <img
-                            onClick={() => {
-                                handleOpen();
-                                setImgFullView(cell.getValue());
-                            }}
-                            src={cell.getValue()}
-                            alt="Frame"
-                            style={{
-                                width: 50,
-                                height: 50,
-                                objectFit: "contain",
-                                cursor: "pointer",
-                            }}
-                        />
-                    ) : (
-                        <Skeleton
-                            animation="pulse"
-                            variant="rectangular"
-                            width={50}
-                            height={50}
-                        />
-                    ),
-            },
-            {
-                accessorKey: "code_name",
-                header: "Frame Code",
-                size: 50,
-            },
+    if (loadingFrameListByBrand) {
+        return <div>Loading brands...</div>;
+    }
 
-            {
-                accessorKey: "totalQty",
-                header: "Total Qty",
-                size: 50,
-            },
-        ],
-        []
+    // Pagination logic
+    const rowsPerPage = 10; // Set the number of rows per page
+    const filteredFrameList = frameListByBrand.filter(
+        (brandItem) =>
+            brandItem.brand_name.toLowerCase().includes(filter.toLowerCase()) ||
+            brandItem.code_name.toLowerCase().includes(filter.toLowerCase())
     );
 
-    const renderDetailPanel = ({ row }) => {
-        return (
-            <Box
-                sx={{
-                    padding: 2,
-                    backgroundColor: "#f0f2f5", // Light background for clarity
-                    borderRadius: 2,
-                    boxShadow: 2,
-                    width: "100%", // Ensure it takes full width
-                }}
-            >
-                <Typography
-                    variant="h6"
-                    sx={{ marginBottom: 1, fontWeight: "bold", color: "#333" }} // Darker color for contrast
-                >
-                    Frame Details
-                </Typography>
-                {row.original.frames.map((frame, index) => (
-                    <Box
-                        key={index}
-                        sx={{
-                            marginBottom: 2,
-                            padding: 2,
-                            border: "1px solid #ccc", // Border for separation
-                            borderRadius: 1,
-                            backgroundColor: "#fff", // White background for clarity
-                        }}
-                    >
-                        <Grid container spacing={2} alignItems="center">
-                            {/* Action Buttons */}
-                            <Grid item xs={12} sm={4} md={3}>
-                                <Grid container spacing={1}>
-                                    <Grid item>
-                                        <Button
-                                            variant="contained"
-                                            color="success"
-                                            size="small"
-                                            onClick={() => {
-                                                setOpenStockManageModel(true);
-                                                setFrameQtyManage("add");
-                                                setSelectedframeIDs(frame);
-                                            }}
-                                        >
-                                            <Add />
-                                        </Button>
-                                    </Grid>
-                                    <Grid item>
-                                        <Button
-                                            variant="contained"
-                                            color="error"
-                                            size="small"
-                                            onClick={() => {
-                                                setOpenStockManageModel(true);
-                                                setFrameQtyManage("remove");
-                                                setSelectedframeIDs(frame);
-                                            }}
-                                        >
-                                            <RemoveTwoTone />
-                                        </Button>
-                                    </Grid>
-                                    <Grid item>
-                                        <Button
-                                            variant="contained"
-                                            color="warning"
-                                            size="small"
-                                            onClick={() =>
-                                                navigate(
-                                                    `/frames/history/${frame.id}`
-                                                )
-                                            }
-                                        >
-                                            <History />
-                                        </Button>
-                                    </Grid>
-                                </Grid>
-                            </Grid>
-
-                            {/* Brand and Code */}
-                            <Grid item xs={12} sm={8} md={5}>
-                                <Typography
-                                    variant="body1"
-                                    sx={{
-                                        fontWeight: "semibold",
-                                        textTransform: "capitalize",
-                                        display: "flex",
-                                        alignItems: "center",
-                                    }}
-                                >
-                                    {frame.brand.brand_name} —{" "}
-                                    {frame.code.code_name}
-                                </Typography>
-                            </Grid>
-
-                            {/* Color Information */}
-                            <Grid item xs={12} sm={6} md={2}>
-                                <Grid container alignItems="center">
-                                    <Grid item>
-                                        <ColorLens sx={{ marginRight: 1 }} />
-                                    </Grid>
-                                    <Grid item>
-                                        <Typography
-                                            variant="body1"
-                                            sx={{
-                                                fontWeight: "bold",
-                                                textTransform: "capitalize",
-                                            }}
-                                        >
-                                            {frame.color.color_name}
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
-                            </Grid>
-                            <Grid item xs={12} sm={6} md={2}>
-                                <Grid container alignItems="center">
-                                    <Grid item>
-                                        <ShoppingCart sx={{ marginRight: 1 }} />
-                                    </Grid>
-                                    <Grid item>
-                                        <Typography
-                                            variant="body1"
-                                            sx={{
-                                                fontWeight: "bold",
-                                                textTransform: "capitalize",
-                                            }}
-                                        >
-                                            {frame.stocks[0].qty}
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
-                            </Grid>
-
-                            {/* Stock Information */}
-                        </Grid>
-                    </Box>
-                ))}
-            </Box>
-        );
-    };
+    // Calculate pagination
+    const indexOfLastRow = currentPage * rowsPerPage; // Last index of current page
+    const indexOfFirstRow = indexOfLastRow - rowsPerPage; // First index of current page
+    const currentFrameList = filteredFrameList.slice(
+        indexOfFirstRow,
+        indexOfLastRow
+    ); // Get current rows for the page
 
     return (
-        <Box
-            sx={{
-                marginTop: 3,
-                height: "100%",
-                width: "100%",
-                overflowX: "auto",
-            }}
-        >
-            <MaterialReactTable
-                columns={columns}
-                data={frameListByBrand}
-                enablePagination
-                enableColumnFilters
-                enableSorting
-                enableExpandAll={false}
-                enableExpanding={false}
-                enableToolbarInternalActions
-                muiTableContainerProps={{
-                    sx: { maxHeight: "calc(100vh - 200px)" },
+        <div style={{ padding: "20px" }}>
+            <TextField
+                label="Filter by Brand Name or Code Name"
+                variant="outlined"
+                fullWidth
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+            />
+            <table
+                style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    marginTop: ".5em",
                 }}
-                renderDetailPanel={renderDetailPanel} // Add the detail panel function here
-                muiTableProps={{
-                    sx: {
-                        "& .MuiTableCell-root": {
-                            padding: ".5rem",
-                        },
-                        "& .MuiTableRow-root": {
-                            height: ".5rem",
-                        },
-                    },
-                }}
-                renderTopToolbarCustomActions={() => (
-                    <Typography
-                        variant="h6"
-                        sx={{ fontWeight: 600, color: "#5b08a7" }}
-                    >
-                        Frame Store
-                    </Typography>
-                )}
-                manualPagination // Enable manual (server-side) pagination
-                pageCount={Math.ceil(frameListByBrand.length / pageSize)} // Total number of pages
-                state={{
-                    isLoading: loadingFrameListByBrand, // Use your custom loading state
-                }}
-                initialState={{ pagination: { pageSize: 10, pageIndex: 0 } }}
-                muiPaginationProps={{
-                    color: "primary", // Customize pagination button color
-                    shape: "rounded", // Change button shape to rounded
-                    showRowsPerPage: true, // Hide rows per page selector
-                    variant: "outlined", // Set button variant to outlined
-                }}
-                paginateExpandedRows={false}
-                // onExpandedChange={(expandedRows) => {
-                //     const expandedRowIds = Array.from(expandedRows);
-                //     console.log(expandedRowIds);
+            >
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>Image</th>
+                        <th>Brand Name</th>
+                        <th>Code Name</th>
+                        <th>Total Qty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {currentFrameList?.map((brandItem) => (
+                        <React.Fragment key={brandItem.code_id}>
+                            <tr
+                                style={{
+                                    borderBottom: "1px solid #ddd",
+                                    backgroundColor:
+                                        expandedRow === brandItem.code_id
+                                            ? "#ffb3b3" // Background color when expanded
+                                            : "#fff", // Default background color
+                                }}
+                            >
+                                <td>
+                                    <Button
+                                        variant="contained"
+                                        color="info"
+                                        size="small"
+                                        onClick={() => {
+                                            setSelectedframeIDs(
+                                                brandItem["frames"][0]
+                                            );
+                                            setOpen(true);
+                                            setModelType("add");
+                                            setColorList(
+                                                brandItem["frames"].map(
+                                                    (item) => item.color_id
+                                                )
+                                            );
+                                        }}
+                                    >
+                                        <Add />
+                                    </Button>
+                                    <IconButton
+                                        size="small"
+                                        onClick={() =>
+                                            handleRowExpand(brandItem.code_id)
+                                        }
+                                        style={{
+                                            background:
+                                                expandedRow ===
+                                                brandItem.code_id
+                                                    ? "#d9534f"
+                                                    : "#5cb85c",
+                                            color: "white",
+                                            marginLeft: "5px",
+                                        }}
+                                    >
+                                        {expandedRow === brandItem.code_id ? (
+                                            <ArrowUpward />
+                                        ) : (
+                                            <ArrowDownward />
+                                        )}
+                                    </IconButton>
+                                </td>
+                                <td>
+                                    <Box
+                                        sx={{
+                                            flexShrink: 0,
+                                            mb: {
+                                                xs: 2,
+                                                sm: 0,
+                                            },
+                                            mr: { sm: 2 },
+                                        }}
+                                        onClick={() => {
+                                            handleOpen();
+                                            setImgFullView(
+                                                brandItem.frames[0]["image"]
+                                            );
+                                        }}
+                                    >
+                                        <LazyLoadImage
+                                            alt="Frame"
+                                            effect="blur"
+                                            src={brandItem.frames[0]["image"]}
+                                            width="60px"
+                                            height="auto"
+                                            style={{
+                                                borderRadius: "8px",
+                                            }}
+                                        />
+                                    </Box>
+                                </td>
+                                <td>{brandItem.brand_name}</td>
+                                <td>{brandItem.code_name}</td>
+                                <td>{brandItem.totalQty}</td>
+                            </tr>
+                            {expandedRow === brandItem.code_id && (
+                                <tr>
+                                    <td
+                                        colSpan="5"
+                                        style={{
+                                            backgroundColor: "#f0f0f0", // Expanded row background color
+                                            padding: "10px",
+                                        }}
+                                    >
+                                        <div
+                                            style={{
+                                                display: "grid",
+                                                gap: ".5em",
+                                            }}
+                                        >
+                                            {brandItem.frames.map((frame) => (
+                                                <Paper
+                                                    key={frame.id}
+                                                    sx={{
+                                                        display: "flex",
+                                                        flexDirection: {
+                                                            xs: "column",
+                                                            sm: "row",
+                                                        },
+                                                        borderRadius: 2,
+                                                        boxShadow: 3,
+                                                        backgroundColor: "#fff",
+                                                        border: "1px solid #e0e0e0",
+                                                        padding: "1em",
+                                                        alignItems: "center",
+                                                    }}
+                                                >
+                                                    <Box
+                                                        sx={{
+                                                            flexGrow: 1,
+                                                            display: "flex",
+                                                            flexDirection: {
+                                                                xs: "column",
+                                                                sm: "row",
+                                                            },
+                                                            justifyContent: {
+                                                                sm: "space-between",
+                                                            },
+                                                            alignItems: {
+                                                                sm: "center",
+                                                            },
+                                                        }}
+                                                    >
+                                                        {/* Action Buttons */}
+                                                        <div
+                                                            style={{
+                                                                display: "flex",
+                                                                gap: "0.5em",
+                                                                flexWrap:
+                                                                    "wrap",
+                                                            }}
+                                                        >
+                                                            <Button
+                                                                variant="contained"
+                                                                color="success"
+                                                                size="small"
+                                                                onClick={() => {
+                                                                    setOpenStockManageModel(
+                                                                        true
+                                                                    );
+                                                                    setFrameQtyManage(
+                                                                        "add"
+                                                                    );
+                                                                    setSelectedframeIDs(
+                                                                        frame
+                                                                    );
+                                                                }}
+                                                            >
+                                                                <Add />
+                                                            </Button>
+                                                            <Button
+                                                                variant="contained"
+                                                                color="error"
+                                                                size="small"
+                                                                onClick={() => {
+                                                                    setOpenStockManageModel(
+                                                                        true
+                                                                    );
+                                                                    setFrameQtyManage(
+                                                                        "remove"
+                                                                    );
+                                                                    setSelectedframeIDs(
+                                                                        frame
+                                                                    );
+                                                                    console.log(
+                                                                        frame
+                                                                    );
+                                                                }}
+                                                            >
+                                                                <RemoveTwoTone />
+                                                            </Button>
+                                                            <Button
+                                                                variant="contained"
+                                                                color="warning"
+                                                                size="small"
+                                                                onClick={() =>
+                                                                    navigate(
+                                                                        `/frames/history/${frame.id}`
+                                                                    )
+                                                                }
+                                                            >
+                                                                <History />
+                                                            </Button>
+                                                        </div>
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="textSecondary"
+                                                            sx={{
+                                                                mx: 1,
+                                                                mb: {
+                                                                    xs: 1,
+                                                                    sm: 0,
+                                                                },
+                                                            }}
+                                                        >
+                                                            <strong>
+                                                                Color:
+                                                            </strong>{" "}
+                                                            {
+                                                                frame.color
+                                                                    .color_name
+                                                            }
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="textSecondary"
+                                                            sx={{
+                                                                mx: 1,
+                                                                mb: {
+                                                                    xs: 1,
+                                                                    sm: 0,
+                                                                },
+                                                            }}
+                                                        >
+                                                            <strong>
+                                                                Size:
+                                                            </strong>{" "}
+                                                            {frame.size}
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="textSecondary"
+                                                            sx={{
+                                                                mx: 1,
+                                                                mb: {
+                                                                    xs: 1,
+                                                                    sm: 0,
+                                                                },
+                                                            }}
+                                                        >
+                                                            <strong>
+                                                                Species:
+                                                            </strong>{" "}
+                                                            {frame.species}
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="textSecondary"
+                                                            sx={{
+                                                                mx: 1,
+                                                                mb: {
+                                                                    xs: 1,
+                                                                    sm: 0,
+                                                                },
+                                                            }}
+                                                        >
+                                                            <strong>
+                                                                Price:
+                                                            </strong>{" "}
+                                                            {frame.price}
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="textSecondary"
+                                                            sx={{
+                                                                mx: 1,
+                                                                mb: {
+                                                                    xs: 1,
+                                                                    sm: 0,
+                                                                },
+                                                            }}
+                                                        >
+                                                            <strong>
+                                                                Quantity:
+                                                            </strong>{" "}
+                                                            {frame.stocks[0]
+                                                                ?.qty || 0}
+                                                        </Typography>
+                                                    </Box>
+                                                </Paper>
+                                            ))}
+                                        </div>
+                                    </td>
+                                </tr>
+                            )}
+                        </React.Fragment>
+                    ))}
+                </tbody>
+            </table>
 
-                //     if (expandedRowIds.length > 0) {
-                //         setExpandedRowId(expandedRowIds[0]); // Get the first expanded row ID (if multiple rows can be expanded)
-                //     } else {
-                //         setExpandedRowId(null); // No rows are expanded
-                //     }
-                // }}
+            {/* Pagination */}
+            <Pagination
+                count={Math.ceil(filteredFrameList.length / rowsPerPage)}
+                page={currentPage}
+                onChange={(event, value) => setCurrentPage(value)}
+                variant="outlined"
+                shape="rounded"
+                style={{ marginTop: "20px" }} // Add some margin to the pagination
             />
 
+            {/* Image Modal */}
             <ImageModal
                 open={open}
                 imgFullVIew={imgFullView}
@@ -384,14 +425,20 @@ export default function FrameCountIndex() {
                 modelType={modelType}
                 colorList={colorList}
                 handleRefreshTable={handleRefreshTable}
+                refresh={refreshFrameListByBrand}
             />
+
+            {/* Stock Manage Model */}
             <FrameStockManageModel
                 open={openStockManageModel}
                 handleClose={CloseStockManage}
-                selectedframeIDs={selectedframeIDs}
-                handleRefreshTable={handleRefreshTable}
                 frameQtyManage={frameQtyManage}
+                handleRefreshTable={handleRefreshTable}
+                selectedframeIDs={selectedframeIDs}
+                refresh={refreshFrameListByBrand}
             />
-        </Box>
+        </div>
     );
-}
+};
+
+export default FrameCountIndex;

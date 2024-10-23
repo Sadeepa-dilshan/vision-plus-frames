@@ -18,6 +18,7 @@ import { useStateContext } from "../contexts/contextprovider";
 import axiosClient from "../axiosClient";
 import { useAlert } from "../contexts/AlertContext";
 import useBranchList from "../hooks/useBranchList";
+import useFrameListByBrand from "../hooks/useFrameListByBrand";
 
 const style = {
     position: "absolute",
@@ -36,6 +37,7 @@ export default function FrameStockManageModel({
     selectedframeIDs,
     handleRefreshTable,
     frameQtyManage,
+    refresh,
 }) {
     //TODO
     const { token } = useStateContext(); // To handle the auth token
@@ -49,8 +51,14 @@ export default function FrameStockManageModel({
     const [loading, setLoading] = React.useState(false);
 
     const handleInputChange = (e) => {
-        setBranch(e.target.value);
+        const selectedBranch = JSON.parse(e.target.value); // Parse the value to get id and name
+
+        console.log(selectedBranch);
+
+        // Set the branch state with both id and name
+        setBranch(selectedBranch);
     };
+
     React.useEffect(() => {
         if (!open) {
             setInputStockCount(0);
@@ -138,6 +146,7 @@ export default function FrameStockManageModel({
             } finally {
                 setLoading(false);
                 setInputStockCount(0);
+                refresh();
             }
         } else {
             showAlert("Fill The Input", "error");
@@ -193,17 +202,21 @@ export default function FrameStockManageModel({
                                         <Select
                                             id="branch"
                                             name="branch"
-                                            value={branch}
+                                            value={
+                                                branch
+                                                    ? JSON.stringify(branch)
+                                                    : ""
+                                            }
                                             onChange={handleInputChange}
                                             label="Select Branch"
                                         >
                                             {branchDataList.map((branch) => (
                                                 <MenuItem
                                                     key={branch.id}
-                                                    value={{
+                                                    value={JSON.stringify({
                                                         id: branch.id,
                                                         name: branch.name,
-                                                    }}
+                                                    })} // Store both id and name as a JSON string
                                                 >
                                                     {branch.name}
                                                 </MenuItem>

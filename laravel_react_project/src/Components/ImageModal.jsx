@@ -20,6 +20,7 @@ import axiosClient from "../axiosClient";
 import { useAlert } from "../contexts/AlertContext";
 import useColorList from "../hooks/useColorList";
 import DropdownInput from "../Components/DropdownInput";
+import useFrameListByBrand from "../hooks/useFrameListByBrand";
 const style = {
     position: "absolute",
     top: "50%",
@@ -39,6 +40,7 @@ export default function ImageModal({
     modelType,
     colorList,
     handleRefreshTable,
+    refresh,
 }) {
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -72,7 +74,7 @@ export default function ImageModal({
                 brand_id: selectedframeIDs.brand_id,
                 code_id: selectedframeIDs.code_id,
                 color_id: colorId,
-                price: selectedframeIDs.price,
+                price: selectedframeIDs.brand.price,
                 size: selectedframeIDs.size,
                 species: selectedframeIDs.species,
                 image: selectedframeIDs.image,
@@ -115,6 +117,7 @@ export default function ImageModal({
             }
         } finally {
             setLoading(false);
+            refresh();
         }
     };
     const handleBrandListSelectionChange = (selectedValue) => {

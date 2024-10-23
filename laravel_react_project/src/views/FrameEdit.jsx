@@ -178,7 +178,7 @@ export default function FrameEdit() {
         if (frameData) {
             setFilterCode(
                 codeDataList.filter(
-                    (code) => code.brand_id === parseInt(frame.brand_id)
+                    (code) => code.brand_id == parseInt(frame.brand_id)
                 )
             );
         }
@@ -194,7 +194,6 @@ export default function FrameEdit() {
     const handleDropdownCodeChange = (selectedValue) => {
         setFrame({ ...frame, code_id: selectedValue });
     };
-    console.log(frameData);
 
     return (
         <Card>

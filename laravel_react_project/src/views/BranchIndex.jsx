@@ -90,19 +90,15 @@ export default function BrancheIndex() {
                     />
                 ),
             },
-            {
-                accessorKey: "id",
-                header: "Brand Name",
-                size: 150,
-            },
+
             {
                 accessorKey: "name",
-                header: "Brand Name",
+                header: "Branch Name",
                 size: 150,
             },
             {
                 accessorKey: "location",
-                header: "Price",
+                header: "Location",
                 size: 150,
             },
         ],
@@ -143,10 +139,10 @@ export default function BrancheIndex() {
                             variant="h6"
                             sx={{ fontWeight: 600, color: "#5b08a7" }}
                         >
-                            Branches Management
+                            Branch Management
                         </Typography>
                         <Button
-                            onClick={() => navigate("/users/new")}
+                            onClick={() => navigate("/branches/new")}
                             variant="contained"
                         >
                             Add Branch

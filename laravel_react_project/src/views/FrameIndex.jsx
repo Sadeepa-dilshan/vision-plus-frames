@@ -126,6 +126,26 @@ export default function FrameIndex() {
             header: "Code",
             size: 50,
         },
+        {
+            accessorKey: "color.color_name",
+            header: "Color",
+            size: 50,
+            Cell: ({ cell }) => (
+                <span style={{ textTransform: "capitalize" }}>
+                    {cell.getValue()}
+                </span>
+            ),
+        },
+        // {
+        //     accessorKey: "stocks",
+        //     header: "Qty",
+        //     size: 50,
+        //     Cell: ({ cell }) => (
+        //         <span style={{ textTransform: "capitalize" }}>
+        //             {cell.getValue()[0]["initial_count"]}
+        //         </span>
+        //     ),
+        // },
 
         {
             accessorKey: "price",
