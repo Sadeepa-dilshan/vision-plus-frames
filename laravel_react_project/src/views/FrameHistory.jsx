@@ -19,6 +19,7 @@ import useColor from "../hooks/useColor";
 import { useStateContext } from "../contexts/contextprovider";
 import useBranch from "../hooks/useBranch";
 import { useAlert } from "../contexts/AlertContext";
+import useFrame from "../hooks/useFrame";
 export default function FrameHistory() {
     const { id } = useParams(); // Get frame ID from the URL
     const [history, setHistory] = useState([]);
@@ -28,8 +29,8 @@ export default function FrameHistory() {
 
     const [colorData, setColorData] = useState(null);
     const [loadingColor, setLoadingColor] = useState(true);
-    const [brandData, setBrandData] = useState(null);
-    const [loadingBrand, setLoadingBrand] = useState(true);
+
+    const { frameData, loadingFrame } = useFrame(id);
     const { showAlert } = useAlert();
     //DATE FILTER
 
@@ -51,19 +52,6 @@ export default function FrameHistory() {
                 })
                 .then(({ data }) => {
                     setColorData(data);
-                })
-                .catch((err) => {
-                    throw err;
-                });
-
-            axiosClient
-                .get(`/brands/${response.data.frame.brand_id}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                })
-                .then(({ data }) => {
-                    setBrandData(data);
                 })
                 .catch((err) => {
                     throw err;
@@ -121,8 +109,8 @@ export default function FrameHistory() {
                                             fontWeight: "bold",
                                         }}
                                         label={
-                                            brandData
-                                                ? brandData.brand_name
+                                            frameData
+                                                ? frameData.brand.brand_name
                                                 : "loading.."
                                         }
                                     />
@@ -154,7 +142,10 @@ export default function FrameHistory() {
                                 color="textSecondary"
                                 fontWeight={"bold"}
                             >
-                                Total Stock: {history.initial_count}
+                                Avilable Stock:{" "}
+                                {!loadingFrame
+                                    ? frameData["stocks"][0]["qty"]
+                                    : "loading..."}
                             </Typography>
                             <Typography variant="body2" color="textSecondary">
                                 Created At:{" "}
@@ -163,13 +154,64 @@ export default function FrameHistory() {
                                 ).toLocaleString()}
                             </Typography>
                         </Paper>
-
                         <Typography variant="h5" gutterBottom>
                             Stock Changes
                         </Typography>
-
                         <Divider />
 
+                        {history.initial_count > 0 && (
+                            <Card
+                                sx={{
+                                    backgroundColor: "rgba(76, 175, 80, 0.1)",
+                                    borderRadius: 2,
+                                    boxShadow: 3,
+                                    padding: 2,
+                                }}
+                            >
+                                <CardContent
+                                    sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                    }}
+                                >
+                                    <Avatar
+                                        sx={{
+                                            backgroundColor: "green",
+                                            marginRight: 2,
+                                        }}
+                                    >
+                                        <Add />
+                                    </Avatar>
+                                    <Box>
+                                        <Typography
+                                            variant="body1"
+                                            sx={{
+                                                fontWeight: "bold",
+                                            }}
+                                        >
+                                            {"Added"} {history.initial_count}{" "}
+                                            units
+                                        </Typography>
+                                        <Typography
+                                            textTransform={"capitalize"}
+                                            variant="body1"
+                                        >
+                                            stock Updated
+                                        </Typography>
+
+                                        <Typography
+                                            variant="body2"
+                                            color="textSecondary"
+                                        >
+                                            Date:
+                                            {new Date(
+                                                history.frame.created_at
+                                            ).toLocaleString()}
+                                        </Typography>
+                                    </Box>
+                                </CardContent>
+                            </Card>
+                        )}
                         {history.changes.length > 0 ? (
                             <Grid container spacing={2}>
                                 {history.changes
@@ -275,13 +317,14 @@ export default function FrameHistory() {
                                     ))}
                             </Grid>
                         ) : (
-                            <Typography
-                                variant="body1"
-                                color="textSecondary"
-                                sx={{ marginTop: 2 }}
-                            >
-                                No changes recorded.
-                            </Typography>
+                            // <Typography
+                            //     variant="body1"
+                            //     color="textSecondary"
+                            //     sx={{ marginTop: 2 }}
+                            // >
+                            //     No New changes recorded.
+                            // </Typography>
+                            <></>
                         )}
                     </motion.div>
                 )
