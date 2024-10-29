@@ -14,7 +14,7 @@ import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import QueueIcon from "@mui/icons-material/Queue";
 import DesktopNav from "./DesktopNav";
 import MobileNav from "./MobileNav";
-import { AddHome, Home, People } from "@mui/icons-material";
+import { AddHome, Home, People, Store } from "@mui/icons-material";
 
 export default function MiniDrawer() {
     const theme = useTheme();
@@ -28,24 +28,24 @@ export default function MiniDrawer() {
         { path: "/dashboard", text: "Dashboard", icon: <DashboardIcon /> },
         { path: "/brands", text: "Brands", icon: <FolderCopyIcon /> },
 
-        {
-            path: "/brands/new",
-            text: "New Brand",
-            icon: <CreateNewFolderIcon />,
-        },
+        // {
+        //     path: "/brands/new",
+        //     text: "New Brand",
+        //     icon: <CreateNewFolderIcon />,
+        // },
         { path: "/codes", text: "Codes", icon: <PinIcon /> },
-        { path: "/codes/new", text: "Add Code", icon: <Add /> },
+        // { path: "/codes/new", text: "Add Code", icon: <Add /> },
         { path: "/colors", text: "Colours", icon: <ColorLensIcon /> },
-        {
-            path: "/colors/new",
-            text: "Add Colour",
-            icon: <FormatColorFillIcon />,
-        },
+        // {
+        //     path: "/colors/new",
+        //     text: "Add Colour",
+        //     icon: <FormatColorFillIcon />,
+        // },
         { path: "/frames", text: "Frames", icon: <RemoveRedEyeIcon /> },
         {
             path: "/frames-store",
             text: "Frames Store",
-            icon: <RemoveRedEyeIcon />,
+            icon: <Store />,
         },
         { path: "/frames/new", text: "New Frames", icon: <QueueIcon /> },
 

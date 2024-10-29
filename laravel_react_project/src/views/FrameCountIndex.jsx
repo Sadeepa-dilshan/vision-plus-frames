@@ -21,7 +21,6 @@ import {
 import ImageModal from "../Components/ImageModal";
 import FrameStockManageModel from "../Components/FrameStockManageModel";
 import { useNavigate } from "react-router-dom";
-import CoustomPagination from "../Components/CoustomPagination";
 
 const FrameCountIndex = () => {
     const [expandedRow, setExpandedRow] = useState(null);
@@ -122,7 +121,7 @@ const FrameCountIndex = () => {
                                     borderBottom: "1px solid #ddd",
                                     backgroundColor:
                                         expandedRow === brandItem.code_id
-                                            ? "#ffb3b3" // Background color when expanded
+                                            ? "#ffde21" // Background color when expanded
                                             : "#fff", // Default background color
                                 }}
                             >

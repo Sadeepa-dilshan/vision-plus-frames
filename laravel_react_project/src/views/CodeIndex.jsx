@@ -1,8 +1,15 @@
 import { useState, useMemo, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
-import { IconButton, Paper, Typography, CircularProgress } from "@mui/material";
+import {
+    IconButton,
+    Paper,
+    Typography,
+    CircularProgress,
+    Box,
+    Button,
+} from "@mui/material";
 import { Delete, Edit } from "@mui/icons-material";
 import { MaterialReactTable } from "material-react-table";
 import useCodeList from "../hooks/useCodeList";
@@ -10,7 +17,7 @@ import useCodeList from "../hooks/useCodeList";
 export default function CodeIndex() {
     const { token } = useStateContext(); // To handle the auth token
     const { codeDataList, loadingCodeList, refreshCodeList } = useCodeList();
-
+    const navigate = useNavigate();
     const [deletingId, setDeletingId] = useState(null); // Track which code is being deleted
 
     const handleDelete = (codeId) => {
@@ -114,12 +121,20 @@ export default function CodeIndex() {
                     },
                 }}
                 renderTopToolbarCustomActions={() => (
-                    <Typography
-                        variant="h6"
-                        sx={{ fontWeight: 600, color: "#5b08a7" }}
-                    >
-                        Frame Codes
-                    </Typography>
+                    <Box>
+                        <Typography
+                            variant="h6"
+                            sx={{ fontWeight: 600, color: "#5b08a7" }}
+                        >
+                            Frame Code Management
+                        </Typography>
+                        <Button
+                            onClick={() => navigate("/codes/new")}
+                            variant="contained"
+                        >
+                            Add New Code
+                        </Button>
+                    </Box>
                 )}
             />
         </Paper>

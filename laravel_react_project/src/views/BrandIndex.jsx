@@ -1,8 +1,15 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
-import { CircularProgress, IconButton, Paper, Typography } from "@mui/material";
+import {
+    Box,
+    Button,
+    CircularProgress,
+    IconButton,
+    Paper,
+    Typography,
+} from "@mui/material";
 import { Delete, Edit } from "@mui/icons-material";
 import useBrandList from "../hooks/useBrandList";
 import { MaterialReactTable } from "material-react-table";
@@ -40,7 +47,7 @@ export default function BrandIndex() {
     const { token } = useStateContext(); // Get the auth token
     const { brandDataList, loadingBrandList, refreshBrandList } =
         useBrandList();
-
+    const navigate = useNavigate();
     const [deletingId, setDeletingId] = useState(null); // Track the ID of the brand being deleted
 
     const handleDelete = (brandId) => {
@@ -123,12 +130,20 @@ export default function BrandIndex() {
                     },
                 }}
                 renderTopToolbarCustomActions={() => (
-                    <Typography
-                        variant="h6"
-                        sx={{ fontWeight: 600, color: "#5b08a7" }}
-                    >
-                        Frame Brands
-                    </Typography>
+                    <Box>
+                        <Typography
+                            variant="h6"
+                            sx={{ fontWeight: 600, color: "#5b08a7" }}
+                        >
+                            Brand Management
+                        </Typography>
+                        <Button
+                            onClick={() => navigate("/brands/new")}
+                            variant="contained"
+                        >
+                            Add New Brand
+                        </Button>
+                    </Box>
                 )}
             />
         </Paper>

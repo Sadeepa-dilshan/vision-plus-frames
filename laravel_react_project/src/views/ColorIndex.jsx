@@ -1,8 +1,15 @@
 import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
-import { IconButton, Paper, Typography, CircularProgress } from "@mui/material";
+import {
+    IconButton,
+    Paper,
+    Typography,
+    CircularProgress,
+    Box,
+    Button,
+} from "@mui/material";
 import { Delete, Edit } from "@mui/icons-material";
 import { MaterialReactTable } from "material-react-table";
 import useColorList from "../hooks/useColorList";
@@ -13,7 +20,7 @@ export default function ColorIndex() {
         useColorList();
 
     const [deletingId, setDeletingId] = useState(null); // Track which color is being deleted
-
+    const navigate = useNavigate();
     const handleDelete = (colorId) => {
         if (!window.confirm("Are you sure you want to delete this color?")) {
             return;
@@ -115,12 +122,20 @@ export default function ColorIndex() {
                     },
                 }}
                 renderTopToolbarCustomActions={() => (
-                    <Typography
-                        variant="h6"
-                        sx={{ fontWeight: 600, color: "#5b08a7" }}
-                    >
-                        Frame Colors
-                    </Typography>
+                    <Box>
+                        <Typography
+                            variant="h6"
+                            sx={{ fontWeight: 600, color: "#5b08a7" }}
+                        >
+                            Color Management
+                        </Typography>
+                        <Button
+                            onClick={() => navigate("/colors/new")}
+                            variant="contained"
+                        >
+                            Add New Color
+                        </Button>
+                    </Box>
                 )}
             />
         </Paper>
