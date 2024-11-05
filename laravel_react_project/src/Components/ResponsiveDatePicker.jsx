@@ -15,7 +15,7 @@ export default function ResponsiveDatePicker({
         <Paper
             elevation={2}
             sx={{
-                p: 2,
+                p: 1,
                 flexWrap: "wrap",
                 display: "flex",
                 justifyContent: "center",

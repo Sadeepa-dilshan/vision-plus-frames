@@ -61,7 +61,6 @@ export default function Login() {
                     "An unexpected error occurred. Please try again.",
                     "error"
                 );
-                console.log("Error:", err);
             }
         }
     };

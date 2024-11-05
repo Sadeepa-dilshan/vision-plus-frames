@@ -28,6 +28,13 @@ import BranchEdit from "./views/branchEdit.jsx";
 import UsersIndex from "./views/UsersIndex.jsx";
 import UserCreate from "./views/UserCreate.jsx";
 import UserEdit from "./views/UserEdit.jsx";
+import DashboardLens from "./views/lens/DashboardLens.jsx";
+import RootIndex from "./views/RootIndex.jsx";
+import AddLens from "./views/lens/AddLens.jsx";
+import LensStoreIndex from "./views/lens/LensStoreIndex.jsx";
+import VarianceAdd from "./views/lens/VarianceAdd.jsx";
+import LensIndex from "./views/lens/LensIndex.jsx";
+import LensHistoryIndex from "./views/lens/LensHistoryIndex.jsx";
 
 const router = createBrowserRouter([
     {
@@ -38,7 +45,7 @@ const router = createBrowserRouter([
                 path: "/",
                 element: (
                     <AnimatedPage>
-                        <Navigate to="/dashboard" replace />
+                        <RootIndex />
                     </AnimatedPage>
                 ),
             },
@@ -212,7 +219,60 @@ const router = createBrowserRouter([
             },
         ],
     },
-
+    {
+        path: "/lens",
+        element: <DefaultLayout />,
+        children: [
+            {
+                path: "dashboard",
+                element: (
+                    <AnimatedPage>
+                        <DashboardLens />
+                    </AnimatedPage>
+                ),
+            },
+            {
+                path: "add_lens",
+                element: (
+                    <AnimatedPage>
+                        <AddLens />
+                    </AnimatedPage>
+                ),
+            },
+            {
+                path: "lens_store",
+                element: (
+                    <AnimatedPage>
+                        <LensStoreIndex />
+                    </AnimatedPage>
+                ),
+            },
+            {
+                path: "add_variance",
+                element: (
+                    <AnimatedPage>
+                        <VarianceAdd />
+                    </AnimatedPage>
+                ),
+            },
+            {
+                path: "",
+                element: (
+                    <AnimatedPage>
+                        <LensIndex />
+                    </AnimatedPage>
+                ),
+            },
+            {
+                path: "history",
+                element: (
+                    <AnimatedPage>
+                        <LensHistoryIndex />
+                    </AnimatedPage>
+                ),
+            },
+        ],
+    },
     {
         path: "/",
         element: <GuestLayout />,
