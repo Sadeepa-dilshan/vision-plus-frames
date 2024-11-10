@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CodeController;
+use App\Http\Controllers\LensController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\ColorController;
@@ -24,11 +25,9 @@ use App\Http\Controllers\BranchController;
 
 Route::middleware('auth:sanctum')->group(function() {
     Route::get('logout',[AuthController::class,'logout']);
-
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
-
     Route::middleware('admin')->group(function () {
         Route::apiResource('/users', UserController::class)->except(['show', 'update']);
     });
@@ -78,9 +77,9 @@ Route::middleware(['auth:sanctum'])->group(function() {
     Route::put('stocks/{stock}', [StockController::class, 'update'])->middleware('admin');
     Route::delete('stocks/{stock}', [StockController::class, 'destroy'])->middleware('admin');
     Route::get('/frames/{frameId}/stock-history', [StockController::class, 'getStockHistory']);
-
 });
 
+Route::apiResource('lenses', LensController::class);
 Route::post('login',[AuthController::class,'login']);
 Route::post('register',[AuthController::class,'register']);
 Route::get('hello', function () {
