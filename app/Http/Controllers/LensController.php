@@ -130,7 +130,6 @@ class LensController extends Controller
     {
         // Delete the lens
         $lens->delete();
-
         return response()->json(['message' => 'Lens deleted successfully'], 200);
     }
 }

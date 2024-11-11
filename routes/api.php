@@ -11,6 +11,7 @@ use App\Http\Controllers\ColorController;
 use App\Http\Controllers\FrameController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\BranchController;
+use App\Http\Controllers\LensTypeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -80,6 +81,8 @@ Route::middleware(['auth:sanctum'])->group(function() {
 });
 
 Route::apiResource('lenses', LensController::class);
+Route::apiResource('lens-types', LensTypeController::class);
+
 Route::post('login',[AuthController::class,'login']);
 Route::post('register',[AuthController::class,'register']);
 Route::get('hello', function () {
