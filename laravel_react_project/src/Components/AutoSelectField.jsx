@@ -30,14 +30,14 @@ const AutoSelectField = ({
                 <Autocomplete
                     sx={{ flexGrow: 1 }}
                     options={options}
-                    getOptionLabel={(option) => option.toString()} // Convert number to string for display
+                    value={selectedValue}
+                    getOptionLabel={(option) => option.toString()}
                     onChange={(event, newValue) => onChange(newValue)}
                     renderInput={(params) => (
                         <TextField
                             {...params}
                             variant="outlined"
                             label={`Select ${label}`}
-                            sx={{ flexGrow: 1 }}
                         />
                     )}
                 />

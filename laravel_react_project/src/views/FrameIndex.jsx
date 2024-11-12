@@ -42,7 +42,7 @@ export default function FrameIndex() {
         setImgFullView("");
     };
 
-    const handleDelete = (frameId) => {
+    const handleDelete = (frameId, data) => {
         if (!window.confirm("Are you sure you want to delete this frame?")) {
             return;
         }
@@ -80,7 +80,9 @@ export default function FrameIndex() {
                         variant="contained"
                         color="secondary"
                         size="small"
-                        onClick={() => handleDelete(row.original.id)}
+                        onClick={() =>
+                            handleDelete(row.original.id, row.original)
+                        }
                     >
                         <Delete color="error" />
                     </IconButton>

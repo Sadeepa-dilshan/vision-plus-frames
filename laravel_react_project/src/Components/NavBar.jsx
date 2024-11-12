@@ -83,8 +83,8 @@ export default function MiniDrawer() {
             text: "Add Variance",
             icon: <CategorySharp />,
         },
-        { path: "/lens/", text: "Lens", icon: <LensBlur /> },
-        { path: "/lens/history/", text: "History", icon: <History /> },
+        // { path: "/lens/", text: "Lens", icon: <LensBlur /> },
+        // { path: "/lens/history/", text: "History", icon: <History /> },
         { path: "/dashboard", text: "Frame", icon: <SwitchRight /> },
     ];
 

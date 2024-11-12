@@ -29,6 +29,7 @@ export default function DrawerList({ NavData, toggleDrawer }) {
         axiosClient.get("/logout").then(() => {
             setUser(null);
             setToken(null);
+            localStorage.removeItem("ACCESS_TOKEN");
         });
     };
     const handleOpenInNewTab = (path) => {

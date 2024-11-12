@@ -8,6 +8,7 @@ const AutocompleteInputFiled = ({
     loading,
     labelName,
     defaultId,
+    testid,
 }) => {
     const [selectedOption, setSelectedOption] = useState(null);
 
@@ -30,6 +31,7 @@ const AutocompleteInputFiled = ({
 
     return (
         <Autocomplete
+            data-test={testid}
             fullWidth
             disabled={loading}
             value={selectedOption}

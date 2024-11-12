@@ -135,6 +135,7 @@ export default function FrameCreate() {
                     {/* Brand Dropdown */}
                     <Grid item xs={12}>
                         <DropdownInput
+                            testid="color-input"
                             //pass array list [{name: "Brand 1", id: 1}]
                             options={brandDataList.map((brand) => ({
                                 name: brand.brand_name,
@@ -148,6 +149,7 @@ export default function FrameCreate() {
                     </Grid>
                     <Grid item xs={12}>
                         <DropdownInput
+                            testid="color-input"
                             options={filteredCodes.map((code) => ({
                                 name: code.code_name,
                                 id: code.id,
@@ -160,6 +162,7 @@ export default function FrameCreate() {
                     </Grid>
                     <Grid item xs={12}>
                         <DropdownInput
+                            testid="color-input"
                             options={colorDataList.map((color) => ({
                                 name: color.color_name,
                                 id: color.id,
@@ -172,6 +175,7 @@ export default function FrameCreate() {
                     </Grid>
                     <Grid item xs={12}>
                         <TextField
+                            data-test="price-input"
                             fullWidth
                             id="price"
                             label="Price"
@@ -191,6 +195,7 @@ export default function FrameCreate() {
                                 Frame Shape
                             </InputLabel>
                             <Select
+                                data-test="frame-shape-input"
                                 labelId="frameShape-label"
                                 id="frameShape"
                                 value={frameShape}
@@ -209,6 +214,7 @@ export default function FrameCreate() {
                                 Frame Species
                             </InputLabel>
                             <Select
+                                data-test="frame-species-input"
                                 labelId="frameSpecies-label"
                                 id="frameSpecies"
                                 value={frameSpecies}
@@ -225,6 +231,7 @@ export default function FrameCreate() {
                     </Grid>
                     <Grid item xs={12}>
                         <TextField
+                            data-test="frame-quantity-input"
                             fullWidth
                             id="quantity"
                             label="Quantity"
@@ -259,6 +266,7 @@ export default function FrameCreate() {
                             )}
 
                             <Button
+                                data-test="frame-uplord-button"
                                 variant="outlined"
                                 component="label"
                                 fullWidth
@@ -278,6 +286,7 @@ export default function FrameCreate() {
 
                     <Grid item xs={12}>
                         <Button
+                            data-test="frame-submit-button"
                             type="submit"
                             variant="contained"
                             color="primary"

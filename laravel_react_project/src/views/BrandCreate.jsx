@@ -28,7 +28,8 @@ export default function BrandCreate() {
     //Submite Stats
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState(null);
-    const { brandDataList } = useBrandList();
+    const { brandDataList, loadingBrandList, refreshBrandList } =
+        useBrandList();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -36,7 +37,7 @@ export default function BrandCreate() {
         try {
             setLoading(true);
 
-            if (brandDataList) {
+            if (brandDataList && !loadingBrandList) {
                 const exists = brandDataList.some(
                     (item) => item.brand_name === brandName
                 );
@@ -47,7 +48,7 @@ export default function BrandCreate() {
                         "/brands",
                         {
                             brand_name: brandName,
-                            price: price,
+                            price: parseInt(price),
                         },
                         {
                             headers: {
@@ -71,53 +72,69 @@ export default function BrandCreate() {
     };
 
     return (
-        <Card sx={{ padding: 4, maxWidth: 500, margin: "auto", marginTop: 5 }}>
+        <Card
+            sx={{
+                padding: 4,
+                maxWidth: 500,
+                margin: "auto",
+                marginTop: 5,
+            }}
+        >
             <Typography variant="h4" gutterBottom>
                 Create New Brand
             </Typography>
-            <form onSubmit={handleSubmit}>
-                <Box sx={{ marginBottom: 3 }}>
-                    <TextField
-                        fullWidth
-                        label="Brand Name"
-                        value={brandName}
-                        onChange={(e) => setBrandName(e.target.value)}
-                        variant="outlined"
-                        error={!!errors}
-                        helperText={errors ? errors.brand_name : ""}
-                        required
-                    />
-                </Box>
-                <Box sx={{ marginBottom: 3 }}>
-                    <TextField
-                        fullWidth
-                        type="number"
-                        label="Price"
-                        value={price}
-                        variant="outlined"
-                        error={!!errors}
-                        helperText={errors ? errors.price : ""}
-                        required
-                        onChange={(e) => {
-                            const inputValue = e.target.value;
-                            // Prevent entering negative numbers
-                            if (inputValue >= 0) {
-                                setPrice(inputValue);
-                            }
-                        }}
-                    />
-                </Box>
+            {loadingBrandList ? (
+                <CircularProgress />
+            ) : (
+                <form onSubmit={handleSubmit}>
+                    <Box sx={{ marginBottom: 3 }}>
+                        <TextField
+                            fullWidth
+                            name="brand_name"
+                            label="Brand Name"
+                            value={brandName}
+                            onChange={(e) => setBrandName(e.target.value)}
+                            variant="outlined"
+                            error={!!errors}
+                            helperText={errors ? errors.brand_name : ""}
+                            required
+                        />
+                    </Box>
+                    <Box sx={{ marginBottom: 3 }}>
+                        <TextField
+                            fullWidth
+                            name="brand_price"
+                            type="number"
+                            label="Price"
+                            value={price}
+                            variant="outlined"
+                            error={!!errors}
+                            helperText={errors ? errors.price : ""}
+                            required
+                            onChange={(e) => {
+                                const inputValue = e.target.value;
+                                // Prevent entering negative numbers
+                                if (inputValue >= 0) {
+                                    setPrice(inputValue);
+                                }
+                            }}
+                        />
+                    </Box>
 
-                <Button
-                    disabled={loading}
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    startIcon={loading ? <CircularProgress size={24} /> : null}
-                >
-                    {loading ? "Creating..." : "Create Brand"}
-                </Button>
-            </form>
+                    <Button
+                        data-test="brand-submit-button"
+                        disabled={loading}
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                        startIcon={
+                            loading ? <CircularProgress size={24} /> : null
+                        }
+                    >
+                        {loading ? "Creating..." : "Create Brand"}
+                    </Button>
+                </form>
+            )}
         </Card>
     );
 }

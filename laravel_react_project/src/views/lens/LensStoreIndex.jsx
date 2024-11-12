@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
-import { Box, Stack, Button } from "@mui/material";
+import { Box, Stack, Button, IconButton } from "@mui/material";
 import { MaterialReactTable } from "material-react-table";
+import { Add, AddCircle, Delete, RemoveCircle } from "@mui/icons-material";
 
 const LensStoreIndex = () => {
     const initialData = [
@@ -65,6 +66,29 @@ const LensStoreIndex = () => {
                 header: "Lens Type",
                 accessorKey: "lensType",
                 enableGrouping: true,
+                GroupedCell: ({ cell }) => (
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <strong>{cell.getValue()}</strong>
+                        <IconButton
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            onClick={() => handleAddLens(cell.getValue())}
+                            //change hover textcolor to black
+
+                            sx={{
+                                ml: 2,
+                                bgcolor: "primary.main",
+                                color: "white", //hover textcolor to black
+                                "&:hover": {
+                                    color: "black",
+                                },
+                            }}
+                        >
+                            <Add />
+                        </IconButton>
+                    </Box>
+                ),
             },
             {
                 header: "Sph",
@@ -84,26 +108,25 @@ const LensStoreIndex = () => {
                 Cell: ({ row }) => (
                     <Box>
                         <Stack direction="row" spacing={1} alignItems="center">
-                            <Button
-                                variant="outlined"
-                                color="primary"
-                                onClick={() =>
-                                    handleIncreaseQuantity(row.index)
-                                }
+                            <IconButton
+                                variant="contained"
+                                color="success"
+                                size="small"
+                                onClick={() => handleRemoveLens(row.index)}
                             >
-                                +
-                            </Button>
+                                <AddCircle />
+                            </IconButton>
                             <Box>{row.getValue("quantity")}</Box>
-                            <Button
-                                variant="outlined"
-                                color="secondary"
-                                onClick={() =>
-                                    handleDecreaseQuantity(row.index)
-                                }
-                                disabled={row.getValue("quantity") === 0}
+                            {/* //add icon button with add remove icons */}
+
+                            <IconButton
+                                variant="contained"
+                                color="error"
+                                size="small"
+                                onClick={() => handleRemoveLens(row.index)}
                             >
-                                -
-                            </Button>
+                                <RemoveCircle />
+                            </IconButton>
                         </Stack>
                     </Box>
                 ),
@@ -116,7 +139,7 @@ const LensStoreIndex = () => {
                     </Stack>
                 ),
             },
-            { header: "Color", accessorKey: "color" },
+            { header: "Coating", accessorKey: "color" },
         ],
         [data]
     );

@@ -144,14 +144,16 @@ export default function Login() {
                         )}
                         <TextField
                             label="Email"
+                            type="email"
+                            name="email"
                             sx={{ width: "100%", marginTop: "1rem" }}
                             variant="outlined"
                             value={email}
-                            type="email"
                             placeholder="Enter your login email"
                             onChange={(e) => setEmail(e.target.value)}
                         />
                         <TextField
+                            name="password"
                             label="Password"
                             sx={{ width: "100%", marginTop: "1rem" }}
                             variant="outlined"

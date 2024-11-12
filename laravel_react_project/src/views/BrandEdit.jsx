@@ -46,7 +46,7 @@ export default function BrandEdit() {
         try {
             setLoading(true);
 
-            if (brandDataList) {
+            if (brandDataList && !loadingBrand) {
                 const exists = brandDataList.some(
                     (item) =>
                         item.brand_name === brandName &&

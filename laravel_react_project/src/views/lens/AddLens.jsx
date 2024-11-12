@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
     Box,
     Button,
@@ -12,14 +12,21 @@ import {
     Card,
     CardContent,
 } from "@mui/material";
+import axiosClient from "../../axiosClient";
+import { useStateContext } from "../../contexts/contextprovider";
+import { useAlert } from "../../contexts/AlertContext";
 
 export default function AddLens() {
+    const { token } = useStateContext();
+    const { showAlert } = useAlert();
+
     const [lensType, setLensType] = useState("");
     const [sph, setSph] = useState("");
     const [cyl, setCyl] = useState("");
     const [add, setAdd] = useState("");
     const [price, setPrice] = useState("");
     const [quantity, setQuantity] = useState("");
+    const [corting, setCorting] = useState("");
 
     const [errors, setErrors] = useState({
         lensType: false,
@@ -35,6 +42,10 @@ export default function AddLens() {
         setSph("");
         setCyl("");
         setAdd("");
+        setCorting("");
+    };
+    const handleLenscortingChange = (event) => {
+        setCorting(event.target.value);
     };
 
     const validateForm = () => {
@@ -42,36 +53,61 @@ export default function AddLens() {
             lensType: !lensType,
             sph: !sph,
             cyl: !cyl,
-            add:
-                lensType === "Bifocal" || lensType === "Varifocal"
-                    ? !add
-                    : false,
+            add: lensType === "2" || lensType === "3" ? !add : false,
             price: !price,
             quantity: !quantity,
+            corting: !corting,
         };
         setErrors(newErrors);
         return Object.values(newErrors).every((error) => !error);
     };
 
-    const handleAddLens = () => {
+    const handleAddLens = async () => {
         if (validateForm()) {
-            console.log({
-                lensType,
-                sph,
-                cyl,
-                add: add,
+            // Construct the lens data based on the lens type
+            const lensData = {
+                type_id: parseInt(lensType),
+                price: parseFloat(price),
+                quantity: parseInt(quantity),
+                coating_id: parseInt(corting),
+                lens_powers: [
+                    { power_id: 1, value: parseFloat(sph) }, // SPH
+                    { power_id: 2, value: parseFloat(cyl) }, // CYL
+                ],
+            };
 
-                price,
-                quantity,
+            // If it's a bifocal or varifocal lens, include the ADD power
+            if (lensType === "2" || lensType === "3") {
+                lensData.lens_powers.push({
+                    power_id: 3,
+                    value: parseFloat(add),
+                });
+            }
+
+            // Send data to DB
+            await sendDataToDB(lensData);
+        }
+    };
+
+    const sendDataToDB = async (data) => {
+        console.log(data);
+
+        try {
+            // Send the POST request to create a new lens
+            const response = await axiosClient.post("/lenses", data, {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Ensure the token is included for authorization
+                },
             });
 
-            //TODO SEND TO DATA BASE WITH AXIOS
-            // Reset form after adding lens
+            // On success, show success alert and reset form
+            showAlert("Lens created successfully", "success");
             setLensType("");
             setSph("");
             setCyl("");
             setAdd("");
             setPrice("");
+            setCorting("");
             setQuantity("");
             setErrors({
                 lensType: false,
@@ -80,7 +116,13 @@ export default function AddLens() {
                 add: false,
                 price: false,
                 quantity: false,
+                corting: false,
             });
+        } catch (error) {
+            // Handle error and show error alert
+            showAlert("Network error, try again", "error");
+            console.error("Error creating lens:", error);
+            console.log(data);
         }
     };
 
@@ -114,11 +156,9 @@ export default function AddLens() {
                             variant="outlined"
                             label="Lens Type"
                         >
-                            <MenuItem value="Single Vision">
-                                Single Vision
-                            </MenuItem>
-                            <MenuItem value="Bifocal">Bifocal</MenuItem>
-                            <MenuItem value="Varifocal">Varifocal</MenuItem>
+                            <MenuItem value="1">Single Vision</MenuItem>
+                            <MenuItem value="2">Bifocal</MenuItem>
+                            <MenuItem value="3">Varifocal</MenuItem>
                         </Select>
                         {errors.lensType && (
                             <Typography variant="caption" color="error">
@@ -145,6 +185,7 @@ export default function AddLens() {
                                         label="SPH"
                                         variant="outlined"
                                         fullWidth
+                                        type="number"
                                         value={sph}
                                         onChange={(e) => setSph(e.target.value)}
                                         margin="normal"
@@ -158,6 +199,7 @@ export default function AddLens() {
                                     <TextField
                                         label="CYL"
                                         variant="outlined"
+                                        type="number"
                                         fullWidth
                                         value={cyl}
                                         onChange={(e) => setCyl(e.target.value)}
@@ -168,13 +210,13 @@ export default function AddLens() {
                                         }
                                     />
                                 </Grid>
-                                {(lensType === "Bifocal" ||
-                                    lensType === "Varifocal") && (
+                                {(lensType === "2" || lensType === "3") && (
                                     <Grid item xs={12}>
                                         <TextField
                                             label="ADD"
                                             variant="outlined"
                                             fullWidth
+                                            type="number"
                                             value={add}
                                             onChange={(e) =>
                                                 setAdd(e.target.value)
@@ -222,6 +264,28 @@ export default function AddLens() {
                             errors.quantity ? "Quantity is required." : ""
                         }
                     />
+                </Grid>
+
+                <Grid item xs={12}>
+                    <FormControl fullWidth error={errors.corting}>
+                        <InputLabel id="lens-type-label">Corting</InputLabel>
+                        <Select
+                            labelId="Corting"
+                            value={corting}
+                            onChange={handleLenscortingChange}
+                            variant="outlined"
+                            label="Corting"
+                        >
+                            <MenuItem value="1">Multicoated</MenuItem>
+                            <MenuItem value="2">Bluecut</MenuItem>
+                            <MenuItem value="3">Bluecut Photocromic</MenuItem>
+                        </Select>
+                        {errors.lensType && (
+                            <Typography variant="caption" color="error">
+                                corting is required.
+                            </Typography>
+                        )}
+                    </FormControl>
                 </Grid>
                 <Grid item xs={12}>
                     <Button

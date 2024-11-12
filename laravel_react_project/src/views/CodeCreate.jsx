@@ -80,52 +80,56 @@ export default function CodeCreate() {
             <Typography variant="h4" gutterBottom>
                 Create New Code
             </Typography>
-            <form onSubmit={handleSubmit}>
-                <Box sx={{ marginBottom: 3 }}>
-                    <DropdownInput
-                        //pass array list [{name: "Brand 1", id: 1}]
-                        options={brandDataList.map((brand) => ({
-                            name: brand.brand_name,
-                            id: brand.id,
-                        }))}
-                        onChange={handleDropdownSelectionChange} // Will receive the selected brand's id
-                        loading={loadingBrandList}
-                        labelName="Select Brand"
-                        defaultId={brandId} // Pass the Defalt value
-                    />
-                </Box>
-                <Box sx={{ marginBottom: 3 }}>
-                    <TextField
-                        fullWidth
-                        label="Code Name"
-                        value={codeName}
-                        onChange={(e) => setCodeName(e.target.value)}
-                        variant="outlined"
-                        error={!!errors}
-                        helperText={errors ? errors.code_name : ""}
-                        required
-                    />
-                </Box>
-                <Box
-                    sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                    }}
-                >
-                    <Button
-                        disabled={loading}
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        startIcon={
-                            loading ? <CircularProgress size={24} /> : null
-                        }
+            {loadingBrandList ? (
+                <CircularProgress />
+            ) : (
+                <form onSubmit={handleSubmit}>
+                    <Box sx={{ marginBottom: 3 }}>
+                        <DropdownInput
+                            //pass array list [{name: "Brand 1", id: 1}]
+                            options={brandDataList.map((brand) => ({
+                                name: brand.brand_name,
+                                id: brand.id,
+                            }))}
+                            onChange={handleDropdownSelectionChange} // Will receive the selected brand's id
+                            loading={loadingBrandList}
+                            labelName="Select Brand"
+                            defaultId={brandId} // Pass the Defalt value
+                        />
+                    </Box>
+                    <Box sx={{ marginBottom: 3 }}>
+                        <TextField
+                            fullWidth
+                            label="Code Name"
+                            value={codeName}
+                            onChange={(e) => setCodeName(e.target.value)}
+                            variant="outlined"
+                            error={!!errors}
+                            helperText={errors ? errors.code_name : ""}
+                            required
+                        />
+                    </Box>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                        }}
                     >
-                        {loading ? "Creating..." : "Create Code"}
-                    </Button>
-                </Box>
-            </form>
+                        <Button
+                            disabled={loading}
+                            type="submit"
+                            variant="contained"
+                            color="primary"
+                            startIcon={
+                                loading ? <CircularProgress size={24} /> : null
+                            }
+                        >
+                            {loading ? "Creating..." : "Create Code"}
+                        </Button>
+                    </Box>
+                </form>
+            )}
         </Card>
     );
 }
