@@ -32,14 +32,15 @@ class Lens extends Model
         return $this->belongsTo(LensType::class, 'type_id');
     }
 
-    public function power()
-    {
-        return $this->belongsTo(Power::class, 'power_id');
-    }
-
     public function lensPower()
     {
         return $this->belongsTo(LensPower::class, 'lens_id');
+    }
+
+    public function powers()
+    {
+        return $this->belongsToMany(Power::class, 'lens_powers', 'lens_id', 'power_id')
+                    ->withPivot('value'); // Include the `value` field from the pivot table
     }
 
     public function coating()

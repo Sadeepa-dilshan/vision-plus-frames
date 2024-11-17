@@ -14,11 +14,9 @@ class LensController extends Controller
      */
     public function index()
     {
-        // Fetch all lenses with related data (type, power, coating)
-        $lenses = Lens::with(['type', 'power', 'coating'])->get();
+        $lenses = Lens::with(['type:id,name,description', 'coating:id,name,description', 'powers:id,name'])->get();
         return response()->json($lenses, 200);
     }
-
     /**
      * Store a newly created lens in storage.
      */
@@ -65,8 +63,7 @@ class LensController extends Controller
     public function show(Lens $lens)
     {
         // Load related data for the lens
-        $lens->load(['type', 'power', 'coating']);
-
+        $lens->load(['type:id,name,description', 'coating:id,name,description', 'powers:id,name']);
         return response()->json($lens, 200);
     }
 
@@ -82,7 +79,7 @@ class LensController extends Controller
             'lens_powers' => 'required|array',
             'lens_powers.*.power_id' => 'required|exists:powers,id',
             'lens_powers.*.value' => 'required|numeric|min:0',
-            'quantity' => 'required|integer|min:0', 
+            'quantity' => 'required|integer|min:0',
         ]);
         $lens->update([
             'type_id' => $request->type_id ?? $lens->type_id,
