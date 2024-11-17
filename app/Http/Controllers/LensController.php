@@ -14,7 +14,7 @@ class LensController extends Controller
      */
     public function index()
     {
-        $lenses = Lens::with(['type:id,name,description', 'coating:id,name,description', 'powers:id,name'])->get();
+        $lenses = Lens::with(['type:id,name,description', 'coating:id,name,description', 'powers:id,name','lensStock'])->get();
         return response()->json($lenses, 200);
     }
     /**
@@ -63,7 +63,7 @@ class LensController extends Controller
     public function show(Lens $lens)
     {
         // Load related data for the lens
-        $lens->load(['type:id,name,description', 'coating:id,name,description', 'powers:id,name']);
+        $lens->load(['type:id,name,description', 'coating:id,name,description', 'powers:id,name','lensStock']);
         return response()->json($lens, 200);
     }
 

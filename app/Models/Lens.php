@@ -50,7 +50,7 @@ class Lens extends Model
 
     public function lensStock()
     {
-        return $this->hasOne(LensStock::class);
-    }
+        return $this->hasOne(LensStock::class, 'lens_id');
+    }    
 
 }
