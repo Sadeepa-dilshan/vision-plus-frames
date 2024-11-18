@@ -1,83 +1,77 @@
-import React, { useMemo, useState } from "react";
-import { Box, Stack, Button, IconButton } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import * as React from "react";
+import { useMemo, useState } from "react";
+import { Box, Stack, IconButton, Typography } from "@mui/material";
 import { MaterialReactTable } from "material-react-table";
-import { Add, AddCircle, Delete, RemoveCircle } from "@mui/icons-material";
-
+import { Add, AddCircle, Edit, RemoveCircle } from "@mui/icons-material";
+import useData from "../../hooks/useData";
+import AddLensesDialog from "../../Components/AddLensesDialog";
+import LenseQuantityAjustDialog from "../../Components/LenseQuantityAjustDialog";
 const LensStoreIndex = () => {
-    const initialData = [
-        {
-            lensType: "Single Vision",
-            sph: -2.0,
-            cyl: -0.5,
-            quantity: 10,
-            color: "Clear",
-        },
-        {
-            lensType: "Bifocal",
-            sph: -1.5,
-            cyl: -0.75,
-            quantity: 5,
-            color: "Brown",
-        },
-        {
-            lensType: "very focal",
-            sph: -1.0,
-            cyl: -1.0,
-            quantity: 8,
-            color: "Gray",
-        },
-        {
-            lensType: "Bifocal",
-            sph: -2.5,
-            cyl: 0.0,
-            quantity: 12,
-            color: "Green",
-        },
-        {
-            lensType: "Single Vision",
-            sph: -1.25,
-            cyl: -0.25,
-            quantity: 15,
-            color: "Blue",
-        },
-    ];
+    const navigate = useNavigate();
+    const {
+        data: lensesList,
+        loading: loadingLensesList,
+        error: errorLensesList,
+        refresh: refreshLenses,
+    } = useData("lenses");
+    const [open, setOpen] = React.useState(false);
+    const [openQuantityAjust, setOpenQuantityAjust] = React.useState(false);
 
-    const [data, setData] = useState(initialData);
-
-    const handleIncreaseQuantity = (rowIndex) => {
-        const newData = [...data];
-        newData[rowIndex].quantity += 1;
-        setData(newData);
-        console.log("Increased Quantity for:", newData[rowIndex]);
+    const handleClickOpen = () => {
+        setOpen(true);
     };
 
-    const handleDecreaseQuantity = (rowIndex) => {
-        const newData = [...data];
-        if (newData[rowIndex].quantity > 0) {
-            newData[rowIndex].quantity -= 1;
-            setData(newData);
-            console.log("Decreased Quantity for:", newData[rowIndex]);
-        }
+    const handleClose = () => {
+        setOpen(false);
     };
+    const handleQtyAjustClose = () => {
+        setOpenQuantityAjust(false);
+    };
+    console.log(lensesList);
 
     const columns = useMemo(
         () => [
             {
                 header: "Lens Type",
-                accessorKey: "lensType",
+                accessorKey: "type.name",
                 enableGrouping: true,
-                GroupedCell: ({ cell }) => (
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                GroupedCell: ({ cell, row }) => (
+                    <Box
+                        sx={{
+                            display: "flex",
+                            width: "100%",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                        }}
+                    >
                         <strong>{cell.getValue()}</strong>
+                    </Box>
+                ),
+            },
+            {
+                header: "Powers",
+                accessorKey: "powers",
+                enableGrouping: false,
+                Cell: ({ cell }) => (
+                    <Box
+                        sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                        }}
+                    >
                         <IconButton
                             variant="contained"
                             color="primary"
                             size="small"
-                            onClick={() => handleAddLens(cell.getValue())}
+                            onClick={() => {
+                                handleClickOpen();
+                            }}
                             //change hover textcolor to black
 
                             sx={{
-                                ml: 2,
+                                marginRight: 1,
                                 bgcolor: "primary.main",
                                 color: "white", //hover textcolor to black
                                 "&:hover": {
@@ -87,80 +81,110 @@ const LensStoreIndex = () => {
                         >
                             <Add />
                         </IconButton>
+                        <div>
+                            {cell.getValue().map((power) => (
+                                <Box
+                                    key={power.id}
+                                    sx={{
+                                        display: "flex",
+                                        gap: 1,
+                                        justifyContent: "space-between",
+                                    }}
+                                >
+                                    <Typography
+                                        sx={{
+                                            textTransform: "capitalize",
+                                        }}
+                                        variant="body2"
+                                    >
+                                        {power.name}-
+                                    </Typography>
+                                    <Typography variant="body2">
+                                        {power.pivot.value}
+                                    </Typography>
+                                </Box>
+                            ))}
+                        </div>
                     </Box>
                 ),
             },
-            {
-                header: "Sph",
-                accessorKey: "sph",
-                enableGrouping: true,
-                GroupedCell: ({ cell, row }) => (
-                    <Box sx={{ color: "primary.main" }}>
-                        <strong>Sph: {cell.getValue()}</strong> (
-                        {row.subRows.length})
-                    </Box>
-                ),
-            },
-            { header: "Cyl", accessorKey: "cyl" },
+
             {
                 header: "Quantity",
-                accessorKey: "quantity",
-                Cell: ({ row }) => (
+                accessorKey: "lens_stock.qty",
+                Cell: ({ row, cell }) => (
                     <Box>
                         <Stack direction="row" spacing={1} alignItems="center">
                             <IconButton
                                 variant="contained"
                                 color="success"
                                 size="small"
-                                onClick={() => handleRemoveLens(row.index)}
+                                onClick={() => setOpenQuantityAjust(true)}
                             >
                                 <AddCircle />
                             </IconButton>
-                            <Box>{row.getValue("quantity")}</Box>
+                            <Box>{cell.getValue()}</Box>
                             {/* //add icon button with add remove icons */}
 
                             <IconButton
                                 variant="contained"
                                 color="error"
                                 size="small"
-                                onClick={() => handleRemoveLens(row.index)}
+                                onClick={() => setOpenQuantityAjust(true)}
                             >
                                 <RemoveCircle />
                             </IconButton>
                         </Stack>
                     </Box>
                 ),
-                Footer: () => (
-                    <Stack>
-                        Total Quantity:
-                        <Box color="warning.main">
-                            {data.reduce((acc, curr) => acc + curr.quantity, 0)}
-                        </Box>
-                    </Stack>
+            },
+            { header: "Coating", accessorKey: "coating.name" },
+            {
+                header: "Price",
+                accessorKey: "price",
+                enableGrouping: false,
+                Cell: ({ cell, row }) => (
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                        {cell.getValue()}
+                        {/* <IconButton
+                            onClick={() =>
+                                navigate(`/lens/edit_lens/${row.original.id}`)
+                            }
+                        >
+                            <Edit />
+                        </IconButton> */}
+                    </Box>
                 ),
             },
-            { header: "Coating", accessorKey: "color" },
         ],
-        [data]
+        [lensesList]
     );
 
     return (
-        <MaterialReactTable
-            columns={columns}
-            data={data}
-            enableColumnResizing
-            enableGrouping
-            enableStickyHeader
-            enableStickyFooter
-            initialState={{
-                density: "compact",
-                expanded: false,
-                grouping: ["lensType"],
-                pagination: { pageIndex: 0, pageSize: 20 },
-            }}
-            muiToolbarAlertBannerChipProps={{ color: "primary" }}
-            muiTableContainerProps={{ sx: { maxHeight: 700 } }}
-        />
+        <div>
+            <MaterialReactTable
+                columns={columns}
+                data={lensesList}
+                enableColumnResizing
+                enableGrouping
+                enableStickyHeader
+                enableStickyFooter
+                initialState={{
+                    density: "compact",
+                    expanded: false,
+                    grouping: ["type.name"],
+                    pagination: { pageIndex: 0, pageSize: 20 },
+                }}
+                state={{ isLoading: loadingLensesList }}
+                muiToolbarAlertBannerChipProps={{ color: "primary" }}
+                muiTableContainerProps={{ sx: { maxHeight: 700 } }}
+            />
+            <AddLensesDialog open={open} handleClose={handleClose} />
+            <LenseQuantityAjustDialog
+                open={openQuantityAjust}
+                handleClose={handleQtyAjustClose}
+            />
+        </div>
     );
 };
 

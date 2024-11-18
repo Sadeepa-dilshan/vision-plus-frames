@@ -35,6 +35,11 @@ import LensStoreIndex from "./views/lens/LensStoreIndex.jsx";
 import VarianceAdd from "./views/lens/VarianceAdd.jsx";
 import LensIndex from "./views/lens/LensIndex.jsx";
 import LensHistoryIndex from "./views/lens/LensHistoryIndex.jsx";
+import LenseCoatingsCreate from "./views/lens/LenseCoatingsCreate.jsx";
+import LenseTypeEdit from "./views/lens/LenseTypeEdit.jsx";
+import LenseCoatingsEdit from "./views/lens/LenseCoatingsEdit.jsx";
+import LenseTypeCreate from "./views/lens/LenseTypeCreate.jsx";
+import EditLens from "./views/lens/EditLens.jsx";
 
 const router = createBrowserRouter([
     {
@@ -240,6 +245,14 @@ const router = createBrowserRouter([
                 ),
             },
             {
+                path: "edit_lens/:id",
+                element: (
+                    <AnimatedPage>
+                        <EditLens />
+                    </AnimatedPage>
+                ),
+            },
+            {
                 path: "lens_store",
                 element: (
                     <AnimatedPage>
@@ -252,6 +265,41 @@ const router = createBrowserRouter([
                 element: (
                     <AnimatedPage>
                         <VarianceAdd />
+                    </AnimatedPage>
+                ),
+            },
+            {
+                path: "lense_type/new",
+                element: (
+                    <AnimatedPage>
+                        <LenseTypeCreate />
+                    </AnimatedPage>
+                ),
+            },
+            {
+                path: "lense_type/edit/:id",
+                element: (
+                    <AnimatedPage>
+                        <LenseTypeEdit />
+                    </AnimatedPage>
+                ),
+            },
+            {
+                path: "lense_coating/new",
+                element: (
+                    <AnimatedPage>
+                        {/* <LenseCoatingsCreate /> */}
+                        <div>
+                            <LenseCoatingsCreate />
+                        </div>
+                    </AnimatedPage>
+                ),
+            },
+            {
+                path: "lense_coating/edit/:id",
+                element: (
+                    <AnimatedPage>
+                        <LenseCoatingsEdit />
                     </AnimatedPage>
                 ),
             },

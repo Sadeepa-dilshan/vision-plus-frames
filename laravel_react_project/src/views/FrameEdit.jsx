@@ -307,6 +307,9 @@ export default function FrameEdit() {
                                             Plastic
                                         </MenuItem>
                                         <MenuItem value="Metal">Metal</MenuItem>
+                                        <MenuItem value="Metal / Plastic">
+                                            Metal / Plastic
+                                        </MenuItem>
                                     </Select>
                                 </FormControl>
                             </Grid>

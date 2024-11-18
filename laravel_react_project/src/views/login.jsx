@@ -18,8 +18,8 @@ import { useAlert } from "../contexts/AlertContext";
 export default function Login() {
     const { showAlert } = useAlert();
 
-    const [password, setPassword] = useState("");
-    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("vision@1234");
+    const [email, setEmail] = useState("Visionplus@gmail.com");
     const { setUser, setToken } = useStateContext();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");

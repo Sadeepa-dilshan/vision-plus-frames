@@ -413,6 +413,8 @@ const FrameCountIndex = () => {
                 variant="outlined"
                 shape="rounded"
                 style={{ marginTop: "20px" }} // Add some margin to the pagination
+                showFirstButton
+                showLastButton
             />
 
             {/* Image Modal */}

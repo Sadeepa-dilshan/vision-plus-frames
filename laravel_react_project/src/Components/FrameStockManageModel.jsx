@@ -11,6 +11,8 @@ import {
     FormControl,
     InputLabel,
     CircularProgress,
+    Typography,
+    Chip,
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
 
@@ -55,7 +57,6 @@ export default function FrameStockManageModel({
 
         console.log(selectedBranch);
 
-        // Set the branch state with both id and name
         setBranch(selectedBranch);
     };
 
@@ -173,10 +174,55 @@ export default function FrameStockManageModel({
                     >
                         <Close />
                     </IconButton>
-                    <Box sx={{ width: "100%" }}>
+                    <Box
+                        sx={{
+                            padding: 2,
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            width: 400,
+                        }}
+                    >
+                        <Typography variant="h5">Add New Frame</Typography>
+                        <Box sx={{ display: "flex", gap: 1 }}>
+                            <Typography variant="subtitle1">
+                                Frame Code:
+                                <Chip
+                                    sx={{
+                                        marginLeft: 1,
+                                        fontWeight: "bold",
+                                        textTransform: "capitalize",
+                                    }}
+                                    size="small"
+                                    label={
+                                        selectedframeIDs.code
+                                            ? selectedframeIDs.code.code_name
+                                            : ""
+                                    }
+                                />
+                            </Typography>
+                            <Typography variant="subtitle1">
+                                / Color:
+                                <Chip
+                                    size="small"
+                                    sx={{
+                                        marginLeft: 1,
+                                        fontWeight: "bold",
+                                        textTransform: "capitalize",
+                                    }}
+                                    label={
+                                        selectedframeIDs.color
+                                            ? selectedframeIDs.color.color_name
+                                            : ""
+                                    }
+                                />
+                            </Typography>
+                        </Box>
                         <TextField
+                            fullWidth
+                            sx={{ marginY: 1 }}
                             value={inputStockCount}
-                            sx={{ marginTop: 3 }}
                             onChange={(e) => {
                                 setInputStockCount(e.target.value);
                             }}
@@ -194,12 +240,13 @@ export default function FrameStockManageModel({
                             <div>
                                 <Box>
                                     <FormControl
-                                        fullWidth
+                                        sx={{ width: "300px" }}
                                         margin="normal"
                                         required
                                     >
                                         <InputLabel>Select Branch</InputLabel>
                                         <Select
+                                            fullWidth
                                             id="branch"
                                             name="branch"
                                             value={

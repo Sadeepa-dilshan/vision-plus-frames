@@ -1,15 +1,10 @@
 import PropTypes from "prop-types";
-import {
-    Box,
-    Button,
-    Typography,
-    TextField,
-    Autocomplete,
-} from "@mui/material";
-
+import { Box, Button, Typography } from "@mui/material";
+import DropdownInput from "./DropdownInput";
 const AutoSelectField = ({
     label,
     options,
+    loading,
     selectedValue,
     onChange,
     onAdd,
@@ -27,19 +22,16 @@ const AutoSelectField = ({
                 mb={2}
                 sx={{ flexWrap: "wrap", gap: 2 }}
             >
-                <Autocomplete
-                    sx={{ flexGrow: 1 }}
-                    options={options}
-                    value={selectedValue}
-                    getOptionLabel={(option) => option.toString()}
-                    onChange={(event, newValue) => onChange(newValue)}
-                    renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            variant="outlined"
-                            label={`Select ${label}`}
-                        />
-                    )}
+                <DropdownInput
+                    testid="color-input"
+                    options={options.map((data) => ({
+                        name: data.name,
+                        id: data.id,
+                    }))}
+                    onChange={(e) => onChange(e)}
+                    loading={loading}
+                    labelName="Select Code"
+                    defaultId={selectedValue} // Pass the Defalt value
                 />
                 <Box sx={{ ml: 1 }}>
                     <Button variant="contained" color="primary" onClick={onAdd}>
@@ -77,6 +69,7 @@ AutoSelectField.propTypes = {
     onAdd: PropTypes.func.isRequired,
     onEdit: PropTypes.func.isRequired,
     onDelete: PropTypes.func.isRequired,
+    loading: PropTypes.bool.isRequired,
 };
 
 export default AutoSelectField;

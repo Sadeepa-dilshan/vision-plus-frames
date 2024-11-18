@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Box,
     Button,
@@ -11,19 +11,27 @@ import {
     Grid,
     Card,
     CardContent,
-    CircularProgress,
 } from "@mui/material";
 import axiosClient from "../../axiosClient";
 import { useStateContext } from "../../contexts/contextprovider";
 import { useAlert } from "../../contexts/AlertContext";
 import useData from "../../hooks/useData";
+import { useParams } from "react-router-dom";
 
-export default function AddLens() {
+export default function EditLens() {
     const { token } = useStateContext();
     const { showAlert } = useAlert();
-    const [loading, setLoading] = useState(false);
+    const { id } = useParams();
     const { data: lensTypeList, loading: loadingLensType } =
         useData("lens-types");
+    const { data: lenseData, loading: loadingLenseData } = useData(
+        `lenses/${id}`
+    );
+    const { data: lensePowerData, loading: loadingLensePowerData } = useData(
+        `lens-powers/${id}`
+    );
+    console.log(lenseData);
+
     const {
         data: lenseCotingsList,
         loading: loadingLenseCoting,
@@ -72,6 +80,10 @@ export default function AddLens() {
         setErrors(newErrors);
         return Object.values(newErrors).every((error) => !error);
     };
+    useEffect(() => {
+        if (lenseData) {
+        }
+    }, [lenseData]);
 
     const handleAddLens = async () => {
         if (validateForm()) {
@@ -94,30 +106,33 @@ export default function AddLens() {
                         ? singleVisionPowers
                         : varifocalPowers,
             };
+            console.log(lensData);
 
-            try {
-                setLoading(true);
-                await axiosClient.post("/lenses", lensData, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                showAlert("Lens created successfully", "success");
-                setFormData({
-                    lensType: "",
-                    sph: "",
-                    cyl: "",
-                    add: "",
-                    price: "",
-                    quantity: "",
-                    corting: "",
-                });
-                setErrors({});
-            } catch (error) {
-                showAlert("Network error, try again", "error");
-            } finally {
-                setLoading(false);
-            }
+            await sendDataToDB(lensData);
+        }
+    };
+
+    const sendDataToDB = async (data) => {
+        try {
+            await axiosClient.post("/lenses", data, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            showAlert("Lens created successfully", "success");
+            setFormData({
+                lensType: "",
+                sph: "",
+                cyl: "",
+                add: "",
+                price: "",
+                quantity: "",
+                corting: "",
+            });
+            setErrors({});
+        } catch (error) {
+            showAlert("Network error, try again", "error");
+            console.error("Error creating lens:", error);
         }
     };
 
@@ -303,9 +318,8 @@ export default function AddLens() {
                         color="primary"
                         onClick={handleAddLens}
                         fullWidth
-                        disabled={loading}
                     >
-                        {loading ? <CircularProgress size={24} /> : "Add Lens"}
+                        Add Lens
                     </Button>
                 </Grid>
             </Grid>

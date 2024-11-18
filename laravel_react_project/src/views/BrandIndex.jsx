@@ -102,7 +102,7 @@ export default function BrandIndex() {
     );
 
     return (
-        <Paper elevation={3} sx={{ padding: 2, marginTop: 3 }}>
+        <Box elevation={1} sx={{ padding: 1, marginTop: 3 }}>
             <MaterialReactTable
                 columns={columns}
                 data={brandDataList || []}
@@ -146,6 +146,6 @@ export default function BrandIndex() {
                     </Box>
                 )}
             />
-        </Paper>
+        </Box>
     );
 }

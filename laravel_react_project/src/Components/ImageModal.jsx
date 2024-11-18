@@ -174,6 +174,15 @@ export default function ImageModal({
                                 <Typography variant="h5">
                                     Add New Frame
                                 </Typography>
+                                <Typography
+                                    fontWeight={"bold"}
+                                    variant="subtitle1"
+                                >
+                                    Frame Code:{" "}
+                                    {selectedframeIDs.code
+                                        ? selectedframeIDs.code.code_name
+                                        : ""}
+                                </Typography>
 
                                 <DropdownInput
                                     //pass array list [{name: "Brand 1", id: 1}]

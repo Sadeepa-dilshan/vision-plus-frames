@@ -1,11 +1,9 @@
 import { useState, useCallback, useEffect } from "react";
-import { useAlert } from "../contexts/AlertContext";
 import { useStateContext } from "../contexts/contextprovider";
 import axiosClient from "../axiosClient";
 
-const useApiData = (endpoint) => {
-    const { showAlert } = useAlert();
-    const [data, setData] = useState(null);
+const useData = (endpoint) => {
+    const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -24,16 +22,13 @@ const useApiData = (endpoint) => {
                 setError(null);
             })
             .catch((err) => {
+                setData([]);
                 setError(err.response?.data?.message || "Network Error");
-                showAlert(
-                    err.response?.data?.message || "Network Error",
-                    "error"
-                );
             })
             .finally(() => {
                 setLoading(false);
             });
-    }, [endpoint, token, showAlert]);
+    }, [endpoint, token]);
 
     useEffect(() => {
         fetchData();
@@ -46,4 +41,4 @@ const useApiData = (endpoint) => {
     return { data, loading, error, refresh };
 };
 
-export default useApiData;
+export default useData;
