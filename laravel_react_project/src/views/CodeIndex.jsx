@@ -19,6 +19,7 @@ export default function CodeIndex() {
     const { codeDataList, loadingCodeList, refreshCodeList } = useCodeList();
     const navigate = useNavigate();
     const [deletingId, setDeletingId] = useState(null); // Track which code is being deleted
+    const [loading, setLoading] = useState(null); // Track which code is being deleted
 
     const handleDelete = (codeId) => {
         if (!window.confirm("Are you sure you want to delete this code?")) {
@@ -27,7 +28,7 @@ export default function CodeIndex() {
 
         // Set the current deleting code's ID
         setDeletingId(codeId);
-
+        setLoading(true);
         axiosClient
             .delete(`/codes/${codeId}`, {
                 headers: {
@@ -40,6 +41,7 @@ export default function CodeIndex() {
             .finally(() => {
                 // Reset the deleting state
                 setDeletingId(null);
+                setLoading(false);
             });
     };
 

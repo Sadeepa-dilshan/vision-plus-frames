@@ -115,6 +115,7 @@ export default function VarianceAdd() {
                             )
                         }
                         onDelete={() =>
+                            item.field !== "lensType" &&
                             handleDelete(item.selectedValue, item.field)
                         }
                     />

@@ -1,13 +1,23 @@
 import { useNavigate } from "react-router-dom";
 import * as React from "react";
 import { useMemo, useState } from "react";
-import { Box, Stack, IconButton, Typography } from "@mui/material";
+import { Box, Stack, IconButton, Typography, Chip } from "@mui/material";
 import { MaterialReactTable } from "material-react-table";
-import { Add, AddCircle, Edit, RemoveCircle } from "@mui/icons-material";
+import {
+    Add,
+    AddCircle,
+    Delete,
+    Edit,
+    RemoveCircle,
+} from "@mui/icons-material";
 import useData from "../../hooks/useData";
 import AddLensesDialog from "../../Components/AddLensesDialog";
 import LenseQuantityAjustDialog from "../../Components/LenseQuantityAjustDialog";
+import axiosClient from "../../axiosClient";
+import { useStateContext } from "../../contexts/contextprovider";
 const LensStoreIndex = () => {
+    const { token } = useStateContext(); // To handle the auth token
+
     const navigate = useNavigate();
     const {
         data: lensesList,
@@ -17,10 +27,7 @@ const LensStoreIndex = () => {
     } = useData("lenses");
     const [open, setOpen] = React.useState(false);
     const [openQuantityAjust, setOpenQuantityAjust] = React.useState(false);
-
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
+    const [deletingId, setDeletingId] = useState(null); // Track which code is being deleted
 
     const handleClose = () => {
         setOpen(false);
@@ -28,7 +35,28 @@ const LensStoreIndex = () => {
     const handleQtyAjustClose = () => {
         setOpenQuantityAjust(false);
     };
-    console.log(lensesList);
+    const handleDelete = (codeId) => {
+        if (!window.confirm("Are you sure you want to delete this code?")) {
+            return;
+        }
+
+        // Set the current deleting code's ID
+        setDeletingId(codeId);
+
+        axiosClient
+            .delete(`/lenses/${codeId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            .then(() => {
+                refreshLenses(); // Refresh the code list after deletion
+            })
+            .finally(() => {
+                // Reset the deleting state
+                setDeletingId(null);
+            });
+    };
 
     const columns = useMemo(
         () => [
@@ -61,26 +89,6 @@ const LensStoreIndex = () => {
                             alignItems: "center",
                         }}
                     >
-                        <IconButton
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            onClick={() => {
-                                handleClickOpen();
-                            }}
-                            //change hover textcolor to black
-
-                            sx={{
-                                marginRight: 1,
-                                bgcolor: "primary.main",
-                                color: "white", //hover textcolor to black
-                                "&:hover": {
-                                    color: "black",
-                                },
-                            }}
-                        >
-                            <Add />
-                        </IconButton>
                         <div>
                             {cell.getValue().map((power) => (
                                 <Box
@@ -89,18 +97,23 @@ const LensStoreIndex = () => {
                                         display: "flex",
                                         gap: 1,
                                         justifyContent: "space-between",
+                                        alignItems: "center",
                                     }}
                                 >
                                     <Typography
                                         sx={{
                                             textTransform: "capitalize",
+                                            m: 0.5,
                                         }}
                                         variant="body2"
+                                        fontWeight="bold"
                                     >
-                                        {power.name}-
+                                        <Chip label={power.name} />
                                     </Typography>
                                     <Typography variant="body2">
-                                        {power.pivot.value}
+                                        {power.pivot.value == 0
+                                            ? "Plano"
+                                            : power.pivot.value}
                                     </Typography>
                                 </Box>
                             ))}
@@ -144,15 +157,26 @@ const LensStoreIndex = () => {
                 accessorKey: "price",
                 enableGrouping: false,
                 Cell: ({ cell, row }) => (
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                        {cell.getValue()}
-                        {/* <IconButton
-                            onClick={() =>
-                                navigate(`/lens/edit_lens/${row.original.id}`)
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                        }}
+                    >
+                        <Typography>{cell.getValue()}</Typography>
+                        <IconButton
+                            onClick={
+                                () => {
+                                    // handleDelete
+
+                                    handleDelete(row.original.id);
+                                }
+                                // navigate(`/lens/edit_lens/${row.original.id}`)
                             }
                         >
-                            <Edit />
-                        </IconButton> */}
+                            <Delete color="error" />
+                        </IconButton>
                     </Box>
                 ),
             },

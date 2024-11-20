@@ -78,11 +78,11 @@ export default function AddLens() {
     const handleAddLens = async () => {
         if (validateForm()) {
             const singleVisionPowers = [
-                { power_id: 4, value: parseFloat(formData.sph) },
+                { power_id: 1, value: parseFloat(formData.sph) },
                 { power_id: 2, value: parseFloat(formData.cyl) },
             ];
             const varifocalPowers = [
-                { power_id: 4, value: parseFloat(formData.sph) },
+                { power_id: 1, value: parseFloat(formData.sph) },
                 { power_id: 3, value: parseFloat(formData.add) },
             ];
 
@@ -92,7 +92,7 @@ export default function AddLens() {
                 quantity: parseInt(formData.quantity),
                 coating_id: parseInt(formData.corting),
                 lens_powers:
-                    formData.lensType === 1
+                    formData.lensType === 4
                         ? singleVisionPowers
                         : varifocalPowers,
             };
