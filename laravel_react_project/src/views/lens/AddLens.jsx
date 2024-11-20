@@ -39,6 +39,8 @@ export default function AddLens() {
         quantity: "",
         corting: "",
     });
+    console.log(lensTypeList);
+    console.log(lenseCotingsList);
 
     const [errors, setErrors] = useState({
         lensType: false,
@@ -59,7 +61,7 @@ export default function AddLens() {
         const newErrors = {
             lensType: !formData.lensType,
             sph: !formData.sph,
-            cyl: parseInt(formData.lensType) === 1 ? !formData.cyl : false,
+            cyl: parseInt(formData.lensType) === 4 ? !formData.cyl : false,
             add:
                 parseInt(formData.lensType) === 2 ||
                 parseInt(formData.lensType) === 3
@@ -76,11 +78,11 @@ export default function AddLens() {
     const handleAddLens = async () => {
         if (validateForm()) {
             const singleVisionPowers = [
-                { power_id: 1, value: parseFloat(formData.sph) },
+                { power_id: 4, value: parseFloat(formData.sph) },
                 { power_id: 2, value: parseFloat(formData.cyl) },
             ];
             const varifocalPowers = [
-                { power_id: 1, value: parseFloat(formData.sph) },
+                { power_id: 4, value: parseFloat(formData.sph) },
                 { power_id: 3, value: parseFloat(formData.add) },
             ];
 
@@ -115,6 +117,7 @@ export default function AddLens() {
                 setErrors({});
             } catch (error) {
                 showAlert("Network error, try again", "error");
+                console.log("Error creating lens:", error);
             } finally {
                 setLoading(false);
             }
@@ -197,7 +200,7 @@ export default function AddLens() {
                                         }
                                     />
                                 </Grid>
-                                {parseInt(formData.lensType) === 1 && (
+                                {parseInt(formData.lensType) === 4 && (
                                     <Grid item xs={12} sm={6}>
                                         <TextField
                                             label="CYL"

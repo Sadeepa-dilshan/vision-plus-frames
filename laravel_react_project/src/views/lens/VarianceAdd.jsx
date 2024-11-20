@@ -3,20 +3,26 @@ import { Box, Paper, Typography } from "@mui/material";
 import AutoSelectField from "../../Components/AutoSelectField";
 import useData from "../../hooks/useData";
 import { useNavigate } from "react-router-dom";
+import axiosClient from "../../axiosClient";
+import { useStateContext } from "../../contexts/contextprovider";
+import { useAlert } from "../../contexts/AlertContext";
 
 export default function VarianceAdd() {
+    const { token } = useStateContext();
+    const { showAlert } = useAlert();
+
     const navigate = useNavigate();
     const {
         data: lensTypeList,
         loading: loadingLenceType,
         // error: errorLenceType,
-        // refresh: refreshLenceType,
+        refresh: refreshLenceType,
     } = useData("lens-types");
     const {
         data: lenseCotingsList,
         loading: loadingLenseCoting,
         // error: errorLenceCoting,
-        // refresh: refreshLenceCoting,
+        refresh: refreshLenceCoting,
     } = useData("lens-coatings");
 
     const [selectedValues, setSelectedValues] = useState({
@@ -27,6 +33,39 @@ export default function VarianceAdd() {
     const handleSelectChange = (field, value) => {
         // setSelectedValues((prevValues) => ({ ...prevValues, [field]: value }));
         setSelectedValues((prevValues) => ({ ...prevValues, [field]: value }));
+    };
+    const handleDelete = async (id, field) => {
+        if (field === "lensType") {
+            try {
+                const response = await axiosClient.delete(`/lens-types/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Optional: If your API requires authentication
+                    },
+                });
+
+                showAlert("successfully Deleted", "success");
+                refreshLenceType();
+            } catch (error) {
+                showAlert("Delete Failed try again", "error");
+            }
+        } else if (field === "lensCoatings") {
+            console.log(id);
+
+            try {
+                const response = await axiosClient.delete(
+                    `/lens-coatings/${id}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`, // Optional: If your API requires authentication
+                        },
+                    }
+                );
+                showAlert("successfully Deleted", "success");
+                refreshLenceCoting();
+            } catch (error) {
+                showAlert("Delete Failed try again", "error");
+            }
+        }
     };
 
     return (
@@ -47,6 +86,7 @@ export default function VarianceAdd() {
                     selectedValue: selectedValues.lensType,
                     field: "lensType",
                     path: "lense_type",
+                    loading: loadingLenceType,
                 },
                 {
                     label: "Lens Coatings",
@@ -54,13 +94,14 @@ export default function VarianceAdd() {
                     selectedValue: selectedValues.lensCoatings,
                     field: "lensCoatings",
                     path: "lense_coating",
+                    loading: loadingLenseCoting,
                 },
             ].map((item, index) => (
                 <Paper key={index} sx={{ p: 2, borderRadius: 2, boxShadow: 3 }}>
                     <AutoSelectField
                         label={item.label}
                         options={item.options}
-                        loading={loadingLenceType}
+                        loading={item.loading}
                         selectedValue={item.selectedValue}
                         onChange={(value) => {
                             handleSelectChange(item.field, value);
@@ -73,7 +114,9 @@ export default function VarianceAdd() {
                                 `/lens/${item.path}/edit/${item.selectedValue}`
                             )
                         }
-                        onDelete={() => console.log(`Delete ${item.label}`)}
+                        onDelete={() =>
+                            handleDelete(item.selectedValue, item.field)
+                        }
                     />
                 </Paper>
             ))}
