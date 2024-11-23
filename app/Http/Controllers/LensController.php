@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Lens;
 use App\Models\LensPower;
 use App\Models\LensStock;
 use Illuminate\Http\Request;
+use App\Models\LensStockChange;
 
 class LensController extends Controller
 {
@@ -14,7 +16,7 @@ class LensController extends Controller
      */
     public function index()
     {
-        $lenses = Lens::with(['type:id,name,description', 'coating:id,name,description', 'powers:id,name','lensStock'])->get();
+        $lenses = Lens::with(['type:id,name,description', 'coating:id,name,description', 'powers:id,name', 'lensStock'])->get();
         return response()->json($lenses, 200);
     }
     /**
@@ -27,8 +29,8 @@ class LensController extends Controller
             'coating_id' => 'required|exists:coatings,id',
             'price' => 'required|numeric|min:0',
             'lens_powers' => 'required|array',
-            'lens_powers.*.power_id' => 'required|exists:powers,id',
-            'lens_powers.*.value' => 'required|numeric|min:0',
+            'lens_powers.*.power_id' => 'required',
+            'lens_powers.*.value' => 'required|numeric',
             'quantity' => 'required|integer|min:0',
         ]);
         $lens = Lens::create([
@@ -56,14 +58,13 @@ class LensController extends Controller
         ], 201);
     }
 
-
     /**
      * Display the specified lens.
      */
     public function show(Lens $lens)
     {
         // Load related data for the lens
-        $lens->load(['type:id,name,description', 'coating:id,name,description', 'powers:id,name','lensStock']);
+        $lens->load(['type:id,name,description', 'coating:id,name,description', 'powers:id,name', 'lensStock']);
         return response()->json($lens, 200);
     }
 
@@ -78,20 +79,23 @@ class LensController extends Controller
             'price' => 'numeric|min:0',
             'lens_powers' => 'required|array',
             'lens_powers.*.power_id' => 'required|exists:powers,id',
-            'lens_powers.*.value' => 'required|numeric|min:0',
-            'quantity' => 'required|integer|min:0',
+            'lens_powers.*.value' => 'required|numeric',
+            'quantity' => 'required|integer',
         ]);
+    
+        // Update the Lens record
         $lens->update([
             'type_id' => $request->type_id ?? $lens->type_id,
             'coating_id' => $request->coating_id ?? $lens->coating_id,
             'price' => $request->price ?? $lens->price,
         ]);
-        // Delete existing LensPower records for the specified lens and power_ids in the request
+    
+        // Update Lens Powers
         $powerIds = array_column($request->lens_powers, 'power_id');
         LensPower::where('lens_id', $lens->id)
             ->whereIn('power_id', $powerIds)
             ->delete();
-
+    
         $lensPowers = [];
         foreach ($request->lens_powers as $powerData) {
             $lensPowers[] = LensPower::create([
@@ -100,26 +104,55 @@ class LensController extends Controller
                 'value' => $powerData['value'],
             ]);
         }
+    
+        // Update Lens Stock and Record Stock Changes
         $lensStock = $lens->lensStock;
         if ($lensStock) {
+            $changeQty = $request->quantity - $lensStock->qty; // Difference in stock quantity
+            $status = $changeQty > 0 ? 'plus' : 'minus';
+    
             $lensStock->update([
-                'initial_count' => $lensStock->initial_count,
                 'qty' => $request->quantity,
             ]);
+    
+            // Record a stock change only if there is a change in quantity
+            if ($changeQty !== 0) {
+                LensStockChange::create([
+                    'lens_stock_id' => $lensStock->id,
+                    'lens_id' => $lens->id,
+                    'status' => $status,
+                    'change_date' => now(),
+                    'change_qty' => abs($changeQty), // Corrected field name
+                    'reason' => 'Stock adjustment during lens update',
+                    'created_at' => now(),
+                ]);
+            }
         } else {
+            // Create a new stock record
             $lensStock = LensStock::create([
                 'lens_id' => $lens->id,
                 'initial_count' => $request->quantity,
                 'qty' => $request->quantity,
             ]);
+    
+            // Record the initial stock addition
+            LensStockChange::create([
+                'lens_stock_id' => $lensStock->id,
+                'lens_id' => $lens->id,
+                'status' => 'plus',
+                'change_qty' => $request->quantity,
+                'reason' => 'Initial stock added during lens creation',
+                'created_at' => now(),
+            ]);
         }
+    
         return response()->json([
             'lens' => $lens,
             'lens_powers' => $lensPowers,
             'lens_stock' => $lensStock,
         ], 200);
     }
-
+    
     /**
      * Remove the specified lens from storage.
      */
@@ -128,5 +161,42 @@ class LensController extends Controller
         // Delete the lens
         $lens->delete();
         return response()->json(['message' => 'Lens deleted successfully'], 200);
+    }
+    //lens 
+    public function topLensesByStockReduction(Request $request)
+    {
+        $startDate = $request->input('start_date', Carbon::now()->subDays(30)->toDateString());
+        $endDate = $request->input('end_date', Carbon::now()->toDateString());
+
+        // Ensure dates are formatted correctly
+        $startDate = Carbon::parse($startDate)->startOfDay();
+        $endDate = Carbon::parse($endDate)->endOfDay();
+
+        // Query the stock_changes table for the top 5 Lenses 
+        $topLenses = LensStockChange::with(['lens.type', 'lens.coating', 'lens.color'])
+            ->select('lens_id')
+            ->where('status', 'minus')
+            ->whereBetween('change_date', [$startDate, $endDate])
+            ->selectRaw('SUM(change_qty) as total_reduction')
+            ->groupBy('lens_id')
+            ->orderBy('total_reduction', 'desc')
+            ->take(5)
+            ->get()
+            ->map(function ($stockChange) {
+                $lens = $stockChange->lens;
+                $currentQty = LensStock::where('lens_id', $lens->id)->value('qty');
+
+                return [
+                    'lens_id' => $lens->id,
+                    'total_reduction' => $stockChange->total_reduction,
+                    'current_qty' => $currentQty ?? 0,
+                    'lens' => [
+                        'id' => $lens->id,
+                        'created_at' => $lens->created_at,
+                        'updated_at' => $lens->updated_at,
+                    ]
+                ];
+            });
+        return response()->json($topLenses, 200);
     }
 }

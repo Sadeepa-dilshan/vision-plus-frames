@@ -6,6 +6,7 @@ use App\Models\Power;
 use App\Models\Coating;
 use App\Models\LensPower;
 use App\Models\LensStock;
+use App\Models\LensStockChange;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -51,6 +52,11 @@ class Lens extends Model
     public function lensStock()
     {
         return $this->hasOne(LensStock::class, 'lens_id');
-    }    
+    }   
+
+    public function lensStockChanges()
+    {
+        return $this->hasMany(LensStockChange::class);
+    } 
 
 }

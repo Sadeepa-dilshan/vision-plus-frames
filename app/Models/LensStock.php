@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\LensStockChange;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class LensStock extends Model
 {
@@ -26,5 +27,9 @@ class LensStock extends Model
     public function lens()
     {
         return $this->belongsTo(Lens::class);
+    }
+    public function stockChanges()
+    {
+        return $this->hasMany(LensStockChange::class);
     }
 }

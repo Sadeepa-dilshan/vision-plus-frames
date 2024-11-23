@@ -14,7 +14,6 @@ class FrameController extends Controller
     public function index()
     {
         $frames = Frame::with(['stocks', 'brand', 'code', 'color'])->get();
-
         return response()->json($frames);
     }
 
@@ -90,7 +89,6 @@ class FrameController extends Controller
         $frame->update($frameData);
         // Update stock and stock_changes
         $existingStock = $frame->stocks()->first();
-
         if ($existingStock) {
             // Calculate the change in quantity and status
             if ($request->quantity > $existingStock->qty) {
@@ -102,10 +100,8 @@ class FrameController extends Controller
             } else {
                 $changeQty = 0; // No change in stock
             }
-    
             // Update the existing stock quantity
             $existingStock->update(['qty' => $request->quantity]);
-    
             // Insert a new record in stock_changes table only if changeQty is not 0 or negative
             if ($changeQty > 0) {
                 StockChange::create([
@@ -145,7 +141,6 @@ class FrameController extends Controller
     public function destroy(Frame $frame)
     {
         $frame->delete();
-
         return response()->json(null, 204);
     }
 

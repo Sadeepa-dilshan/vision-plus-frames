@@ -13,6 +13,7 @@ use App\Http\Controllers\StockController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CoatingController;
 use App\Http\Controllers\LensTypeController;
+use App\Http\Controllers\LensStockController;
 use App\Http\Controllers\LensPowersController;
 
 /*
@@ -80,6 +81,15 @@ Route::middleware(['auth:sanctum'])->group(function() {
     Route::put('stocks/{stock}', [StockController::class, 'update'])->middleware('admin');
     Route::delete('stocks/{stock}', [StockController::class, 'destroy'])->middleware('admin');
     Route::get('/frames/{frameId}/stock-history', [StockController::class, 'getStockHistory']);
+
+    //lens
+    Route::get('lens-stocks', [LensStockController::class, 'index']);
+    Route::put('lens-stock/update/{lens}', [LensStockController::class, 'LensUpdate']);
+    Route::post('lens-stocks', [LensStockController::class, 'store']);
+    Route::get('lens-stocks/{stock}', [LensStockController::class, 'show']);
+    Route::put('lens-stocks/{stock}', [LensStockController::class, 'update']);
+    Route::delete('lens-stocks/{stock}', [LensStockController::class, 'destroy'])->middleware('admin');
+    Route::get('/lenses/{lensId}/stock-history', [LensStockController::class, 'getStockHistory']);
 });
 
 Route::apiResource('lenses', LensController::class);
@@ -87,7 +97,7 @@ Route::apiResource('lens-types', LensTypeController::class);
 Route::apiResource('lens-coatings', CoatingController::class);
 Route::apiResource('lens-powers', LensPowersController::class)->only('index','store','delete','show');
 Route::put('lens-powers/update-multiple', [LensPowersController::class, 'updateMultiple']);
-
+Route::get('top-lenses-by-stock-reduction', [LensController::class, 'toplensesByStockReduction']);
 
 Route::post('login',[AuthController::class,'login']);
 Route::post('register',[AuthController::class,'register']);
