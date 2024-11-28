@@ -2,8 +2,9 @@
 // app/Models/Branch.php
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\LensStockChange;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Branch extends Model
 {
@@ -14,5 +15,10 @@ class Branch extends Model
     public function stockChanges()
     {
         return $this->hasMany(StockChange::class);
+    }
+
+    public function lensStockChanges()
+    {
+        return $this->hasMany(LensStockChange::class);
     }
 }

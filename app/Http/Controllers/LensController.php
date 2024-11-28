@@ -81,8 +81,8 @@ class LensController extends Controller
             'lens_powers.*.power_id' => 'required|exists:powers,id',
             'lens_powers.*.value' => 'required|numeric',
             'quantity' => 'required|integer',
+            'branch_id' => 'required|integer', // Validate branch existence
         ]);
-    
         // Update the Lens record
         $lens->update([
             'type_id' => $request->type_id ?? $lens->type_id,
@@ -120,9 +120,10 @@ class LensController extends Controller
                 LensStockChange::create([
                     'lens_stock_id' => $lensStock->id,
                     'lens_id' => $lens->id,
+                    'branch_id' => $request->branch_id, // Add branch information
                     'status' => $status,
                     'change_date' => now(),
-                    'change_qty' => abs($changeQty), // Corrected field name
+                    'change_qty' => abs($changeQty),
                     'reason' => 'Stock adjustment during lens update',
                     'created_at' => now(),
                 ]);
@@ -139,6 +140,7 @@ class LensController extends Controller
             LensStockChange::create([
                 'lens_stock_id' => $lensStock->id,
                 'lens_id' => $lens->id,
+                'branch_id' => $request->branch_id, // Add branch information
                 'status' => 'plus',
                 'change_qty' => $request->quantity,
                 'reason' => 'Initial stock added during lens creation',
@@ -162,18 +164,19 @@ class LensController extends Controller
         $lens->delete();
         return response()->json(['message' => 'Lens deleted successfully'], 200);
     }
-    //lens 
+
+    //top lens
     public function topLensesByStockReduction(Request $request)
     {
         $startDate = $request->input('start_date', Carbon::now()->subDays(30)->toDateString());
         $endDate = $request->input('end_date', Carbon::now()->toDateString());
-
+    
         // Ensure dates are formatted correctly
         $startDate = Carbon::parse($startDate)->startOfDay();
         $endDate = Carbon::parse($endDate)->endOfDay();
-
-        // Query the stock_changes table for the top 5 Lenses 
-        $topLenses = LensStockChange::with(['lens.type', 'lens.coating', 'lens.color'])
+    
+        // Query the stock_changes table for the top 5 Lens
+        $topLens = LensStockChange::with(['lens.type', 'lens.lensStock', 'lens.coating'])
             ->select('lens_id')
             ->where('status', 'minus')
             ->whereBetween('change_date', [$startDate, $endDate])
@@ -184,19 +187,26 @@ class LensController extends Controller
             ->get()
             ->map(function ($stockChange) {
                 $lens = $stockChange->lens;
-                $currentQty = LensStock::where('lens_id', $lens->id)->value('qty');
-
+                $currentQty = $lens->lensStock ? $lens->lensStock->qty : 0;
+    
                 return [
                     'lens_id' => $lens->id,
                     'total_reduction' => $stockChange->total_reduction,
-                    'current_qty' => $currentQty ?? 0,
+                    'current_qty' => $currentQty,
                     'lens' => [
                         'id' => $lens->id,
-                        'created_at' => $lens->created_at,
-                        'updated_at' => $lens->updated_at,
-                    ]
+                        'price' => $lens->price,
+                        'type' => $lens->type ? $lens->type->name : null,
+                        'coating' => $lens->coating ? $lens->coating->name : null,
+                        'stock' => [
+                            'initial_count' => $lens->lensStock ? $lens->lensStock->initial_count : 0,
+                            'qty' => $currentQty,
+                        ],
+                    ],
                 ];
             });
-        return response()->json($topLenses, 200);
+    
+        return response()->json($topLens, 200);
     }
+    
 }

@@ -38,16 +38,13 @@ class LensStockController extends Controller
             'lens_id' => 'required|exists:lenses,id',
             'qty' => 'required|integer',
         ]);
-
         $stock->update($request->all());
-
         return response()->json($stock);
     }
 
     public function destroy(LensStock $stock)
     {
         $stock->delete();
-
         return response()->json(null, 204);
     }
 

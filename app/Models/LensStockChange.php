@@ -33,7 +33,6 @@ class LensStockChange extends Model
     {
         return $this->belongsTo(LensStock::class);
     }
-
     /**
      * Relationship to the Frame model.
      * A stock change might belong to a specific frame (optional).
@@ -42,7 +41,6 @@ class LensStockChange extends Model
     {
         return $this->belongsTo(Lens::class);
     }
-
     public function branch()
     {
         return $this->belongsTo(Branch::class);

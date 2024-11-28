@@ -74,7 +74,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
 });
 
 // Stocks Routes
-Route::middleware(['auth:sanctum'])->group(function() {
+// Route::middleware(['auth:sanctum'])->group(function() {
     Route::get('stocks', [StockController::class, 'index']);
     Route::post('stocks', [StockController::class, 'store'])->middleware('admin');
     Route::get('stocks/{stock}', [StockController::class, 'show']);
@@ -90,7 +90,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
     Route::put('lens-stocks/{stock}', [LensStockController::class, 'update']);
     Route::delete('lens-stocks/{stock}', [LensStockController::class, 'destroy'])->middleware('admin');
     Route::get('/lenses/{lensId}/stock-history', [LensStockController::class, 'getStockHistory']);
-});
+// });
 
 Route::apiResource('lenses', LensController::class);
 Route::apiResource('lens-types', LensTypeController::class);
