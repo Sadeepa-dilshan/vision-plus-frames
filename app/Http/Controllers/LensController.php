@@ -176,7 +176,7 @@ class LensController extends Controller
         $endDate = Carbon::parse($endDate)->endOfDay();
     
         // Query the stock_changes table for the top 5 Lens
-        $topLens = LensStockChange::with(['lens.type', 'lens.lensStock', 'lens.coating'])
+        $topLens = LensStockChange::with(['lens.type', 'lens.lensStock', 'lens.coating','lens.powers'])
             ->select('lens_id')
             ->where('status', 'minus')
             ->whereBetween('change_date', [$startDate, $endDate])
@@ -188,6 +188,14 @@ class LensController extends Controller
             ->map(function ($stockChange) {
                 $lens = $stockChange->lens;
                 $currentQty = $lens->lensStock ? $lens->lensStock->qty : 0;
+
+                 // Map lens powers
+                $lensPowers = $lens->powers->map(function ($power) {
+                    return [
+                        'power_id' => $power->id,
+                        'value' => $power->pivot->value, // Access value from the pivot table
+                    ];
+                });
     
                 return [
                     'lens_id' => $lens->id,
@@ -202,6 +210,7 @@ class LensController extends Controller
                             'initial_count' => $lens->lensStock ? $lens->lensStock->initial_count : 0,
                             'qty' => $currentQty,
                         ],
+                        'lens_powers' => $lensPowers,
                     ],
                 ];
             });
