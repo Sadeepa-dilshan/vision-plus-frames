@@ -11,7 +11,6 @@ const drawerWidth = 240;
 
 import DrawerList from "./DrawerList";
 export default function DesktopNav({ NavData }) {
-    const theme = useTheme();
     const [open, setOpen] = React.useState(true);
 
     const handleDrawerOpen = () => {

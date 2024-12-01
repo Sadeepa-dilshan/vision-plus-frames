@@ -180,11 +180,10 @@ export default function FrameCreate() {
                             id="price"
                             label="Price"
                             type="number"
+                            inputProps={{ min: 0 }}
                             value={price}
                             onChange={(e) => {
-                                if (e.target.value >= 0) {
-                                    setPrice(e.target.value);
-                                }
+                                setPrice(e.target.value);
                             }}
                             required
                         />
@@ -240,10 +239,9 @@ export default function FrameCreate() {
                             label="Quantity"
                             type="number"
                             value={quantity}
+                            inputProps={{ min: 0 }}
                             onChange={(e) => {
-                                if (e.target.value >= 0) {
-                                    setQuantity(e.target.value);
-                                }
+                                setQuantity(e.target.value);
                             }}
                             required
                         />

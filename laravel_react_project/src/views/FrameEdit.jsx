@@ -255,6 +255,7 @@ export default function FrameEdit() {
                                     name="price"
                                     label="Price"
                                     type="number"
+                                    inputProps={{ min: 0 }}
                                     value={frame.price}
                                     onChange={handleInputChange}
                                     required

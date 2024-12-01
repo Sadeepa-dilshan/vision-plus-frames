@@ -1,12 +1,42 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ResponsiveDatePicker from "../../Components/ResponsiveDatePicker";
 import dayjs from "dayjs";
 import LensDashboardTable from "../../Components/LensDashboardTable";
 import { Box, Typography, Paper } from "@mui/material";
+import { useStateContext } from "../../contexts/contextprovider";
+import axiosClient from "../../axiosClient";
 
 export default function DashboardLens() {
     const [fromDate, setFromDate] = useState(dayjs().subtract(30, "day"));
     const [toDate, setToDate] = useState(dayjs());
+    const [lenses, setLenses] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const { token } = useStateContext(); // Get the auth token
+    const fetchTopFrames = async () => {
+        setLoading(true);
+        try {
+            const response = await axiosClient.get(
+                "/top-lenses-by-stock-reduction",
+                {
+                    params: {
+                        start_date: fromDate.format("YYYY-MM-DD"),
+                        end_date: toDate.format("YYYY-MM-DD"),
+                    },
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            setLenses(response.data);
+        } catch (error) {
+            console.error("Error fetching top frames:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    useEffect(() => {
+        fetchTopFrames();
+    }, [fromDate, toDate]); // Fetch data when date range or sort option changes
 
     return (
         <Box sx={{ padding: 3 }}>
@@ -47,10 +77,10 @@ export default function DashboardLens() {
                     >
                         Top Performing Lenses
                     </Typography>
-                    <LensDashboardTable />
+                    <LensDashboardTable lenses={lenses} />
                 </Box>
 
-                <Box sx={{ width: "100%", maxWidth: 600 }}>
+                {/* <Box sx={{ width: "100%", maxWidth: 600 }}>
                     <Typography
                         align="center"
                         variant="h5"
@@ -59,7 +89,7 @@ export default function DashboardLens() {
                         Low Performing Lenses
                     </Typography>
                     <LensDashboardTable />
-                </Box>
+                </Box> */}
             </Box>
         </Box>
     );

@@ -1,17 +1,25 @@
 import { useNavigate } from "react-router-dom";
 import * as React from "react";
 import { useMemo, useState } from "react";
-import { Box, Stack, IconButton, Typography, Chip } from "@mui/material";
+import {
+    Box,
+    Stack,
+    IconButton,
+    Typography,
+    Chip,
+    Button,
+} from "@mui/material";
 import { MaterialReactTable } from "material-react-table";
 import {
     Add,
     AddCircle,
     Delete,
     Edit,
+    History,
     RemoveCircle,
 } from "@mui/icons-material";
 import useData from "../../hooks/useData";
-import AddLensesDialog from "../../Components/AddLensesDialog";
+
 import LenseQuantityAjustDialog from "../../Components/LenseQuantityAjustDialog";
 import axiosClient from "../../axiosClient";
 import { useStateContext } from "../../contexts/contextprovider";
@@ -25,15 +33,17 @@ const LensStoreIndex = () => {
         error: errorLensesList,
         refresh: refreshLenses,
     } = useData("lenses");
-    const [open, setOpen] = React.useState(false);
-    const [openQuantityAjust, setOpenQuantityAjust] = React.useState(false);
-    const [deletingId, setDeletingId] = useState(null); // Track which code is being deleted
 
-    const handleClose = () => {
-        setOpen(false);
-    };
+    const [openQuantityAjust, setOpenQuantityAjust] = React.useState({
+        open: false,
+        openType: null,
+    });
+    const [deletingId, setDeletingId] = useState(null); // Track which code is being deleted
+    const [selectedLens, setSelectedLens] = useState(null);
+
     const handleQtyAjustClose = () => {
-        setOpenQuantityAjust(false);
+        setOpenQuantityAjust({ open: false, openType: null });
+        setSelectedLens(null);
     };
     const handleDelete = (codeId) => {
         if (!window.confirm("Are you sure you want to delete this code?")) {
@@ -77,6 +87,16 @@ const LensStoreIndex = () => {
                     </Box>
                 ),
             },
+
+            {
+                header: "Quantity",
+                accessorKey: "lens_stock.qty",
+                Cell: ({ row, cell }) => (
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <Box>{cell.getValue()}</Box>
+                    </Box>
+                ),
+            },
             {
                 header: "Powers",
                 accessorKey: "powers",
@@ -108,7 +128,18 @@ const LensStoreIndex = () => {
                                         variant="body2"
                                         fontWeight="bold"
                                     >
-                                        <Chip label={power.name} />
+                                        <Chip
+                                            size="small"
+                                            sx={{
+                                                background:
+                                                    power.name === "sph"
+                                                        ? "#b6dafc"
+                                                        : power.name === "cyl"
+                                                        ? "#b6b9fc"
+                                                        : "#cffcb6",
+                                            }}
+                                            label={power.name}
+                                        />
                                     </Typography>
                                     <Typography variant="body2">
                                         {power.pivot.value == 0
@@ -122,35 +153,6 @@ const LensStoreIndex = () => {
                 ),
             },
 
-            {
-                header: "Quantity",
-                accessorKey: "lens_stock.qty",
-                Cell: ({ row, cell }) => (
-                    <Box>
-                        <Stack direction="row" spacing={1} alignItems="center">
-                            <IconButton
-                                variant="contained"
-                                color="success"
-                                size="small"
-                                onClick={() => setOpenQuantityAjust(true)}
-                            >
-                                <AddCircle />
-                            </IconButton>
-                            <Box>{cell.getValue()}</Box>
-                            {/* //add icon button with add remove icons */}
-
-                            <IconButton
-                                variant="contained"
-                                color="error"
-                                size="small"
-                                onClick={() => setOpenQuantityAjust(true)}
-                            >
-                                <RemoveCircle />
-                            </IconButton>
-                        </Stack>
-                    </Box>
-                ),
-            },
             { header: "Coating", accessorKey: "coating.name" },
             {
                 header: "Price",
@@ -187,6 +189,51 @@ const LensStoreIndex = () => {
     return (
         <div>
             <MaterialReactTable
+                enableRowActions
+                renderRowActions={({ row }) => (
+                    <Box sx={{ display: "flex", flexDirection: "column" }}>
+                        <IconButton
+                            variant="contained"
+                            color="success"
+                            size="small"
+                            onClick={() => {
+                                setOpenQuantityAjust({
+                                    open: true,
+                                    openType: "add",
+                                });
+
+                                setSelectedLens(row.original);
+                            }}
+                        >
+                            <AddCircle />
+                        </IconButton>
+                        {/* //add icon button with add remove icons */}
+
+                        <IconButton
+                            variant="contained"
+                            color="error"
+                            size="small"
+                            onClick={() => {
+                                setOpenQuantityAjust({
+                                    open: true,
+                                    openType: "remove",
+                                });
+                                setSelectedLens(row.original);
+                            }}
+                        >
+                            <RemoveCircle />
+                        </IconButton>
+                        <IconButton
+                            variant="contained"
+                            size="small"
+                            onClick={() =>
+                                navigate(`/lens/${row.original.id}/history`)
+                            }
+                        >
+                            <History />
+                        </IconButton>
+                    </Box>
+                )}
                 columns={columns}
                 data={lensesList}
                 enableColumnResizing
@@ -202,11 +249,29 @@ const LensStoreIndex = () => {
                 state={{ isLoading: loadingLensesList }}
                 muiToolbarAlertBannerChipProps={{ color: "primary" }}
                 muiTableContainerProps={{ sx: { maxHeight: 700 } }}
+                muiTableBodyRowProps={({ row }) => {
+                    const lensType = row.original?.type?.id;
+
+                    return {
+                        sx: {
+                            backgroundColor:
+                                lensType === 2
+                                    ? "#E4FFE6"
+                                    : lensType === 3
+                                    ? "#FFF2E4"
+                                    : lensType === 4
+                                    ? "#E4E7FF"
+                                    : "inherit", // Default background
+                        },
+                    };
+                }}
             />
-            <AddLensesDialog open={open} handleClose={handleClose} />
+
             <LenseQuantityAjustDialog
-                open={openQuantityAjust}
+                openQuantityAjust={openQuantityAjust}
                 handleClose={handleQtyAjustClose}
+                selectedLens={selectedLens}
+                refreshLenses={refreshLenses}
             />
         </div>
     );

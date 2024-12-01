@@ -20,6 +20,7 @@ import { useStateContext } from "../contexts/contextprovider";
 import useBranch from "../hooks/useBranch";
 import { useAlert } from "../contexts/AlertContext";
 import useFrame from "../hooks/useFrame";
+import HistoryDetailCard from "../Components/HistoryDetailCard";
 export default function FrameHistory() {
     const { id } = useParams(); // Get frame ID from the URL
     const [history, setHistory] = useState([]);
@@ -28,7 +29,6 @@ export default function FrameHistory() {
     const { token } = useStateContext(); // To handle the auth token
 
     const [colorData, setColorData] = useState(null);
-    const [loadingColor, setLoadingColor] = useState(true);
 
     const { frameData, loadingFrame } = useFrame(id);
     const { showAlert } = useAlert();
@@ -219,100 +219,14 @@ export default function FrameHistory() {
                                     .reverse()
                                     .map((change, index) => (
                                         <Grid item xs={12} key={index}>
-                                            <motion.div
-                                                initial={{
-                                                    scale: 0.9,
-                                                    opacity: 0,
-                                                }}
-                                                animate={{
-                                                    scale: 1,
-                                                    opacity: 1,
-                                                }}
-                                                transition={{
-                                                    duration: 0.3,
-                                                    delay: index * 0.1,
-                                                }}
-                                            >
-                                                <Card
-                                                    sx={{
-                                                        backgroundColor:
-                                                            change.status ===
-                                                            "plus"
-                                                                ? "rgba(76, 175, 80, 0.1)"
-                                                                : "rgba(244, 67, 54, 0.1)",
-                                                        borderRadius: 2,
-                                                        boxShadow: 3,
-                                                        padding: 2,
-                                                    }}
-                                                >
-                                                    <CardContent
-                                                        sx={{
-                                                            display: "flex",
-                                                            alignItems:
-                                                                "center",
-                                                        }}
-                                                    >
-                                                        <Avatar
-                                                            sx={{
-                                                                backgroundColor:
-                                                                    change.status ===
-                                                                    "plus"
-                                                                        ? "green"
-                                                                        : "red",
-                                                                marginRight: 2,
-                                                            }}
-                                                        >
-                                                            {change.status ===
-                                                            "plus" ? (
-                                                                <Add />
-                                                            ) : (
-                                                                <Remove />
-                                                            )}
-                                                        </Avatar>
-                                                        <Box>
-                                                            <Typography
-                                                                variant="body1"
-                                                                sx={{
-                                                                    fontWeight:
-                                                                        "bold",
-                                                                }}
-                                                            >
-                                                                {change.status ===
-                                                                "plus"
-                                                                    ? "Added"
-                                                                    : "Removed"}{" "}
-                                                                {
-                                                                    change.change_qty
-                                                                }{" "}
-                                                                units
-                                                            </Typography>
-                                                            <Typography
-                                                                textTransform={
-                                                                    "capitalize"
-                                                                }
-                                                                variant="body1"
-                                                            >
-                                                                {change.branch ||
-                                                                    "None"}{" "}
-                                                                {change.branch ===
-                                                                "stock"
-                                                                    ? "Updated"
-                                                                    : "Branch"}
-                                                            </Typography>
-
-                                                            <Typography
-                                                                variant="body2"
-                                                                color="textSecondary"
-                                                            >
-                                                                Date:
-                                                                {new Date(
-                                                                    change.change_date
-                                                                ).toLocaleString()}
-                                                            </Typography>
-                                                        </Box>
-                                                    </CardContent>
-                                                </Card>
-                                            </motion.div>
+                                            <HistoryDetailCard
+                                                status={change.status}
+                                                change_qty={change.change_qty}
+                                                branch_id={change.branch_id}
+                                                change_date={change.change_date}
+                                                index={index}
+                                                branch_name={change.branch}
+                                            />
                                         </Grid>
                                     ))}
                             </Grid>

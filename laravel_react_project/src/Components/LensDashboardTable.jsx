@@ -7,62 +7,12 @@ import {
     TableHead,
     TableRow,
     Paper,
+    Box,
+    Typography,
+    Chip,
 } from "@mui/material";
 
-const LensDashboardTable = () => {
-    // Sample data for the table
-    const rows = [
-        {
-            lensType: "Single Vision",
-            coating: "Anti-Reflective",
-            power: "-1.25",
-            count: 15,
-        },
-        {
-            lensType: "Bifocal",
-            coating: "Blue Light Block",
-            power: "-2.00",
-            count: 10,
-        },
-        {
-            lensType: "Progressive",
-            coating: "Scratch-Resistant",
-            power: "-3.50",
-            count: 8,
-        },
-        {
-            lensType: "Progressive",
-            coating: "Scratch-Resistant",
-            power: "-3.50",
-            count: 8,
-        },
-        {
-            lensType: "Progressive",
-            coating: "Scratch-Resistant",
-            power: "-3.50",
-            count: 8,
-        },
-        {
-            lensType: "Progressive",
-            coating: "Scratch-Resistant",
-            power: "-3.50",
-            count: 8,
-        },
-        {
-            lensType: "Progressive",
-            coating: "Scratch-Resistant",
-            power: "-3.50",
-            count: 8,
-        },
-        {
-            lensType: "Progressive",
-            coating: "Scratch-Resistant",
-            power: "-3.50",
-            count: 8,
-        },
-        // Add more rows as needed
-    ];
-
+const LensDashboardTable = ({ lenses }) => {
     return (
         <TableContainer
             component={Paper}
@@ -92,6 +42,7 @@ const LensDashboardTable = () => {
                         >
                             Lens Type
                         </TableCell>
+
                         <TableCell
                             sx={{
                                 p: 1.5,
@@ -110,7 +61,7 @@ const LensDashboardTable = () => {
                                 color: "white",
                             }}
                         >
-                            Power
+                            Lens Powers
                         </TableCell>
                         <TableCell
                             sx={{
@@ -120,12 +71,22 @@ const LensDashboardTable = () => {
                                 color: "white",
                             }}
                         >
-                            Count
+                            Total Reduction
+                        </TableCell>
+                        <TableCell
+                            sx={{
+                                p: 1.5,
+                                fontWeight: "bold",
+                                background: "gray",
+                                color: "white",
+                            }}
+                        >
+                            Avilable Quantity
                         </TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {rows.map((row, index) => (
+                    {lenses.map((row, index) => (
                         <TableRow
                             key={index}
                             sx={{
@@ -139,11 +100,71 @@ const LensDashboardTable = () => {
                         >
                             <TableCell sx={{ p: 1.5 }}>#{index + 1}</TableCell>
                             <TableCell sx={{ p: 1.5 }}>
-                                {row.lensType}
+                                {console.log(row)}
+                                {row.lens.type}
                             </TableCell>
-                            <TableCell sx={{ p: 1.5 }}>{row.coating}</TableCell>
-                            <TableCell sx={{ p: 1.5 }}>{row.power}</TableCell>
-                            <TableCell sx={{ p: 1.5 }}>{row.count}</TableCell>
+                            <TableCell sx={{ p: 1.5 }}>
+                                {row.lens.coating}
+                            </TableCell>
+                            <TableCell sx={{ p: 1.5 }}>
+                                {row.lens.lens_powers
+                                    ? row.lens.lens_powers.map((power) => (
+                                          <Box
+                                              key={power.power_id}
+                                              sx={{
+                                                  display: "flex",
+                                                  gap: 1,
+                                                  justifyContent:
+                                                      "space-between",
+                                                  alignItems: "center",
+                                              }}
+                                          >
+                                              <Typography
+                                                  sx={{
+                                                      textTransform:
+                                                          "capitalize",
+                                                      m: 0.5,
+                                                  }}
+                                                  variant="body2"
+                                                  fontWeight="bold"
+                                              >
+                                                  <Chip
+                                                      size="small"
+                                                      sx={{
+                                                          background:
+                                                              power.power_id ===
+                                                              1
+                                                                  ? "#b6dafc"
+                                                                  : power.power_id ===
+                                                                    2
+                                                                  ? "#b6b9fc"
+                                                                  : "#cffcb6",
+                                                      }}
+                                                      label={
+                                                          power.power_id === 1
+                                                              ? "Sph"
+                                                              : power.power_id ===
+                                                                2
+                                                              ? "Cyl"
+                                                              : "Add"
+                                                      }
+                                                  />
+                                              </Typography>
+                                              <Typography variant="body2">
+                                                  {power.value == 0
+                                                      ? "Plano"
+                                                      : power.value}
+                                              </Typography>
+                                          </Box>
+                                      ))
+                                    : "No Lens Powers"}
+                            </TableCell>
+                            <TableCell sx={{ p: 1.5 }}>
+                                {row.total_reduction}
+                            </TableCell>
+                            <TableCell sx={{ p: 1.5 }}>
+                                {row.current_qty}
+                            </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

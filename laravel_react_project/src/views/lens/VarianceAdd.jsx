@@ -18,6 +18,8 @@ export default function VarianceAdd() {
         // error: errorLenceType,
         refresh: refreshLenceType,
     } = useData("lens-types");
+    console.log(lensTypeList);
+
     const {
         data: lenseCotingsList,
         loading: loadingLenseCoting,

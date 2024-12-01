@@ -13,6 +13,9 @@ import {
 import { Delete, Edit } from "@mui/icons-material";
 import { MaterialReactTable } from "material-react-table";
 import useCodeList from "../hooks/useCodeList";
+import { deleteObject, listAll, ref } from "firebase/storage";
+import { storage } from "../firebaseConfig";
+import { useAlert } from "../contexts/AlertContext";
 
 export default function CodeIndex() {
     const { token } = useStateContext(); // To handle the auth token
@@ -20,29 +23,45 @@ export default function CodeIndex() {
     const navigate = useNavigate();
     const [deletingId, setDeletingId] = useState(null); // Track which code is being deleted
     const [loading, setLoading] = useState(null); // Track which code is being deleted
+    const { showAlert } = useAlert();
 
-    const handleDelete = (codeId) => {
+    const handleDelete = async (codeId) => {
         if (!window.confirm("Are you sure you want to delete this code?")) {
             return;
         }
 
-        // Set the current deleting code's ID
-        setDeletingId(codeId);
-        setLoading(true);
-        axiosClient
-            .delete(`/codes/${codeId}`, {
+        try {
+            // Set the current deleting code's ID
+            setDeletingId(codeId);
+            setLoading(true);
+
+            // Delete the code from your backend
+            await axiosClient.delete(`/codes/${codeId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
-            })
-            .then(() => {
-                refreshCodeList(); // Refresh the code list after deletion
-            })
-            .finally(() => {
-                // Reset the deleting state
-                setDeletingId(null);
-                setLoading(false);
             });
+
+            // Delete associated files from Firebase Storage
+            const desertRef = ref(storage, `images/${codeId}`);
+            const res = await listAll(desertRef);
+
+            // Ensure all delete operations are completed
+            const deletePromises = res.items.map((itemRef) =>
+                deleteObject(itemRef)
+            );
+            await Promise.all(deletePromises);
+            showAlert("Sucescully Deleted", "success");
+            refreshCodeList();
+        } catch (error) {
+            showAlert(
+                "Error during deletion refresh the page and try gain:",
+                "error"
+            );
+        } finally {
+            setDeletingId(null);
+            setLoading(false);
+        }
     };
 
     // Define table columns

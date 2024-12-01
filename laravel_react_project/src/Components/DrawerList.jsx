@@ -20,17 +20,28 @@ import { OpenInNew } from "@mui/icons-material";
 const drawerWidth = 240;
 
 export default function DrawerList({ NavData, toggleDrawer }) {
-    const { setUser, setToken } = useStateContext();
+    const { setUser, setToken, token } = useStateContext();
     const navigate = useNavigate();
     const location = useLocation();
 
-    const onLogout = (ev) => {
+    const onLogout = async (ev) => {
         ev.preventDefault();
-        axiosClient.get("/logout").then(() => {
+        try {
+            axiosClient.get(`/logout`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             setUser(null);
             setToken(null);
             localStorage.removeItem("ACCESS_TOKEN");
-        });
+            navigate("/login");
+        } catch (error) {
+            setUser(null);
+            setToken(null);
+            localStorage.removeItem("ACCESS_TOKEN");
+            navigate("/login");
+        }
     };
     const handleOpenInNewTab = (path) => {
         window.open(path, "_blank", "noopener,noreferrer");

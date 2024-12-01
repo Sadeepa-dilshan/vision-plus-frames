@@ -312,7 +312,7 @@ const router = createBrowserRouter([
                 ),
             },
             {
-                path: "history",
+                path: ":id/history",
                 element: (
                     <AnimatedPage>
                         <LensHistoryIndex />

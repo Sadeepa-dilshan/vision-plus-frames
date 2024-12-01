@@ -24,12 +24,8 @@ export default function AddLens() {
     const [loading, setLoading] = useState(false);
     const { data: lensTypeList, loading: loadingLensType } =
         useData("lens-types");
-    const {
-        data: lenseCotingsList,
-        loading: loadingLenseCoting,
-        error: errorLenceCoting,
-        refresh: refreshLenceCoting,
-    } = useData("lens-coatings");
+    const { data: lenseCotingsList, loading: loadingLenseCoting } =
+        useData("lens-coatings");
     const [formData, setFormData] = useState({
         lensType: "",
         sph: "",
@@ -39,8 +35,6 @@ export default function AddLens() {
         quantity: "",
         corting: "",
     });
-    console.log(lensTypeList);
-    console.log(lenseCotingsList);
 
     const [errors, setErrors] = useState({
         lensType: false,
@@ -114,7 +108,6 @@ export default function AddLens() {
                     quantity: "",
                     corting: "",
                 });
-                setErrors({});
             } catch (error) {
                 showAlert("Network error, try again", "error");
                 console.log("Error creating lens:", error);
@@ -184,63 +177,71 @@ export default function AddLens() {
                             >
                                 Lens Power
                             </Typography>
-                            <Grid container spacing={2}>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="SPH"
-                                        variant="outlined"
-                                        fullWidth
-                                        type="number"
-                                        name="sph"
-                                        value={formData.sph}
-                                        onChange={handleChange}
-                                        error={errors.sph}
-                                        helperText={
-                                            errors.sph ? "SPH is required." : ""
-                                        }
-                                    />
-                                </Grid>
-                                {parseInt(formData.lensType) === 4 && (
+                            {formData.lensType ? (
+                                <Grid container spacing={2}>
                                     <Grid item xs={12} sm={6}>
                                         <TextField
-                                            label="CYL"
+                                            label="SPH"
                                             variant="outlined"
                                             fullWidth
                                             type="number"
-                                            name="cyl"
-                                            value={formData.cyl}
+                                            name="sph"
+                                            value={formData.sph}
                                             onChange={handleChange}
-                                            error={errors.cyl}
+                                            error={errors.sph}
                                             helperText={
-                                                errors.cyl
-                                                    ? "CYL is required."
+                                                errors.sph
+                                                    ? "SPH is required."
                                                     : ""
                                             }
                                         />
                                     </Grid>
-                                )}
+                                    {parseInt(formData.lensType) === 4 && (
+                                        <Grid item xs={12} sm={6}>
+                                            <TextField
+                                                label="CYL"
+                                                variant="outlined"
+                                                fullWidth
+                                                type="number"
+                                                name="cyl"
+                                                value={formData.cyl}
+                                                onChange={handleChange}
+                                                error={errors.cyl}
+                                                helperText={
+                                                    errors.cyl
+                                                        ? "CYL is required."
+                                                        : ""
+                                                }
+                                            />
+                                        </Grid>
+                                    )}
 
-                                {(parseInt(formData.lensType) === 2 ||
-                                    parseInt(formData.lensType) === 3) && (
-                                    <Grid item xs={12}>
-                                        <TextField
-                                            label="ADD"
-                                            variant="outlined"
-                                            fullWidth
-                                            type="number"
-                                            name="add"
-                                            value={formData.add}
-                                            onChange={handleChange}
-                                            error={errors.add}
-                                            helperText={
-                                                errors.add
-                                                    ? `ADD is required for this lens type.`
-                                                    : ""
-                                            }
-                                        />
-                                    </Grid>
-                                )}
-                            </Grid>
+                                    {(parseInt(formData.lensType) === 2 ||
+                                        parseInt(formData.lensType) === 3) && (
+                                        <Grid item xs={12} sm={6}>
+                                            <TextField
+                                                label="ADD"
+                                                variant="outlined"
+                                                fullWidth
+                                                type="number"
+                                                name="add"
+                                                value={formData.add}
+                                                onChange={handleChange}
+                                                error={errors.add}
+                                                helperText={
+                                                    errors.add
+                                                        ? `ADD is required for this lens type.`
+                                                        : ""
+                                                }
+                                            />
+                                        </Grid>
+                                    )}
+                                </Grid>
+                            ) : (
+                                <Typography variant="caption" color="error">
+                                    Select Lens Type to add lense Powers
+                                </Typography>
+                            )}
                         </CardContent>
                     </Card>
                 </Grid>
@@ -252,6 +253,7 @@ export default function AddLens() {
                         fullWidth
                         type="number"
                         name="price"
+                        inputProps={{ min: 0 }}
                         value={formData.price}
                         onChange={handleChange}
                         error={errors.price}
@@ -264,6 +266,7 @@ export default function AddLens() {
                         variant="outlined"
                         fullWidth
                         type="number"
+                        inputProps={{ min: 0 }}
                         name="quantity"
                         value={formData.quantity}
                         onChange={handleChange}
