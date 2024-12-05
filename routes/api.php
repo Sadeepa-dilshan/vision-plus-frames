@@ -98,6 +98,7 @@ Route::apiResource('lens-coatings', CoatingController::class);
 Route::apiResource('lens-powers', LensPowersController::class)->only('index','store','delete','show');
 Route::put('lens-powers/update-multiple', [LensPowersController::class, 'updateMultiple']);
 Route::get('top-lenses-by-stock-reduction', [LensController::class, 'toplensesByStockReduction']);
+Route::get('low-lenses-by-stock-reduction', [LensController::class, 'lowPerformingLensesByStockReduction']);
 
 Route::post('login',[AuthController::class,'login']);
 Route::post('register',[AuthController::class,'register']);
