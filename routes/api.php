@@ -67,6 +67,7 @@ use App\Http\Controllers\LensPowersController;
 
     // Stocks Routes
     Route::get('stocks/all-stock', [StockController::class, 'allStock']);
+    Route::get('stocks/brandwise-stock', [StockController::class, 'brandWiseStock']);
     Route::get('stocks/total-sold', [StockController::class, 'totalSoldQty']);
     Route::get('stocks', [StockController::class, 'index']);
     Route::post('stocks', [StockController::class, 'store'])->middleware('admin');

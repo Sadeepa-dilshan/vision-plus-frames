@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use App\Models\Brand;
 use App\Models\Stock;
 use App\Models\StockChange;
 use Illuminate\Http\Request;
@@ -78,8 +79,8 @@ class StockController extends Controller
     //all stocks
     public function allStock()
     {
-        $totalQty = Stock::sum('qty'); 
-        return response()->json(['total_stock' => $totalQty], 200); 
+        $totalQty = Stock::sum('qty');
+        return response()->json(['total_stock' => $totalQty], 200);
     }
 
     //total sold quantity
@@ -98,6 +99,24 @@ class StockController extends Controller
             ->sum('change_qty');
 
         return response()->json(['total_sold_quantity' => $totalQty], 200);
-    }    
+    }
 
+    public function brandWiseStock()
+    {
+        $brandWiseStock = Brand::with('frames.stocks')
+            ->get()
+            ->map(function ($brand) {
+                $totalStock = $brand->frames->sum(function ($frame) {
+                    return $frame->stocks->sum('qty'); // Sum stock quantities for each frame
+                });
+
+                return [
+                    'brand_id' => $brand->id,
+                    'brand_name' => $brand->brand_name,
+                    'total_stock' => $totalStock,
+                ];
+            });
+
+        return response()->json($brandWiseStock, 200);
+    }
 }
