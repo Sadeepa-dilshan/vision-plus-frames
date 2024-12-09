@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Stock;
 use App\Models\StockChange;
 use Illuminate\Http\Request;
@@ -73,4 +74,30 @@ class StockController extends Controller
             'changes' => $stockChanges,
         ]);
     }
+
+    //all stocks
+    public function allStock()
+    {
+        $totalQty = Stock::sum('qty'); 
+        return response()->json(['total_stock' => $totalQty], 200); 
+    }
+
+    //total sold quantity
+    public function totalSoldQty(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+        $startDate = Carbon::parse($request->start_date)->startOfDay();
+        $endDate = Carbon::parse($request->end_date)->endOfDay();
+
+        $totalQty = StockChange::where('status', 'minus')
+            ->whereBetween('change_date', [$startDate, $endDate])
+            ->sum('change_qty');
+
+        return response()->json(['total_sold_quantity' => $totalQty], 200);
+    }    
+
 }
