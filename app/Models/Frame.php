@@ -38,3 +38,4 @@ class Frame extends Model
         return $this->hasMany(StockChange::class);
     }
 }
+    

@@ -31,6 +31,7 @@ class LensController extends Controller
             'lens_powers' => 'required|array',
             'lens_powers.*.power_id' => 'required',
             'lens_powers.*.value' => 'required|numeric',
+            'lens_powers.*.side' => 'nullable|string|in:left,right,both', 
             'quantity' => 'required|integer|min:0',
         ]);
         $lens = Lens::create([
@@ -44,6 +45,7 @@ class LensController extends Controller
                 'lens_id' => $lens->id,
                 'power_id' => $powerData['power_id'],
                 'value' => $powerData['value'],
+                'side' => $powerData['side'],
             ]);
         }
         $lensStock = LensStock::create([
@@ -80,6 +82,7 @@ class LensController extends Controller
             'lens_powers' => 'required|array',
             'lens_powers.*.power_id' => 'required|exists:powers,id',
             'lens_powers.*.value' => 'required|numeric',
+            'lens_powers.*.side' => 'nullable|string|in:left,right,both', 
             'quantity' => 'required|integer',
             'branch_id' => 'required|integer', // Validate branch existence
         ]);
@@ -102,6 +105,7 @@ class LensController extends Controller
                 'lens_id' => $lens->id,
                 'power_id' => $powerData['power_id'],
                 'value' => $powerData['value'],
+                'side' => $powerData['side'],
             ]);
         }
 

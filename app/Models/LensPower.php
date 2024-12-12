@@ -13,6 +13,7 @@ class LensPower extends Model
         'lens_id',
         'power_id',
         'value',
+        'side'
     ];
 
     /**
