@@ -16,7 +16,7 @@ class LensController extends Controller
      */
     public function index()
     {
-        $lenses = Lens::with(['type:id,name,description', 'coating:id,name,description', 'powers:id,name', 'lensStock'])->get();
+        $lenses = Lens::with(['type:id,name,description', 'coating:id,name,description', 'powers:id,name,side', 'lensStock'])->get();
         return response()->json($lenses, 200);
     }
     /**
