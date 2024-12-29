@@ -95,7 +95,12 @@ const FrameCountIndex = () => {
                 variant="outlined"
                 fullWidth
                 value={filter}
-                onChange={(e) => setFilter(e.target.value)}
+                onChange={(e) => {
+                    setFilter(e.target.value);
+                    if (currentPage !== 1) {
+                        setCurrentPage(1);
+                    }
+                }}
             />
             <table
                 style={{

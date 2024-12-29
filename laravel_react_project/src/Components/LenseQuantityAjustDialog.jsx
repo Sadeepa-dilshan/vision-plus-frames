@@ -45,6 +45,7 @@ export default function LenseQuantityAjustDialog({
             setBranch("");
         }
     }, [openQuantityAjust.open]);
+
     const addQty = async () => {
         setLoading(true);
 
@@ -58,7 +59,9 @@ export default function LenseQuantityAjustDialog({
                 lens_powers: selectedLens.powers.map((item) => ({
                     power_id: item.pivot.power_id,
                     value: parseFloat(item.pivot.value),
+                    side: item.side,
                 })),
+                branch_id: null,
             };
             const lensDataEdit = {
                 type_id: selectedLens.type_id,
@@ -70,6 +73,7 @@ export default function LenseQuantityAjustDialog({
                 lens_powers: selectedLens.powers.map((item) => ({
                     power_id: item.pivot.power_id,
                     value: parseFloat(item.pivot.value),
+                    side: item.side,
                 })),
             };
 
@@ -92,7 +96,7 @@ export default function LenseQuantityAjustDialog({
     const sendData = async (data) => {
         try {
             setLoading(true);
-            await axiosClient.patch(`lenses/${selectedLens.id}`, data, {
+            await axiosClient.put(`lenses/${selectedLens.id}`, data, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

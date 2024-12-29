@@ -10,165 +10,178 @@ import {
     Box,
     Typography,
     Chip,
+    CircularProgress,
 } from "@mui/material";
 
-const LensDashboardTable = ({ lenses }) => {
+const LensDashboardTable = ({ lenses, loading }) => {
     return (
         <TableContainer
             component={Paper}
             elevation={3}
-            sx={{ borderRadius: 2, overflow: "hidden" }}
+            sx={{
+                borderRadius: 2,
+                overflow: "hidden",
+                p: 2,
+                boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.1)",
+            }}
         >
-            <Table>
-                <TableHead>
-                    <TableRow>
-                        <TableCell
-                            sx={{
-                                p: 1.5,
-                                fontWeight: "bold",
-                                background: "gray",
-                                color: "white",
-                            }}
-                        >
-                            #
-                        </TableCell>
-                        <TableCell
-                            sx={{
-                                p: 1.5,
-                                fontWeight: "bold",
-                                background: "gray",
-                                color: "white",
-                            }}
-                        >
-                            Lens Type
-                        </TableCell>
-
-                        <TableCell
-                            sx={{
-                                p: 1.5,
-                                fontWeight: "bold",
-                                background: "gray",
-                                color: "white",
-                            }}
-                        >
-                            Coating
-                        </TableCell>
-                        <TableCell
-                            sx={{
-                                p: 1.5,
-                                fontWeight: "bold",
-                                background: "gray",
-                                color: "white",
-                            }}
-                        >
-                            Lens Powers
-                        </TableCell>
-                        <TableCell
-                            sx={{
-                                p: 1.5,
-                                fontWeight: "bold",
-                                background: "gray",
-                                color: "white",
-                            }}
-                        >
-                            Total Reduction
-                        </TableCell>
-                        <TableCell
-                            sx={{
-                                p: 1.5,
-                                fontWeight: "bold",
-                                background: "gray",
-                                color: "white",
-                            }}
-                        >
-                            Avilable Quantity
-                        </TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {lenses.map((row, index) => (
-                        <TableRow
-                            key={index}
-                            sx={{
-                                "&:nth-of-type(odd)": {
-                                    backgroundColor: "action.hover",
-                                },
-                                "&:hover": {
-                                    backgroundColor: "action.selected",
-                                },
-                            }}
-                        >
-                            <TableCell sx={{ p: 1.5 }}>#{index + 1}</TableCell>
-                            <TableCell sx={{ p: 1.5 }}>
-                                {console.log(row)}
-                                {row.lens.type}
-                            </TableCell>
-                            <TableCell sx={{ p: 1.5 }}>
-                                {row.lens.coating}
-                            </TableCell>
-                            <TableCell sx={{ p: 1.5 }}>
-                                {row.lens.lens_powers
-                                    ? row.lens.lens_powers.map((power) => (
-                                          <Box
-                                              key={power.power_id}
-                                              sx={{
-                                                  display: "flex",
-                                                  gap: 1,
-                                                  justifyContent:
-                                                      "space-between",
-                                                  alignItems: "center",
-                                              }}
-                                          >
-                                              <Typography
-                                                  sx={{
-                                                      textTransform:
-                                                          "capitalize",
-                                                      m: 0.5,
-                                                  }}
-                                                  variant="body2"
-                                                  fontWeight="bold"
-                                              >
-                                                  <Chip
-                                                      size="small"
-                                                      sx={{
-                                                          background:
-                                                              power.power_id ===
-                                                              1
-                                                                  ? "#b6dafc"
-                                                                  : power.power_id ===
-                                                                    2
-                                                                  ? "#b6b9fc"
-                                                                  : "#cffcb6",
-                                                      }}
-                                                      label={
-                                                          power.power_id === 1
-                                                              ? "Sph"
-                                                              : power.power_id ===
-                                                                2
-                                                              ? "Cyl"
-                                                              : "Add"
-                                                      }
-                                                  />
-                                              </Typography>
-                                              <Typography variant="body2">
-                                                  {power.value == 0
-                                                      ? "Plano"
-                                                      : power.value}
-                                              </Typography>
-                                          </Box>
-                                      ))
-                                    : "No Lens Powers"}
-                            </TableCell>
-                            <TableCell sx={{ p: 1.5 }}>
-                                {row.total_reduction}
-                            </TableCell>
-                            <TableCell sx={{ p: 1.5 }}>
-                                {row.current_qty}
-                            </TableCell>
+            {loading ? (
+                <Box
+                    sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        height: "100%",
+                    }}
+                >
+                    <CircularProgress />
+                </Box>
+            ) : lenses.length === 0 ? (
+                <Typography
+                    variant="body1"
+                    textAlign="center"
+                    color="text.secondary"
+                >
+                    No data available
+                </Typography>
+            ) : (
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            {[
+                                "#",
+                                "Lens Type",
+                                "Coating",
+                                "Lens Powers",
+                                "Price",
+                                "Total Reduction",
+                                "Available Quantity",
+                            ].map((header) => (
+                                <TableCell
+                                    key={header}
+                                    sx={{
+                                        p: 1.5,
+                                        fontWeight: "bold",
+                                        background: "#3f51b5",
+                                        color: "white",
+                                        textAlign: "left",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                >
+                                    {header}
+                                </TableCell>
+                            ))}
                         </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+                    </TableHead>
+                    <TableBody>
+                        {lenses.map((row, index) => (
+                            <TableRow
+                                key={index}
+                                sx={{
+                                    "&:nth-of-type(odd)": {
+                                        backgroundColor: "#f7f7f7",
+                                    },
+                                    "&:hover": {
+                                        backgroundColor: "#e3f2fd",
+                                    },
+                                    transition: "background-color 0.3s ease",
+                                }}
+                            >
+                                <TableCell sx={{ p: 1, textAlign: "left" }}>
+                                    #{index + 1}
+                                </TableCell>
+                                <TableCell sx={{ p: 1, textAlign: "left" }}>
+                                    {row.lens.type}
+                                </TableCell>
+                                <TableCell sx={{ p: 1, textAlign: "left" }}>
+                                    {row.lens.coating}
+                                </TableCell>
+                                <TableCell sx={{ p: 1 }}>
+                                    {row.lens.lens_powers ? (
+                                        <Box
+                                            sx={{
+                                                display: "flex",
+                                                flexWrap: "wrap", // Ensure wrapping in case of too many lens powers
+                                                gap: 8, // Adjusted spacing for inline view
+                                                justifyContent: "flex-start",
+                                            }}
+                                        >
+                                            {row.lens.lens_powers.map(
+                                                (power) => (
+                                                    <Box
+                                                        key={power.power_id}
+                                                        sx={{
+                                                            display: "flex",
+                                                            gap: 2,
+                                                            alignItems:
+                                                                "center",
+                                                            mb: 1,
+                                                        }}
+                                                    >
+                                                        <Chip
+                                                            size="small"
+                                                            sx={{
+                                                                background:
+                                                                    power.power_id ===
+                                                                    1
+                                                                        ? "#b6dafc"
+                                                                        : power.power_id ===
+                                                                          2
+                                                                        ? "#b6b9fc"
+                                                                        : "#cffcb6",
+                                                                fontSize:
+                                                                    "0.75rem", // Smaller font for better alignment
+                                                            }}
+                                                            label={
+                                                                power.power_id ===
+                                                                1
+                                                                    ? "Sph"
+                                                                    : power.power_id ===
+                                                                      2
+                                                                    ? "Cyl"
+                                                                    : "Add"
+                                                            }
+                                                        />
+                                                        <Typography
+                                                            variant="body2"
+                                                            sx={{
+                                                                fontWeight:
+                                                                    "bold",
+                                                                fontSize:
+                                                                    "0.875rem", // Ensures better alignment with chips
+                                                            }}
+                                                        >
+                                                            {power.value === 0
+                                                                ? "Plano"
+                                                                : power.value}
+                                                        </Typography>
+                                                    </Box>
+                                                )
+                                            )}
+                                        </Box>
+                                    ) : (
+                                        <Typography
+                                            variant="body2"
+                                            color="text.secondary"
+                                        >
+                                            No Lens Powers
+                                        </Typography>
+                                    )}
+                                </TableCell>
+                                <TableCell sx={{ p: 1, textAlign: "left" }}>
+                                    Rs:{row.lens.price}
+                                </TableCell>
+                                <TableCell sx={{ p: 1, textAlign: "left" }}>
+                                    {row.total_reduction}
+                                </TableCell>
+                                <TableCell sx={{ p: 1, textAlign: "left" }}>
+                                    {row.current_qty}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            )}
         </TableContainer>
     );
 };

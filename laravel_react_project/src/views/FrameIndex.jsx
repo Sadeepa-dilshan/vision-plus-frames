@@ -63,6 +63,8 @@ export default function FrameIndex() {
             accessorKey: "actions",
             header: "Actions",
             size: 50,
+            enableGrouping: false,
+
             Cell: ({ row }) => (
                 <>
                     <IconButton
@@ -92,6 +94,8 @@ export default function FrameIndex() {
         {
             accessorKey: "image",
             header: "Image",
+            enableGrouping: false,
+
             size: 100,
             Cell: ({ cell }) =>
                 cell.getValue() ? (
@@ -180,12 +184,13 @@ export default function FrameIndex() {
                     columns={columns}
                     data={frameDataList}
                     enableRowSelection={false}
+                    enableGrouping
                     enablePagination
                     enableColumnFilters
                     enableSorting
                     enableToolbarInternalActions
                     initialState={{
-                        pagination: { pageSize: 10, pageIndex: 0 },
+                        pagination: { pageSize: 50, pageIndex: 0 },
                     }}
                     muiPaginationProps={{
                         color: "primary", // Customize pagination button color

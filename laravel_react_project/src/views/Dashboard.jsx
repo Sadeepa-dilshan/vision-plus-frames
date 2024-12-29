@@ -10,6 +10,7 @@ import {
     useMediaQuery,
     useTheme,
     Tooltip,
+    Paper,
 } from "@mui/material";
 import ResponsiveDatePicker from "../Components/ResponsiveDatePicker";
 import dayjs from "dayjs";
@@ -19,10 +20,21 @@ import CircleIcon from "@mui/icons-material/Circle";
 import NightlightRoundIcon from "@mui/icons-material/NightlightRound";
 import { motion } from "framer-motion";
 
+import useDataById from "../hooks/useDataById";
+import StockCountTable from "../Components/StockCountTable";
+import useData from "../hooks/useData";
+
 export default function Dashboard() {
     const [frames, setFrames] = useState([]);
+    const [soldCount, setSoldCount] = useState(null);
+    const [soldloading, setSoldloading] = useState(true);
     const [loading, setLoading] = useState(false);
     const { token } = useStateContext(); // Get the auth token
+    const { data: totalQty, loading: totalQtyLoading } =
+        useDataById("stocks/all-stock");
+    const { data: brandwiseStock, loading: brandwiseStockLoading } = useData(
+        "stocks/brandwise-stock"
+    );
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -32,6 +44,7 @@ export default function Dashboard() {
 
     useEffect(() => {
         fetchTopFrames();
+        fetchSoldCount();
     }, [fromDate, toDate]); // Fetch data when date range or sort option changes
 
     // Fetch top 5 frames with most stock reductions based on selected date range
@@ -57,16 +70,74 @@ export default function Dashboard() {
             setLoading(false);
         }
     };
+    const fetchSoldCount = async () => {
+        setSoldloading(true);
+        try {
+            const response = await axiosClient.get("/stocks/total-sold", {
+                params: {
+                    start_date: fromDate.format("YYYY-MM-DD"),
+                    end_date: toDate.format("YYYY-MM-DD"),
+                },
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            setSoldCount(response.data);
+        } catch (error) {
+            console.error("Error fetching top frames:", error);
+        } finally {
+            setSoldloading(false);
+        }
+    };
 
     return (
         <Box sx={{ marginTop: 3 }}>
-            {/* Date Range Picker */}
-            <ResponsiveDatePicker
-                fromDate={fromDate}
-                toDate={toDate}
-                setFromDate={setFromDate}
-                setToDate={setToDate}
-            />
+            <Paper
+                elevation={2}
+                sx={{
+                    display: "flex",
+                    width: "100%",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    flexWrap: "wrap",
+                }}
+                component={"div"}
+            >
+                <Paper
+                    sx={{
+                        padding: 2,
+                        display: "flex",
+                        flexGrow: 1,
+                        justifyContent: "space-between",
+                        margin: 1,
+                    }}
+                >
+                    <Typography variant="h6">Total Stock Quantity</Typography>
+                    <Typography variant="h6">
+                        {totalQtyLoading ? "..." : totalQty?.total_stock}
+                    </Typography>
+                </Paper>
+                <Paper
+                    sx={{
+                        padding: 2,
+                        display: "flex",
+                        flexGrow: 1,
+                        justifyContent: "space-between",
+                        margin: 1,
+                    }}
+                >
+                    <Typography variant="h6">Total Sold Quantity</Typography>
+                    <Typography variant="h6">
+                        {soldloading ? "..." : soldCount?.total_sold_quantity}
+                    </Typography>
+                </Paper>
+                <ResponsiveDatePicker
+                    fromDate={fromDate}
+                    toDate={toDate}
+                    setFromDate={setFromDate}
+                    setToDate={setToDate}
+                />
+            </Paper>
 
             {loading ? (
                 <Box>
@@ -287,6 +358,12 @@ export default function Dashboard() {
                     ))}
                 </Box>
             )}
+            <div style={{ display: "flex", justifyContent: "center" }}>
+                <StockCountTable
+                    brandWiseStock={brandwiseStock}
+                    loading={brandwiseStockLoading}
+                />
+            </div>
         </Box>
     );
 }

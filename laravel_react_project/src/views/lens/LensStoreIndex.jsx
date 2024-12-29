@@ -8,6 +8,8 @@ import {
     Typography,
     Chip,
     Button,
+    Checkbox,
+    Input,
 } from "@mui/material";
 import { MaterialReactTable } from "material-react-table";
 import {
@@ -25,7 +27,7 @@ import axiosClient from "../../axiosClient";
 import { useStateContext } from "../../contexts/contextprovider";
 const LensStoreIndex = () => {
     const { token } = useStateContext(); // To handle the auth token
-
+    const [qtyAjust, setQtyAjust] = React.useState({});
     const navigate = useNavigate();
     const {
         data: lensesList,
@@ -93,6 +95,36 @@ const LensStoreIndex = () => {
                 accessorKey: "lens_stock.qty",
                 Cell: ({ row, cell }) => (
                     <Box sx={{ display: "flex", alignItems: "center" }}>
+                        {/* <IconButton
+                            variant="contained"
+                            color="success"
+                            size="small"
+                            onClick={() => {
+                                setOpenQuantityAjust({
+                                    open: true,
+                                    openType: "add",
+                                });
+
+                                setSelectedLens(row.original);
+                            }}
+                        >
+                            <AddCircle />
+                        </IconButton> */}
+
+                        {/* <IconButton
+                            variant="contained"
+                            color="error"
+                            size="small"
+                            onClick={() => {
+                                setOpenQuantityAjust({
+                                    open: true,
+                                    openType: "remove",
+                                });
+                                setSelectedLens(row.original);
+                            }}
+                        >
+                            <RemoveCircle />
+                        </IconButton> */}
                         <Box>{cell.getValue()}</Box>
                     </Box>
                 ),
@@ -101,7 +133,8 @@ const LensStoreIndex = () => {
                 header: "Powers",
                 accessorKey: "powers",
                 enableGrouping: false,
-                Cell: ({ cell }) => (
+                size: 300,
+                Cell: ({ row, cell }) => (
                     <Box
                         sx={{
                             display: "flex",
@@ -109,46 +142,58 @@ const LensStoreIndex = () => {
                             alignItems: "center",
                         }}
                     >
-                        <div>
-                            {cell.getValue().map((power) => (
+                        {cell
+                            .getValue()
+                            .sort((a, b) =>
+                                a.name === "sph" ? -1 : b.name === "sph" ? 1 : 0
+                            ) // Sort sph first
+                            .map((power, index) => (
                                 <Box
                                     key={power.id}
                                     sx={{
-                                        display: "flex",
-                                        gap: 1,
-                                        justifyContent: "space-between",
-                                        alignItems: "center",
+                                        display: "flex", // Arrange the elements horizontally
+                                        gap: 1, // Space between elements
+                                        alignItems: "center", // Align the items centrally
+                                        justifyContent: "flex-start", // Align items to the left
+                                        mr: 1,
                                     }}
                                 >
-                                    <Typography
-                                        sx={{
-                                            textTransform: "capitalize",
-                                            m: 0.5,
-                                        }}
-                                        variant="body2"
-                                        fontWeight="bold"
-                                    >
+                                    {power.side && index === 0 && (
                                         <Chip
                                             size="small"
-                                            sx={{
-                                                background:
-                                                    power.name === "sph"
-                                                        ? "#b6dafc"
-                                                        : power.name === "cyl"
-                                                        ? "#b6b9fc"
-                                                        : "#cffcb6",
-                                            }}
-                                            label={power.name}
+                                            label={`${power.side} side`}
+                                            color="primary"
+                                            sx={{ textTransform: "capitalize" }}
                                         />
-                                    </Typography>
-                                    <Typography variant="body2">
+                                    )}
+                                    <Chip
+                                        size="small"
+                                        label={power.name}
+                                        sx={{
+                                            background:
+                                                power.name === "sph"
+                                                    ? "#b6dafc"
+                                                    : power.name === "cyl"
+                                                    ? "#b6b9fc"
+                                                    : "#cffcb6",
+                                            color: "#000", // Ensure the text is visible
+                                            textTransform: "capitalize", // Capitalize the label text
+                                        }}
+                                    />
+
+                                    <Typography
+                                        variant="body2"
+                                        sx={{
+                                            fontWeight: "bold", // Make the text bold for emphasis
+                                            textAlign: "center", // Center the text if it's a single word
+                                        }}
+                                    >
                                         {power.pivot.value == 0
                                             ? "Plano"
                                             : power.pivot.value}
                                     </Typography>
                                 </Box>
                             ))}
-                        </div>
                     </Box>
                 ),
             },
@@ -182,17 +227,52 @@ const LensStoreIndex = () => {
                     </Box>
                 ),
             },
+            {
+                header: "Quantity Ajust",
+                accessorKey: "1",
+                enableGrouping: false,
+                Cell: ({ row }) => (
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                        }}
+                    >
+                        <Input
+                            type="number"
+                            onChange={(e) => {
+                                if (qtyAjust[row.original.id]) {
+                                    const updatedState = { ...qtyAjust };
+                                    updatedState[row.original.id] = {
+                                        ...updatedState[row.original.id],
+                                        ajustQty: parseInt(e.target.value),
+                                    };
+                                    setQtyAjust(updatedState);
+                                }
+                            }}
+                        />
+                    </Box>
+                ),
+            },
         ],
         [lensesList]
     );
+    console.log(qtyAjust);
 
     return (
         <div>
             <MaterialReactTable
-                enableRowActions
-                renderRowActions={({ row }) => (
-                    <Box sx={{ display: "flex", flexDirection: "column" }}>
-                        <IconButton
+                renderTopToolbar={() => (
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            p: 2,
+                            gap: 2,
+                        }}
+                    >
+                        <Button
                             variant="contained"
                             color="success"
                             size="small"
@@ -201,15 +281,12 @@ const LensStoreIndex = () => {
                                     open: true,
                                     openType: "add",
                                 });
-
-                                setSelectedLens(row.original);
                             }}
                         >
-                            <AddCircle />
-                        </IconButton>
-                        {/* //add icon button with add remove icons */}
+                            Add <AddCircle />
+                        </Button>
 
-                        <IconButton
+                        <Button
                             variant="contained"
                             color="error"
                             size="small"
@@ -218,11 +295,15 @@ const LensStoreIndex = () => {
                                     open: true,
                                     openType: "remove",
                                 });
-                                setSelectedLens(row.original);
                             }}
                         >
-                            <RemoveCircle />
-                        </IconButton>
+                            Remove <RemoveCircle />
+                        </Button>
+                    </Box>
+                )}
+                enableRowActions
+                renderRowActions={({ row }) => (
+                    <Box sx={{ display: "flex", flexDirection: "column" }}>
                         <IconButton
                             variant="contained"
                             size="small"
@@ -232,11 +313,30 @@ const LensStoreIndex = () => {
                         >
                             <History />
                         </IconButton>
+                        <Checkbox
+                            onChange={(e) => {
+                                const updatedState = { ...qtyAjust };
+
+                                if (e.target.checked) {
+                                    // Add the item to the state when checked
+                                    updatedState[row.original.id] =
+                                        row.original;
+                                } else {
+                                    // Remove the item from the state when unchecked
+                                    delete updatedState[row.original.id];
+                                }
+
+                                // Update the state
+                                setQtyAjust(updatedState);
+                                console.log(updatedState); // Log the updated state
+                            }}
+                        />
                     </Box>
                 )}
                 columns={columns}
                 data={lensesList}
                 enableColumnResizing
+                muiFilterCheckboxProps={{ color: "primary" }}
                 enableGrouping
                 enableStickyHeader
                 enableStickyFooter
@@ -270,7 +370,7 @@ const LensStoreIndex = () => {
             <LenseQuantityAjustDialog
                 openQuantityAjust={openQuantityAjust}
                 handleClose={handleQtyAjustClose}
-                selectedLens={selectedLens}
+                selectedLens={qtyAjust}
                 refreshLenses={refreshLenses}
             />
         </div>

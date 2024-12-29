@@ -216,7 +216,6 @@ export default function FrameHistory() {
                             <Grid container spacing={2}>
                                 {history.changes
                                     .slice()
-                                    .reverse()
                                     .map((change, index) => (
                                         <Grid item xs={12} key={index}>
                                             <HistoryDetailCard

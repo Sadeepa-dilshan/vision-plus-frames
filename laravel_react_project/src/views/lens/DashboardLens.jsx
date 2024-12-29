@@ -11,6 +11,9 @@ export default function DashboardLens() {
     const [toDate, setToDate] = useState(dayjs());
     const [lenses, setLenses] = useState([]);
     const [loading, setLoading] = useState(false);
+
+    const [lowLenses, setLowLenses] = useState([]);
+    const [lowLenseloading, setLowLenseloading] = useState(false);
     const { token } = useStateContext(); // Get the auth token
     const fetchTopFrames = async () => {
         setLoading(true);
@@ -34,8 +37,31 @@ export default function DashboardLens() {
             setLoading(false);
         }
     };
+    const fetchLowFrames = async () => {
+        setLowLenseloading(true);
+        try {
+            const response = await axiosClient.get(
+                "/low-lenses-by-stock-reduction",
+                {
+                    params: {
+                        start_date: fromDate.format("YYYY-MM-DD"),
+                        end_date: toDate.format("YYYY-MM-DD"),
+                    },
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            setLowLenses(response.data);
+        } catch (error) {
+            console.error("Error fetching top frames:", error);
+        } finally {
+            setLowLenseloading(false);
+        }
+    };
     useEffect(() => {
         fetchTopFrames();
+        fetchLowFrames();
     }, [fromDate, toDate]); // Fetch data when date range or sort option changes
 
     return (
@@ -47,7 +73,7 @@ export default function DashboardLens() {
                     padding: 2,
                     display: "flex",
                     justifyContent: "center",
-                    mb: 3,
+                    mb: 1,
                     borderRadius: 2,
                 }}
             >
@@ -66,30 +92,25 @@ export default function DashboardLens() {
                     justifyContent: "center",
                     gap: 4,
                     flexWrap: "wrap",
-                    padding: 2,
+                    padding: 1,
                 }}
             >
-                <Box sx={{ width: "100%", maxWidth: 600 }}>
-                    <Typography
-                        align="center"
-                        variant="h5"
-                        sx={{ mb: 1, fontWeight: "bold" }}
-                    >
+                <Box sx={{ width: "100%" }}>
+                    <Typography align="center" variant="h5">
                         Top Performing Lenses
                     </Typography>
-                    <LensDashboardTable lenses={lenses} />
+                    <LensDashboardTable loading={loading} lenses={lenses} />
                 </Box>
 
-                {/* <Box sx={{ width: "100%", maxWidth: 600 }}>
-                    <Typography
-                        align="center"
-                        variant="h5"
-                        sx={{ mb: 1, fontWeight: "bold" }}
-                    >
+                <Box sx={{ width: "100%" }}>
+                    <Typography align="center" variant="h5">
                         Low Performing Lenses
                     </Typography>
-                    <LensDashboardTable />
-                </Box> */}
+                    <LensDashboardTable
+                        loading={lowLenseloading}
+                        lenses={lowLenses}
+                    />
+                </Box>
             </Box>
         </Box>
     );

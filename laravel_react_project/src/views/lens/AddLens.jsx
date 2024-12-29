@@ -26,6 +26,8 @@ export default function AddLens() {
         useData("lens-types");
     const { data: lenseCotingsList, loading: loadingLenseCoting } =
         useData("lens-coatings");
+    console.log(lensTypeList);
+
     const [formData, setFormData] = useState({
         lensType: "",
         sph: "",
@@ -34,6 +36,7 @@ export default function AddLens() {
         price: "",
         quantity: "",
         corting: "",
+        side: null,
     });
 
     const [errors, setErrors] = useState({
@@ -44,11 +47,16 @@ export default function AddLens() {
         price: false,
         quantity: false,
         corting: false,
+        side: null,
     });
+    console.log(lensTypeList);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
+        if (formData.lensType !== 3) {
+            setFormData((prev) => ({ ...prev, side: null }));
+        }
     };
 
     const validateForm = () => {
@@ -72,12 +80,28 @@ export default function AddLens() {
     const handleAddLens = async () => {
         if (validateForm()) {
             const singleVisionPowers = [
-                { power_id: 1, value: parseFloat(formData.sph) },
-                { power_id: 2, value: parseFloat(formData.cyl) },
+                {
+                    power_id: 1,
+                    value: parseFloat(formData.sph),
+                    side: formData.side,
+                },
+                {
+                    power_id: 2,
+                    value: parseFloat(formData.cyl),
+                    side: formData.side,
+                },
             ];
             const varifocalPowers = [
-                { power_id: 1, value: parseFloat(formData.sph) },
-                { power_id: 3, value: parseFloat(formData.add) },
+                {
+                    power_id: 1,
+                    value: parseFloat(formData.sph),
+                    side: formData.side,
+                },
+                {
+                    power_id: 3,
+                    value: parseFloat(formData.add),
+                    side: formData.side,
+                },
             ];
 
             const lensData = {
@@ -85,6 +109,7 @@ export default function AddLens() {
                 price: parseFloat(formData.price),
                 quantity: parseInt(formData.quantity),
                 coating_id: parseInt(formData.corting),
+
                 lens_powers:
                     formData.lensType === 4
                         ? singleVisionPowers
@@ -110,7 +135,6 @@ export default function AddLens() {
                 });
             } catch (error) {
                 showAlert("Network error, try again", "error");
-                console.log("Error creating lens:", error);
             } finally {
                 setLoading(false);
             }
@@ -234,6 +258,41 @@ export default function AddLens() {
                                                         : ""
                                                 }
                                             />
+                                        </Grid>
+                                    )}
+                                    {parseInt(formData.lensType) === 3 && (
+                                        <Grid item xs={12}>
+                                            <FormControl
+                                                fullWidth
+                                                error={errors.side}
+                                            >
+                                                <InputLabel id="lens-side-label">
+                                                    Lens Side
+                                                </InputLabel>
+                                                <Select
+                                                    labelId="lens-side-label"
+                                                    name="side"
+                                                    value={formData.side} // Bind value to formData.side
+                                                    onChange={handleChange}
+                                                    variant="outlined"
+                                                    label="Lens Side"
+                                                >
+                                                    <MenuItem value="left">
+                                                        Left
+                                                    </MenuItem>
+                                                    <MenuItem value="right">
+                                                        Right
+                                                    </MenuItem>
+                                                </Select>
+                                                {errors.side && (
+                                                    <Typography
+                                                        variant="caption"
+                                                        color="error"
+                                                    >
+                                                        Lens side is required.
+                                                    </Typography>
+                                                )}
+                                            </FormControl>
                                         </Grid>
                                     )}
                                 </Grid>

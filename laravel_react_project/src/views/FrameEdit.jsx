@@ -285,6 +285,9 @@ export default function FrameEdit() {
                                     >
                                         <MenuItem value="Full">Full</MenuItem>
                                         <MenuItem value="Half">Half</MenuItem>
+                                        <MenuItem value="Rimless">
+                                            Rimless
+                                        </MenuItem>
                                     </Select>
                                 </FormControl>
                             </Grid>

@@ -51,6 +51,7 @@ export default function Login() {
         } catch (err) {
             setLoading(false); // Stop loading
             const response = err.response;
+            console.log(response);
 
             if (response && response.status === 422) {
                 setError(response.data.message);
