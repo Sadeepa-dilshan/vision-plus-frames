@@ -21,8 +21,8 @@ class LensPower extends Model
      */
     public function lens()
     {
-        return $this->belongsTo(Lens::class);
-    }
+        return $this->belongsTo(Lens::class, 'lens_id'); 
+    }    
 
     /**
      * Define the relationship to the Power model.

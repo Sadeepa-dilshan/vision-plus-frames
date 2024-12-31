@@ -84,6 +84,8 @@ use App\Http\Controllers\LensPowersController;
     Route::put('lens-stocks/{stock}', [LensStockController::class, 'update']);
     Route::delete('lens-stocks/{stock}', [LensStockController::class, 'destroy'])->middleware('admin');
     Route::get('/lenses/{lensId}/stock-history', [LensStockController::class, 'getStockHistory']);
+    Route::post('lens-stocks/{lensStock}/set-limit', [LensStockController::class, 'setStockLimit']);
+    Route::get('/lens-stocks', [LensStockController::class, 'getLensStocks']);
 
     Route::apiResource('lenses', LensController::class);
     Route::apiResource('lens-types', LensTypeController::class);

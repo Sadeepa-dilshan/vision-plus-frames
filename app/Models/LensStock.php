@@ -21,13 +21,15 @@ class LensStock extends Model
         'lens_id',
         'initial_count',
         'qty',
+        'limit',
     ];
 
     // Relationship to Lens
     public function lens()
     {
-        return $this->belongsTo(Lens::class);
+        return $this->belongsTo(Lens::class, 'lens_id'); 
     }
+    
     public function stockChanges()
     {
         return $this->hasMany(LensStockChange::class);

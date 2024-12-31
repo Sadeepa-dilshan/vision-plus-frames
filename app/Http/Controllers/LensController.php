@@ -16,7 +16,7 @@ class LensController extends Controller
      */
     public function index()
     {
-        $lenses = Lens::with(['type:id,name,description', 'coating:id,name,description', 'powers:id,name,side', 'lensStock'])->get();
+        $lenses = Lens::with(['type:id,name,description', 'coating:id,name,description', 'powers:id,name,lens_powers.side', 'lensStock'])->get();
         return response()->json($lenses, 200);
     }
     /**
@@ -31,7 +31,7 @@ class LensController extends Controller
             'lens_powers' => 'required|array',
             'lens_powers.*.power_id' => 'required',
             'lens_powers.*.value' => 'required|numeric',
-            'lens_powers.*.side' => 'nullable|string|in:left,right,both', 
+            'lens_powers.*.side' => 'nullable|string|in:left,right,both',
             'quantity' => 'required|integer|min:0',
         ]);
         $lens = Lens::create([
@@ -82,9 +82,9 @@ class LensController extends Controller
             'lens_powers' => 'required|array',
             'lens_powers.*.power_id' => 'required|exists:powers,id',
             'lens_powers.*.value' => 'required|numeric',
-            'lens_powers.*.side' => 'nullable|string|in:left,right,both', 
+            'lens_powers.*.side' => 'nullable|string|in:left,right,both',
             'quantity' => 'required|integer',
-            'branch_id' => 'required|integer', // Validate branch existence
+            'branch_id' => 'required|integer|exists:branches,id', // Validate branch existence
         ]);
         // Update the Lens record
         $lens->update([
