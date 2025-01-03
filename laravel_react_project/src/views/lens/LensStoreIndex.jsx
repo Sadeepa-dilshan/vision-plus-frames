@@ -25,17 +25,33 @@ import useData from "../../hooks/useData";
 import LenseQuantityAjustDialog from "../../Components/LenseQuantityAjustDialog";
 import axiosClient from "../../axiosClient";
 import { useStateContext } from "../../contexts/contextprovider";
+import StockAlertDialog from "../../Components/StockAlertDialog";
+import useLenseStoreValueSort from "../../hooks/useLenseStoreValueSort";
 const LensStoreIndex = () => {
     const { token } = useStateContext(); // To handle the auth token
     const [qtyAjust, setQtyAjust] = React.useState({});
     const navigate = useNavigate();
+    // const {
+    //     data: lensesList,
+    //     loading: loadingLensesList,
+    //     error: errorLensesList,
+    //     refresh: refreshLenses,
+    // } = useData("lenses");
+    const [stockAlert, setStockAlert] = useState({
+        id: null,
+        open: false,
+    });
     const {
         data: lensesList,
-        loading: loadingLensesList,
         error: errorLensesList,
+        loading: loadingLensesList,
         refresh: refreshLenses,
-    } = useData("lenses");
+    } = useLenseStoreValueSort();
 
+    const handleClose = () => {
+        setStockAlert({ id: null, open: false });
+        refreshLenses();
+    };
     const [openQuantityAjust, setOpenQuantityAjust] = React.useState({
         open: false,
         openType: null,
@@ -93,6 +109,8 @@ const LensStoreIndex = () => {
             {
                 header: "Quantity",
                 accessorKey: "lens_stock.qty",
+                size: 150,
+
                 Cell: ({ row, cell }) => (
                     <Box sx={{ display: "flex", alignItems: "center" }}>
                         {/* <IconButton
@@ -130,75 +148,155 @@ const LensStoreIndex = () => {
                 ),
             },
             {
-                header: "Powers",
-                accessorKey: "powers",
-                enableGrouping: false,
-                size: 300,
-                Cell: ({ row, cell }) => (
-                    <Box
+                header: "SPH",
+                accessorKey: "sph",
+                size: 120,
+
+                Cell: ({ cell }) => (
+                    <Typography
+                        variant="body2"
                         sx={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
+                            fontWeight: "bold",
+                            textAlign: "center",
                         }}
                     >
-                        {cell
-                            .getValue()
-                            .sort((a, b) =>
-                                a.name === "sph" ? -1 : b.name === "sph" ? 1 : 0
-                            ) // Sort sph first
-                            .map((power, index) => (
-                                <Box
-                                    key={power.id}
-                                    sx={{
-                                        display: "flex", // Arrange the elements horizontally
-                                        gap: 1, // Space between elements
-                                        alignItems: "center", // Align the items centrally
-                                        justifyContent: "flex-start", // Align items to the left
-                                        mr: 1,
-                                    }}
-                                >
-                                    {power.side && index === 0 && (
-                                        <Chip
-                                            size="small"
-                                            label={`${power.side} side`}
-                                            color="primary"
-                                            sx={{ textTransform: "capitalize" }}
-                                        />
-                                    )}
-                                    <Chip
-                                        size="small"
-                                        label={power.name}
-                                        sx={{
-                                            background:
-                                                power.name === "sph"
-                                                    ? "#b6dafc"
-                                                    : power.name === "cyl"
-                                                    ? "#b6b9fc"
-                                                    : "#cffcb6",
-                                            color: "#000", // Ensure the text is visible
-                                            textTransform: "capitalize", // Capitalize the label text
-                                        }}
-                                    />
+                        {parseFloat(cell.getValue()) === 0
+                            ? "Plano"
+                            : cell.getValue() || "-"}
+                    </Typography>
+                ),
+            },
+            {
+                header: "CYL",
+                accessorKey: "cyl",
+                size: 120,
 
-                                    <Typography
-                                        variant="body2"
-                                        sx={{
-                                            fontWeight: "bold", // Make the text bold for emphasis
-                                            textAlign: "center", // Center the text if it's a single word
-                                        }}
-                                    >
-                                        {power.pivot.value == 0
-                                            ? "Plano"
-                                            : power.pivot.value}
-                                    </Typography>
-                                </Box>
-                            ))}
+                Cell: ({ cell }) => (
+                    <Typography
+                        variant="body2"
+                        sx={{
+                            fontWeight: "bold",
+                            textAlign: "center",
+                        }}
+                    >
+                        {parseFloat(cell.getValue()) === 0
+                            ? "Plano"
+                            : cell.getValue() || "-"}
+                    </Typography>
+                ),
+            },
+            {
+                header: "ADD",
+                accessorKey: "add",
+                size: 120,
+
+                Cell: ({ cell }) => (
+                    <Typography
+                        variant="body2"
+                        sx={{
+                            fontWeight: "bold",
+                            textAlign: "center",
+                        }}
+                    >
+                        {parseFloat(cell.getValue()) === 0
+                            ? "Plano"
+                            : cell.getValue() || "-"}
+                    </Typography>
+                ),
+            },
+            // {
+            //     header: "Powers",
+            //     accessorKey: "powers",
+            //     enableGrouping: false,
+            //     size: 300,
+            //     Cell: ({ row, cell }) => (
+            //         <Box
+            //             sx={{
+            //                 display: "flex",
+            //                 justifyContent: "space-between",
+            //                 alignItems: "center",
+            //             }}
+            //         >
+            //             {cell
+            //                 .getValue()
+            //                 .sort((a, b) =>
+            //                     a.name === "sph" ? -1 : b.name === "sph" ? 1 : 0
+            //                 ) // Sort sph first
+            //                 .map((power, index) => (
+            //                     <Box
+            //                         key={power.id}
+            //                         sx={{
+            //                             display: "flex", // Arrange the elements horizontally
+            //                             gap: 1, // Space between elements
+            //                             alignItems: "center", // Align the items centrally
+            //                             justifyContent: "flex-start", // Align items to the left
+            //                             mr: 1,
+            //                         }}
+            //                     >
+            //                         <Chip
+            //                             size="small"
+            //                             label={power.name}
+            //                             sx={{
+            //                                 background:
+            //                                     power.name === "sph"
+            //                                         ? "#b6dafc"
+            //                                         : power.name === "cyl"
+            //                                         ? "#b6b9fc"
+            //                                         : "#cffcb6",
+            //                                 color: "#000", // Ensure the text is visible
+            //                                 textTransform: "capitalize", // Capitalize the label text
+            //                             }}
+            //                         />
+
+            //                         <Typography
+            //                             variant="body2"
+            //                             sx={{
+            //                                 fontWeight: "bold", // Make the text bold for emphasis
+            //                                 textAlign: "center", // Center the text if it's a single word
+            //                             }}
+            //                         >
+            //                             {power.pivot.value == 0
+            //                                 ? "Plano"
+            //                                 : power.pivot.value}
+            //                         </Typography>
+            //                     </Box>
+            //                 ))}
+            //             {row.original.type_id === 3 && (
+            //                 <Chip
+            //                     size="small"
+            //                     label={`${cell.getValue()[0].side} side`}
+            //                     color="primary"
+            //                     sx={{ textTransform: "capitalize" }}
+            //                 />
+            //             )}
+            //         </Box>
+            //     ),
+            // },
+
+            { header: "Coating", accessorKey: "coating.name" },
+            {
+                header: "L/R",
+                accessorKey: "powers",
+                size: 120,
+
+                Cell: ({ cell, row }) => (
+                    <Box
+                        sx={{
+                            width: "100%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                        }}
+                    >
+                        <Typography sx={{ textTransform: "capitalize" }}>
+                            {cell.getValue()[0]["side"]
+                                ? cell.getValue()[0]["side"]
+                                : "-"}
+                        </Typography>
                     </Box>
                 ),
             },
 
-            { header: "Coating", accessorKey: "coating.name" },
             {
                 header: "Price",
                 accessorKey: "price",
@@ -206,6 +304,7 @@ const LensStoreIndex = () => {
                 Cell: ({ cell, row }) => (
                     <Box
                         sx={{
+                            width: "100%",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "space-between",
@@ -228,8 +327,39 @@ const LensStoreIndex = () => {
                 ),
             },
             {
+                header: "Alert Limit",
+                accessorKey: "lens_stock.limit",
+                Cell: ({ cell, row }) => (
+                    <Box
+                        sx={{
+                            width: "100%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                        }}
+                    >
+                        <Typography>{cell.getValue()}</Typography>
+                        <IconButton
+                            onClick={
+                                () => {
+                                    // handleDelete
+
+                                    setStockAlert({
+                                        id: row.original.id,
+                                        open: true,
+                                    });
+                                }
+                                // navigate(`/lens/edit_lens/${row.original.id}`)
+                            }
+                        >
+                            <Edit color="error" />
+                        </IconButton>
+                    </Box>
+                ),
+            },
+            {
                 header: "Quantity Ajust",
-                accessorKey: "1",
+                accessorKey: "id",
                 enableGrouping: false,
                 Cell: ({ row }) => (
                     <Box
@@ -241,6 +371,15 @@ const LensStoreIndex = () => {
                     >
                         <Input
                             type="number"
+                            value={
+                                qtyAjust[row.original.id]?.ajustQty ?? "" // If the value exists, show it; otherwise, show an empty string
+                            }
+                            onInput={(e) => {
+                                if (e.target.value < 0) {
+                                    e.target.value = ""; // Clear the input if a negative value is entered
+                                }
+                            }}
+                            disabled={!qtyAjust.hasOwnProperty(row.original.id)}
                             onChange={(e) => {
                                 if (qtyAjust[row.original.id]) {
                                     const updatedState = { ...qtyAjust };
@@ -256,9 +395,8 @@ const LensStoreIndex = () => {
                 ),
             },
         ],
-        [lensesList]
+        [lensesList, qtyAjust]
     );
-    console.log(qtyAjust);
 
     return (
         <div>
@@ -308,11 +446,15 @@ const LensStoreIndex = () => {
                             variant="contained"
                             size="small"
                             onClick={() =>
-                                navigate(`/lens/${row.original.id}/history`)
+                                window.open(
+                                    `/lens/${row.original.id}/history`,
+                                    "_blank"
+                                )
                             }
                         >
                             <History />
                         </IconButton>
+
                         <Checkbox
                             onChange={(e) => {
                                 const updatedState = { ...qtyAjust };
@@ -328,7 +470,6 @@ const LensStoreIndex = () => {
 
                                 // Update the state
                                 setQtyAjust(updatedState);
-                                console.log(updatedState); // Log the updated state
                             }}
                         />
                     </Box>
@@ -345,6 +486,12 @@ const LensStoreIndex = () => {
                     expanded: false,
                     grouping: ["type.name"],
                     pagination: { pageIndex: 0, pageSize: 20 },
+                    sorting: [
+                        { id: "coating.name", desc: false },
+                        { id: "sph", desc: false }, // Sort 'sph' in ascending order
+                        { id: "cyl", desc: false }, // Sort 'cyl' in ascending order
+                        { id: "add", desc: false }, // Sort 'add' in ascending order
+                    ],
                 }}
                 state={{ isLoading: loadingLensesList }}
                 muiToolbarAlertBannerChipProps={{ color: "primary" }}
@@ -370,8 +517,14 @@ const LensStoreIndex = () => {
             <LenseQuantityAjustDialog
                 openQuantityAjust={openQuantityAjust}
                 handleClose={handleQtyAjustClose}
-                selectedLens={qtyAjust}
+                selectedLenses={qtyAjust}
                 refreshLenses={refreshLenses}
+                setQtyAjust={setQtyAjust}
+            />
+            <StockAlertDialog
+                id={stockAlert.id}
+                open={stockAlert.open}
+                onClose={handleClose}
             />
         </div>
     );

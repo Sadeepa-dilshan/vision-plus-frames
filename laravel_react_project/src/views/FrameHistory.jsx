@@ -63,6 +63,7 @@ export default function FrameHistory() {
             setLoading(false);
         }
     };
+    console.log(history);
 
     return (
         <Box sx={{ padding: 4 }}>
@@ -206,7 +207,15 @@ export default function FrameHistory() {
                                             Date:
                                             {new Date(
                                                 history.frame.created_at
-                                            ).toLocaleString()}
+                                            ).toLocaleString("en-US", {
+                                                year: "numeric",
+                                                month: "long",
+                                                day: "numeric",
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                                second: "2-digit",
+                                                hour12: true,
+                                            })}
                                         </Typography>
                                     </Box>
                                 </CardContent>
@@ -222,7 +231,7 @@ export default function FrameHistory() {
                                                 status={change.status}
                                                 change_qty={change.change_qty}
                                                 branch_id={change.branch_id}
-                                                change_date={change.change_date}
+                                                change_date={change.updated_at}
                                                 index={index}
                                                 branch_name={change.branch}
                                             />

@@ -77,7 +77,7 @@ export default function LensHistoryIndex() {
                                             )
                                             .map((branch) => branch.name)[0]
                                     }
-                                    change_date={change.change_date}
+                                    change_date={change.updated_at}
                                     index={index}
                                 />
                             </Grid>

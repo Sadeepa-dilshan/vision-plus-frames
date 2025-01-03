@@ -1,17 +1,22 @@
 import axios from "axios";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
 import NavBar from "./NavBar";
-import { Avatar, Box, Typography } from "@mui/material";
+import { Avatar, Box, IconButton, Typography } from "@mui/material";
+import { NotificationImportant, Notifications } from "@mui/icons-material";
+import StockAlertTable from "./StockAlertTable";
 
 export default function DefaultLayout() {
     const { user, token, setUser, setToken } = useStateContext();
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const location = useLocation();
+    const isInLensPart = location.pathname.startsWith("/lens");
+
     if (!token) {
         return <Navigate to="/login" />;
     }
-
     const onLogout = (ev) => {
         ev.preventDefault();
         axiosClient.get("/logout").then(() => {
@@ -39,6 +44,11 @@ export default function DefaultLayout() {
                     right: 16, // Adjust position from the right
                 }}
             >
+                {isInLensPart && (
+                    <IconButton onClick={() => setIsDialogOpen(true)}>
+                        <Notifications color="error" />
+                    </IconButton>
+                )}
                 <Avatar
                     alt={user.name}
                     src="/images/profile.png"
@@ -46,6 +56,10 @@ export default function DefaultLayout() {
                     style={{ cursor: "pointer" }}
                 />
                 <Typography variant="body2">{user.name}</Typography>
+                <StockAlertTable
+                    open={isDialogOpen}
+                    onClose={() => setIsDialogOpen(false)}
+                />
             </Box>
         </div>
     );
