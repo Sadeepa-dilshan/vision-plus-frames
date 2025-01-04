@@ -17,6 +17,7 @@ import axiosClient from "../../axiosClient";
 import { useStateContext } from "../../contexts/contextprovider";
 import { useAlert } from "../../contexts/AlertContext";
 import useData from "../../hooks/useData";
+import StockAlertDialog from "../../Components/StockAlertDialog";
 
 export default function AddLens() {
     const { token } = useStateContext();
@@ -26,7 +27,6 @@ export default function AddLens() {
         useData("lens-types");
     const { data: lenseCotingsList, loading: loadingLenseCoting } =
         useData("lens-coatings");
-    console.log(lensTypeList);
 
     const [formData, setFormData] = useState({
         lensType: "",
@@ -49,8 +49,10 @@ export default function AddLens() {
         corting: false,
         side: null,
     });
-    console.log(lensTypeList);
-
+    const [stockAlert, setStockAlert] = useState({
+        id: null,
+        open: false,
+    });
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
@@ -76,7 +78,9 @@ export default function AddLens() {
         setErrors(newErrors);
         return Object.values(newErrors).every((error) => !error);
     };
-
+    const handleClose = () => {
+        setStockAlert({ id: null, open: false });
+    };
     const handleAddLens = async () => {
         if (validateForm()) {
             const singleVisionPowers = [
@@ -118,7 +122,7 @@ export default function AddLens() {
 
             try {
                 setLoading(true);
-                await axiosClient.post("/lenses", lensData, {
+                const response = await axiosClient.post("/lenses", lensData, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -132,6 +136,11 @@ export default function AddLens() {
                     price: "",
                     quantity: "",
                     corting: "",
+                });
+                console.log(response.data);
+                setStockAlert({
+                    id: response.data.lens.id,
+                    open: true,
                 });
             } catch (error) {
                 showAlert("Network error, try again", "error");
@@ -372,6 +381,11 @@ export default function AddLens() {
                     >
                         {loading ? <CircularProgress size={24} /> : "Add Lens"}
                     </Button>
+                    <StockAlertDialog
+                        id={stockAlert.id}
+                        open={stockAlert.open}
+                        onClose={handleClose}
+                    />
                 </Grid>
             </Grid>
         </Box>

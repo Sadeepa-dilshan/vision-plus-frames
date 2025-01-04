@@ -15,6 +15,7 @@ import {
     MenuItem,
     Select,
     TextField,
+    Typography,
 } from "@mui/material";
 import { useStateContext } from "../contexts/contextprovider";
 import { useAlert } from "../contexts/AlertContext";
@@ -24,8 +25,9 @@ import useBranchList from "../hooks/useBranchList";
 export default function LenseQuantityAjustDialog({
     openQuantityAjust,
     handleClose,
-    selectedLens,
+    selectedLenses,
     refreshLenses,
+    setQtyAjust,
 }) {
     const { token } = useStateContext();
     const { showAlert } = useAlert();
@@ -48,60 +50,66 @@ export default function LenseQuantityAjustDialog({
 
     const addQty = async () => {
         setLoading(true);
+        Object.values(selectedLenses).map(async (selectedLens) => {
+            if (selectedLens) {
+                const lensData = {
+                    type_id: selectedLens.type_id,
+                    price: parseInt(selectedLens.price),
+                    quantity:
+                        parseInt(selectedLens.lens_stock.qty) +
+                        parseInt(selectedLens.ajustQty),
+                    coating_id: selectedLens.coating_id,
+                    lens_powers: selectedLens.powers.map((item) => ({
+                        power_id: item.pivot.power_id,
+                        value: parseFloat(item.pivot.value),
+                        side: item.side,
+                    })),
+                    branch_id: null,
+                };
+                const lensDataEdit = {
+                    type_id: selectedLens.type_id,
+                    branch_id: branch.id,
+                    price: parseInt(selectedLens.price),
+                    quantity:
+                        parseInt(selectedLens.lens_stock.qty) -
+                        parseInt(selectedLens.ajustQty),
+                    coating_id: selectedLens.coating_id,
+                    lens_powers: selectedLens.powers.map((item) => ({
+                        power_id: item.pivot.power_id,
+                        value: parseFloat(item.pivot.value),
+                        side: item.side,
+                    })),
+                };
 
-        if (selectedLens) {
-            const lensData = {
-                type_id: selectedLens.type_id,
-                price: parseInt(selectedLens.price),
-                quantity:
-                    parseInt(selectedLens.lens_stock.qty) + parseInt(quantity),
-                coating_id: selectedLens.coating_id,
-                lens_powers: selectedLens.powers.map((item) => ({
-                    power_id: item.pivot.power_id,
-                    value: parseFloat(item.pivot.value),
-                    side: item.side,
-                })),
-                branch_id: null,
-            };
-            const lensDataEdit = {
-                type_id: selectedLens.type_id,
-                branch_id: branch.id,
-                price: parseInt(selectedLens.price),
-                quantity:
-                    parseInt(selectedLens.lens_stock.qty) - parseInt(quantity),
-                coating_id: selectedLens.coating_id,
-                lens_powers: selectedLens.powers.map((item) => ({
-                    power_id: item.pivot.power_id,
-                    value: parseFloat(item.pivot.value),
-                    side: item.side,
-                })),
-            };
-
-            if (openQuantityAjust.openType === "remove") {
-                if (selectedLens.lens_stock.qty - quantity < 0) {
-                    showAlert(
-                        "Quntity is lower than your Input, try again",
-                        "error"
-                    );
-                    setLoading(false);
-                } else {
-                    await sendData(lensDataEdit);
+                if (openQuantityAjust.openType === "remove") {
+                    if (
+                        selectedLens.lens_stock.qty - selectedLens.ajustQty <
+                        0
+                    ) {
+                        showAlert(
+                            "Quntity is lower than your Input, try again",
+                            "error"
+                        );
+                        setLoading(false);
+                    } else {
+                        await sendData(lensDataEdit, selectedLens.id);
+                    }
+                } else if (openQuantityAjust.openType === "add") {
+                    await sendData(lensData, selectedLens.id);
                 }
-            } else if (openQuantityAjust.openType === "add") {
-                await sendData(lensData);
             }
-        }
+        });
     };
 
-    const sendData = async (data) => {
+    const sendData = async (data, ID) => {
         try {
             setLoading(true);
-            await axiosClient.put(`lenses/${selectedLens.id}`, data, {
+            await axiosClient.put(`lenses/${ID}`, data, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            showAlert("Lens created successfully", "success");
+            showAlert("Lens Updated successfully", "success");
             refreshLenses();
             handleClose();
             setBranch("");
@@ -109,9 +117,11 @@ export default function LenseQuantityAjustDialog({
             showAlert("Network error, try again", "error");
             console.log("Error creating lens:", error);
             setLoading(false);
+            setQtyAjust({});
         } finally {
             setLoading(false);
             setBranch("");
+            setQtyAjust({});
         }
     };
     return (
@@ -126,17 +136,22 @@ export default function LenseQuantityAjustDialog({
                     {"Quantity Ajustment"}
                 </DialogTitle>
                 <DialogContent>
-                    <TextField
-                        sx={{ width: "300px", m: 1 }}
-                        autoFocus
-                        id="name"
-                        label="Quantity"
-                        type="number"
-                        fullWidth
-                        inputProps={{ min: 0 }}
-                        variant="outlined"
-                        onChange={(e) => setQuantity(e.target.value)}
-                    />
+                    {openQuantityAjust.openType === "add" && (
+                        <Box>
+                            <Typography color={"error"}>
+                                Plese Confim New Quantity changes of{" "}
+                                <span style={{ fontWeight: "bold" }}>
+                                    {Object.keys(selectedLenses).length}
+                                </span>{" "}
+                                lenses Items
+                            </Typography>
+                        </Box>
+                    )}
+                    {loading && (
+                        <Typography color={"gold"}>
+                            "Updating Please Wait...
+                        </Typography>
+                    )}
                     {openQuantityAjust.openType === "remove" && (
                         <Box>
                             <FormControl

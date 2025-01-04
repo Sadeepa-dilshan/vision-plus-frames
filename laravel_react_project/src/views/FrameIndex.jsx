@@ -142,16 +142,16 @@ export default function FrameIndex() {
                 </span>
             ),
         },
-        // {
-        //     accessorKey: "stocks",
-        //     header: "Qty",
-        //     size: 50,
-        //     Cell: ({ cell }) => (
-        //         <span style={{ textTransform: "capitalize" }}>
-        //             {cell.getValue()[0]["initial_count"]}
-        //         </span>
-        //     ),
-        // },
+        {
+            accessorKey: "stocks",
+            header: "Quantity",
+            size: 50,
+            Cell: ({ cell }) => (
+                <span style={{ textTransform: "capitalize" }}>
+                    {cell.getValue()[0]["initial_count"]}
+                </span>
+            ),
+        },
 
         {
             accessorKey: "price",

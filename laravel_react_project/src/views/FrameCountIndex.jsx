@@ -306,8 +306,9 @@ const FrameCountIndex = () => {
                                                                 color="warning"
                                                                 size="small"
                                                                 onClick={() =>
-                                                                    navigate(
-                                                                        `/frames/history/${frame.id}`
+                                                                    window.open(
+                                                                        `/frames/history/${frame.id}`,
+                                                                        "_blank"
                                                                     )
                                                                 }
                                                             >

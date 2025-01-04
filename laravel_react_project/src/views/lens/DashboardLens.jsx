@@ -37,31 +37,31 @@ export default function DashboardLens() {
             setLoading(false);
         }
     };
-    const fetchLowFrames = async () => {
-        setLowLenseloading(true);
-        try {
-            const response = await axiosClient.get(
-                "/low-lenses-by-stock-reduction",
-                {
-                    params: {
-                        start_date: fromDate.format("YYYY-MM-DD"),
-                        end_date: toDate.format("YYYY-MM-DD"),
-                    },
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-            setLowLenses(response.data);
-        } catch (error) {
-            console.error("Error fetching top frames:", error);
-        } finally {
-            setLowLenseloading(false);
-        }
-    };
+    // const fetchLowFrames = async () => {
+    //     setLowLenseloading(true);
+    //     try {
+    //         const response = await axiosClient.get(
+    //             "/low-lenses-by-stock-reduction",
+    //             {
+    //                 params: {
+    //                     start_date: fromDate.format("YYYY-MM-DD"),
+    //                     end_date: toDate.format("YYYY-MM-DD"),
+    //                 },
+    //                 headers: {
+    //                     Authorization: `Bearer ${token}`,
+    //                 },
+    //             }
+    //         );
+    //         setLowLenses(response.data);
+    //     } catch (error) {
+    //         console.error("Error fetching top frames:", error);
+    //     } finally {
+    //         setLowLenseloading(false);
+    //     }
+    // };
     useEffect(() => {
         fetchTopFrames();
-        fetchLowFrames();
+        // fetchLowFrames();
     }, [fromDate, toDate]); // Fetch data when date range or sort option changes
 
     return (
@@ -102,7 +102,7 @@ export default function DashboardLens() {
                     <LensDashboardTable loading={loading} lenses={lenses} />
                 </Box>
 
-                <Box sx={{ width: "100%" }}>
+                {/* <Box sx={{ width: "100%" }}>
                     <Typography align="center" variant="h5">
                         Low Performing Lenses
                     </Typography>
@@ -110,7 +110,7 @@ export default function DashboardLens() {
                         loading={lowLenseloading}
                         lenses={lowLenses}
                     />
-                </Box>
+                </Box> */}
             </Box>
         </Box>
     );
