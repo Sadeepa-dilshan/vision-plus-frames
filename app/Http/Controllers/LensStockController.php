@@ -11,9 +11,33 @@ use App\Models\LensStockChange;
 class LensStockController extends Controller
 {
     public function index()
-    {
-        return response()->json(LensStock::with('lens')->get());
-    }
+{
+    $lensStocks = LensStock::with(['lens.powers' => function ($query) {
+        $query->select('powers.id', 'powers.name')
+              ->withPivot('value', 'side'); // Ensure pivot data is included
+    }, 'lens.type', 'lens.coating'])->get();
+
+    $result = $lensStocks->map(function ($stock) {
+        return [
+            'id' => $stock->id,
+            'lens_type' => $stock->lens->type->name ?? 'N/A',
+            'coating' => $stock->lens->coating->name ?? 'N/A',
+            'quantity' => $stock->qty,
+            'limit' => $stock->limit,
+            'powers' => $stock->lens->powers->map(function ($power) {
+                return [
+                    'power_id' => $power->id,
+                    'name' => $power->name,
+                    'value' => $power->pivot->value,
+                    'side' => $power->pivot->side ?? 'N/A',
+                ];
+            }),
+        ];
+    });
+
+    return response()->json($result);
+}
+
 
     public function store(Request $request)
     {

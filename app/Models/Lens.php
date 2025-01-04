@@ -34,16 +34,15 @@ class Lens extends Model
     }
 
     public function lensPower()
-{
-    return $this->hasOne(LensPower::class, 'lens_id'); 
-}
+    {
+        return $this->hasOne(LensPower::class, 'lens_id');
+    }
 
-public function powers()
-{
-    return $this->belongsToMany(Power::class, 'lens_powers', 'lens_id', 'power_id')
-                ->withPivot('value', 'side'); //`side` is included from pivot table
-}
-
+    public function powers()
+    {
+        return $this->belongsToMany(Power::class, 'lens_powers', 'lens_id', 'power_id')
+            ->withPivot('value', 'side'); //`side` is included from pivot table
+    }
 
     public function coating()
     {
@@ -53,11 +52,10 @@ public function powers()
     public function lensStock()
     {
         return $this->hasOne(LensStock::class, 'lens_id');
-    }   
+    }
 
     public function lensStockChanges()
     {
         return $this->hasMany(LensStockChange::class);
-    } 
-
+    }
 }

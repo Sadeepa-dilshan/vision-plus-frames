@@ -20,15 +20,14 @@ class Power extends Model
         'name',
     ];
 
+    public function lensPowers()
+    {
+        return $this->hasMany(LensPower::class, 'power_id');
+    }
+    
     public function lenses()
     {
-        return $this->hasMany(Lens::class, 'power_id');
+        return $this->hasManyThrough(Lens::class, LensPower::class, 'power_id', 'id', 'id', 'lens_id');
     }
-
-    public function lensPowers()
-{
-    return $this->hasMany(LensPower::class, 'power_id');
-}
-
-
+    
 }
