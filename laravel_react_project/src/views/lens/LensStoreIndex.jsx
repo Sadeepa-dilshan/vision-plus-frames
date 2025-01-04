@@ -19,6 +19,7 @@ import {
     Edit,
     History,
     RemoveCircle,
+    Update,
 } from "@mui/icons-material";
 import useData from "../../hooks/useData";
 
@@ -27,6 +28,7 @@ import axiosClient from "../../axiosClient";
 import { useStateContext } from "../../contexts/contextprovider";
 import StockAlertDialog from "../../Components/StockAlertDialog";
 import useLenseStoreValueSort from "../../hooks/useLenseStoreValueSort";
+import LensePriceUpdate from "../../Components/LensePriceUpdate";
 const LensStoreIndex = () => {
     const { token } = useStateContext(); // To handle the auth token
     const [qtyAjust, setQtyAjust] = React.useState({});
@@ -58,7 +60,11 @@ const LensStoreIndex = () => {
     });
     const [deletingId, setDeletingId] = useState(null); // Track which code is being deleted
     const [selectedLens, setSelectedLens] = useState(null);
-
+    const [updatePrice, setUpdatePrice] = useState({
+        open: false,
+        id: null,
+        data: null,
+    });
     const handleQtyAjustClose = () => {
         setOpenQuantityAjust({ open: false, openType: null });
         setSelectedLens(null);
@@ -85,7 +91,20 @@ const LensStoreIndex = () => {
                 setDeletingId(null);
             });
     };
+    const transformLensData = (data) => {
+        const lens_powers = data.powers.map((power) => ({
+            power_id: power.id,
+            value: parseFloat(power.pivot.value),
+        }));
 
+        return {
+            type_id: data.type_id,
+            coating_id: data.coating_id,
+            price: parseFloat(data.price),
+            lens_powers,
+            quantity: data.lens_stock.qty,
+        };
+    };
     const columns = useMemo(
         () => [
             {
@@ -204,95 +223,27 @@ const LensStoreIndex = () => {
                     </Typography>
                 ),
             },
-            // {
-            //     header: "Powers",
-            //     accessorKey: "powers",
-            //     enableGrouping: false,
-            //     size: 300,
-            //     Cell: ({ row, cell }) => (
-            //         <Box
-            //             sx={{
-            //                 display: "flex",
-            //                 justifyContent: "space-between",
-            //                 alignItems: "center",
-            //             }}
-            //         >
-            //             {cell
-            //                 .getValue()
-            //                 .sort((a, b) =>
-            //                     a.name === "sph" ? -1 : b.name === "sph" ? 1 : 0
-            //                 ) // Sort sph first
-            //                 .map((power, index) => (
-            //                     <Box
-            //                         key={power.id}
-            //                         sx={{
-            //                             display: "flex", // Arrange the elements horizontally
-            //                             gap: 1, // Space between elements
-            //                             alignItems: "center", // Align the items centrally
-            //                             justifyContent: "flex-start", // Align items to the left
-            //                             mr: 1,
-            //                         }}
-            //                     >
-            //                         <Chip
-            //                             size="small"
-            //                             label={power.name}
-            //                             sx={{
-            //                                 background:
-            //                                     power.name === "sph"
-            //                                         ? "#b6dafc"
-            //                                         : power.name === "cyl"
-            //                                         ? "#b6b9fc"
-            //                                         : "#cffcb6",
-            //                                 color: "#000", // Ensure the text is visible
-            //                                 textTransform: "capitalize", // Capitalize the label text
-            //                             }}
-            //                         />
-
-            //                         <Typography
-            //                             variant="body2"
-            //                             sx={{
-            //                                 fontWeight: "bold", // Make the text bold for emphasis
-            //                                 textAlign: "center", // Center the text if it's a single word
-            //                             }}
-            //                         >
-            //                             {power.pivot.value == 0
-            //                                 ? "Plano"
-            //                                 : power.pivot.value}
-            //                         </Typography>
-            //                     </Box>
-            //                 ))}
-            //             {row.original.type_id === 3 && (
-            //                 <Chip
-            //                     size="small"
-            //                     label={`${cell.getValue()[0].side} side`}
-            //                     color="primary"
-            //                     sx={{ textTransform: "capitalize" }}
-            //                 />
-            //             )}
-            //         </Box>
-            //     ),
-            // },
 
             { header: "Coating", accessorKey: "coating.name" },
             {
                 header: "L/R",
-                accessorKey: "powers",
+                accessorKey: "id",
                 size: 120,
 
-                Cell: ({ cell, row }) => (
-                    <Box
-                        sx={{
-                            width: "100%",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                        }}
-                    >
-                        <Typography sx={{ textTransform: "capitalize" }}>
-                            {cell.getValue()[0]["side"]
-                                ? cell.getValue()[0]["side"]
-                                : "-"}
-                        </Typography>
+                Cell: ({ row, cell }) => (
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                        {/* ... */}
+                        {row.original["powers"] &&
+                            row.original["powers"].length > 0 && (
+                                <Typography
+                                    sx={{ textTransform: "capitalize" }}
+                                    variant="body1"
+                                    color="textPrimary"
+                                >
+                                    {row.original["powers"][0]["side"]}
+                                </Typography>
+                            )}
+                        {/* ... */}
                     </Box>
                 ),
             },
@@ -397,7 +348,13 @@ const LensStoreIndex = () => {
         ],
         [lensesList, qtyAjust]
     );
-
+    const handlePriceUpdateClose = () => {
+        setUpdatePrice({
+            open: false,
+            id: null,
+            data: null,
+        });
+    };
     return (
         <div>
             <MaterialReactTable
@@ -441,7 +398,14 @@ const LensStoreIndex = () => {
                 )}
                 enableRowActions
                 renderRowActions={({ row }) => (
-                    <Box sx={{ display: "flex", flexDirection: "column" }}>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "center",
+                            alignItems: "center",
+                        }}
+                    >
                         <IconButton
                             variant="contained"
                             size="small"
@@ -472,6 +436,19 @@ const LensStoreIndex = () => {
                                 setQtyAjust(updatedState);
                             }}
                         />
+                        {/* <IconButton
+                            variant="contained"
+                            size="small"
+                            onClick={() => {
+                                setUpdatePrice({
+                                    open: true,
+                                    id: row.original.id,
+                                    data: transformLensData(row.original),
+                                });
+                            }}
+                        >
+                            <Edit />
+                        </IconButton> */}
                     </Box>
                 )}
                 columns={columns}
@@ -487,7 +464,6 @@ const LensStoreIndex = () => {
                     grouping: ["type.name"],
                     pagination: { pageIndex: 0, pageSize: 20 },
                     sorting: [
-                        { id: "coating.name", desc: false },
                         { id: "sph", desc: false }, // Sort 'sph' in ascending order
                         { id: "cyl", desc: false }, // Sort 'cyl' in ascending order
                         { id: "add", desc: false }, // Sort 'add' in ascending order
@@ -525,6 +501,10 @@ const LensStoreIndex = () => {
                 id={stockAlert.id}
                 open={stockAlert.open}
                 onClose={handleClose}
+            />
+            <LensePriceUpdate
+                open={updatePrice}
+                onClose={handlePriceUpdateClose}
             />
         </div>
     );

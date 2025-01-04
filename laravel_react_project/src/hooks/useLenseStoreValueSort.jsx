@@ -34,7 +34,6 @@ export default function useLenseStoreValueSort() {
                     add: powerValues.add ? parseFloat(powerValues.add) : "-",
                 };
             });
-            console.log(sortedData);
 
             setData(sortedData);
             setError(null);

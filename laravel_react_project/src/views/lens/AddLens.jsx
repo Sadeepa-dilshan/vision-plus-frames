@@ -65,7 +65,6 @@ export default function AddLens() {
         const newErrors = {
             lensType: !formData.lensType,
             sph: !formData.sph,
-            cyl: parseInt(formData.lensType) === 4 ? !formData.cyl : false,
             add:
                 parseInt(formData.lensType) === 2 ||
                 parseInt(formData.lensType) === 3
@@ -82,6 +81,8 @@ export default function AddLens() {
         setStockAlert({ id: null, open: false });
     };
     const handleAddLens = async () => {
+        console.log(formData);
+
         if (validateForm()) {
             const singleVisionPowers = [
                 {
@@ -89,11 +90,15 @@ export default function AddLens() {
                     value: parseFloat(formData.sph),
                     side: formData.side,
                 },
-                {
-                    power_id: 2,
-                    value: parseFloat(formData.cyl),
-                    side: formData.side,
-                },
+                ...(formData.cyl
+                    ? [
+                          {
+                              power_id: 2,
+                              value: parseFloat(formData.cyl),
+                              side: formData.side,
+                          },
+                      ]
+                    : []),
             ];
             const varifocalPowers = [
                 {
@@ -137,7 +142,7 @@ export default function AddLens() {
                     quantity: "",
                     corting: "",
                 });
-                console.log(response.data);
+
                 setStockAlert({
                     id: response.data.lens.id,
                     open: true,
@@ -221,6 +226,7 @@ export default function AddLens() {
                                             name="sph"
                                             value={formData.sph}
                                             onChange={handleChange}
+                                            inputProps={{ step: 0.25 }}
                                             error={errors.sph}
                                             helperText={
                                                 errors.sph
@@ -240,6 +246,7 @@ export default function AddLens() {
                                                 value={formData.cyl}
                                                 onChange={handleChange}
                                                 error={errors.cyl}
+                                                inputProps={{ step: 0.25 }}
                                                 helperText={
                                                     errors.cyl
                                                         ? "CYL is required."
@@ -261,6 +268,7 @@ export default function AddLens() {
                                                 value={formData.add}
                                                 onChange={handleChange}
                                                 error={errors.add}
+                                                inputProps={{ step: 0.25 }}
                                                 helperText={
                                                     errors.add
                                                         ? `ADD is required for this lens type.`
