@@ -164,21 +164,31 @@ class LensController extends Controller
      */
     public function destroy(Lens $lens)
     {
-        // Delete the lens
+        // Delete all related LensStockChange records
+        $lens->lensStockChanges()->delete();
+    
+        // Delete the lens stock
+        if ($lens->lensStock) {
+            $lens->lensStock->delete();
+        }
+    
+        // Finally, delete the lens
         $lens->delete();
-        return response()->json(['message' => 'Lens deleted successfully'], 200);
+    
+        return response()->json(['message' => 'Lens and related data deleted successfully'], 200);
     }
+    
 
     //top lens
     public function topLensesByStockReduction(Request $request)
     {
         $startDate = $request->input('start_date', Carbon::now()->subDays(30)->toDateString());
         $endDate = $request->input('end_date', Carbon::now()->toDateString());
-
+    
         // Ensure dates are formatted correctly
         $startDate = Carbon::parse($startDate)->startOfDay();
         $endDate = Carbon::parse($endDate)->endOfDay();
-
+    
         // Query the stock_changes table for the top 5 Lens
         $topLens = LensStockChange::with(['lens.type', 'lens.lensStock', 'lens.coating', 'lens.powers'])
             ->select('lens_id')
@@ -192,7 +202,7 @@ class LensController extends Controller
             ->map(function ($stockChange) {
                 $lens = $stockChange->lens;
                 $currentQty = $lens->lensStock ? $lens->lensStock->qty : 0;
-
+    
                 // Map lens powers
                 $lensPowers = $lens->powers->map(function ($power) {
                     return [
@@ -200,7 +210,7 @@ class LensController extends Controller
                         'value' => $power->pivot->value, // Access value from the pivot table
                     ];
                 });
-
+    
                 return [
                     'lens_id' => $lens->id,
                     'total_reduction' => $stockChange->total_reduction,
@@ -214,13 +224,14 @@ class LensController extends Controller
                             'initial_count' => $lens->lensStock ? $lens->lensStock->initial_count : 0,
                             'qty' => $currentQty,
                         ],
-                        'lens_powers' => $lensPowers,
+                        'lens_powers' => $lensPowers, // Include lens powers here
                     ],
                 ];
             });
-
+    
         return response()->json($topLens, 200);
     }
+    
 
     //low lenses
     public function lowPerformingLensesByStockReduction(Request $request)
