@@ -83,7 +83,7 @@ export default function StockAlertDialog({ id, open, onClose }) {
 }
 
 StockAlertDialog.propTypes = {
-    id: PropTypes.string.isRequired,
+    id: PropTypes.string,
     open: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
 };
