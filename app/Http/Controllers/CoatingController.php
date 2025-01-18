@@ -48,7 +48,7 @@ class CoatingController extends Controller
     /**
      * Update the specified lens coating in storage.
      */
-    public function update(Request $request, Coating $coating)
+    public function updateLens(Request $request, Coating $coating)
     {
         $request->validate([
             'name' => 'required|string|unique:coatings,name,' . $coating->id . '|max:255',
@@ -66,7 +66,7 @@ class CoatingController extends Controller
     /**
      * Remove the specified lens coating from storage.
      */
-    public function destroy(Coating $coating)
+    public function deleteLens(Coating $coating)
     {
         $coating->delete();
         return response()->json(['message' => 'Coating deleted successfully'], 200);

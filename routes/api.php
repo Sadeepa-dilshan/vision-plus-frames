@@ -90,6 +90,8 @@ use App\Http\Controllers\LensPowersController;
     Route::apiResource('lenses', LensController::class);
     Route::apiResource('lens-types', LensTypeController::class);
     Route::apiResource('lens-coatings', CoatingController::class);
+    Route::patch('lens-coatings/{coating}/update', [CoatingController::class, 'updateLens']);
+    Route::delete('lens-coatings/{coating}/delete', [CoatingController::class, 'deleteLens']);
     Route::apiResource('lens-powers', LensPowersController::class)->only('index','store','delete','show');
     Route::put('lens-powers/update-multiple', [LensPowersController::class, 'updateMultiple']);
     Route::get('top-lenses-by-stock-reduction', [LensController::class, 'toplensesByStockReduction']);

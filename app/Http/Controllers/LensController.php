@@ -16,7 +16,7 @@ class LensController extends Controller
      */
     public function index()
     {
-        $lenses = Lens::with(['type:id,name,description', 'coating:id,name,description', 'powers:id,name,lens_powers.side', 'lensStock'])->get();
+        $lenses = Lens::with(['type:id,name,description', 'coating:id,name,description', 'powers:id,name,lens_powers.side','lensStock'])->get();
         return response()->json($lenses, 200);
     }
     /**
@@ -31,7 +31,7 @@ class LensController extends Controller
             'lens_powers' => 'required|array',
             'lens_powers.*.power_id' => 'required',
             'lens_powers.*.value' => 'required|numeric',
-            'lens_powers.*.side' => 'nullable|string|in:left,right,both',
+            'lens_powers.*.side' => 'nullable|string|in:left,right,both', 
             'quantity' => 'required|integer|min:0',
         ]);
         $lens = Lens::create([
@@ -82,9 +82,9 @@ class LensController extends Controller
             'lens_powers' => 'required|array',
             'lens_powers.*.power_id' => 'required|exists:powers,id',
             'lens_powers.*.value' => 'required|numeric',
-            'lens_powers.*.side' => 'nullable|string|in:left,right,both',
+            'lens_powers.*.side' => 'nullable|string|in:left,right,both', 
             'quantity' => 'required|integer',
-            'branch_id' => 'required|integer|exists:branches,id', // Validate branch existence
+            'branch_id' => 'nullable|integer|exists:branches,id', // Validate branch existence
         ]);
         // Update the Lens record
         $lens->update([
@@ -162,25 +162,27 @@ class LensController extends Controller
     /**
      * Remove the specified lens from storage.
      */
-    public function destroy(Lens $lens)
-    {
-        // Delete all related LensStockChange records
+   public function destroy(Lens $lens)
+{
+    // Check and delete all related LensStockChange records
+    if ($lens->lensStockChanges()->exists()) {
         $lens->lensStockChanges()->delete();
-    
-        // Delete the lens stock
-        if ($lens->lensStock) {
-            $lens->lensStock->delete();
-        }
-    
-        // Finally, delete the lens
-        $lens->delete();
-    
-        return response()->json(['message' => 'Lens and related data deleted successfully'], 200);
     }
-    
+
+    // Check and delete the lens stock
+    if ($lens->lensStock) {
+        $lens->lensStock->delete();
+    }
+
+    // Finally, delete the lens
+    $lens->delete();
+
+    return response()->json(['message' => 'Lens and related data deleted successfully'], 200);
+}
+
 
     //top lens
-    public function topLensesByStockReduction(Request $request)
+   public function topLensesByStockReduction(Request $request)
     {
         $startDate = $request->input('start_date', Carbon::now()->subDays(30)->toDateString());
         $endDate = $request->input('end_date', Carbon::now()->toDateString());
@@ -201,7 +203,13 @@ class LensController extends Controller
             ->get()
             ->map(function ($stockChange) {
                 $lens = $stockChange->lens;
-                $currentQty = $lens->lensStock ? $lens->lensStock->qty : 0;
+                
+                 if (!$lens) {
+                return null; // Skip this record if the lens is null
+            }
+            
+                $currentQty = $lens->lensStock->qty ?? 0;
+
     
                 // Map lens powers
                 $lensPowers = $lens->powers->map(function ($power) {
@@ -231,7 +239,6 @@ class LensController extends Controller
     
         return response()->json($topLens, 200);
     }
-    
 
     //low lenses
     public function lowPerformingLensesByStockReduction(Request $request)
