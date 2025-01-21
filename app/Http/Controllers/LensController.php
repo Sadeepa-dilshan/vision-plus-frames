@@ -34,11 +34,33 @@ class LensController extends Controller
             'lens_powers.*.side' => 'nullable|string|in:left,right,both', 
             'quantity' => 'required|integer|min:0',
         ]);
+    
+        // Check if a lens with the same type_id, coating_id, and lens_powers already exists
+        $existingLens = Lens::where('type_id', $request->type_id)
+            ->where('coating_id', $request->coating_id)
+            ->whereHas('lensPower', function ($query) use ($request) {
+                foreach ($request->lens_powers as $powerData) {
+                    $query->where('power_id', $powerData['power_id'])
+                          ->where('value', $powerData['value'])
+                          ->where('side', $powerData['side'] ?? null);
+                }
+            })
+            ->first();
+    
+        if ($existingLens) {
+            return response()->json([
+                'message' => 'Lens with the same type, coating, and power values already exists.',
+            ], 409); // 409 Conflict
+        }
+    
+        // Create a new Lens record
         $lens = Lens::create([
             'type_id' => $request->type_id,
             'coating_id' => $request->coating_id,
             'price' => $request->price,
         ]);
+    
+        // Create LensPower records
         $lensPowers = [];
         foreach ($request->lens_powers as $powerData) {
             $lensPowers[] = LensPower::create([
@@ -48,17 +70,20 @@ class LensController extends Controller
                 'side' => $powerData['side'],
             ]);
         }
+    
+        // Create LensStock record
         $lensStock = LensStock::create([
             'lens_id' => $lens->id,
             'initial_count' => $request->quantity,
             'qty' => $request->quantity,
         ]);
+    
         return response()->json([
             'lens' => $lens,
             'lens_powers' => $lensPowers,
             'lens_stock' => $lensStock,
         ], 201);
-    }
+    }    
 
     /**
      * Display the specified lens.
