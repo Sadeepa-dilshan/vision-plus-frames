@@ -12,7 +12,7 @@ import {
 import axiosClient from "../axiosClient";
 import { useAlert } from "../contexts/AlertContext";
 
-export default function LensePriceUpdate({ open, onClose }) {
+export default function LensePriceUpdate({ open, onClose, refresh }) {
     const [price, setPrice] = useState(open?.data?.price || ""); // Initial price from data
     const [loading, setLoading] = useState(false);
     const { showAlert } = useAlert();
@@ -22,8 +22,6 @@ export default function LensePriceUpdate({ open, onClose }) {
     };
 
     const handleSubmit = async () => {
-        console.log(open);
-
         if (!price || price <= 0) {
             showAlert("Please enter a valid price.", "error");
             return;
@@ -31,23 +29,29 @@ export default function LensePriceUpdate({ open, onClose }) {
 
         setLoading(true);
         try {
-            const response = await axiosClient.patch(`/lenses/${open.id}`, {
+            const response = await axiosClient.put(`/lenses/${open.id}`, {
                 ...open.data,
-                price: parseFloat(price),
+                price: price,
             });
             showAlert("Price updated successfully!", "success");
-            console.log(response.data);
+            setPrice("");
+            refresh();
             onClose(); // Close the dialog
         } catch (error) {
             console.error(error);
             showAlert("Failed to update the price. Please try again.", "error");
+            setPrice("");
         } finally {
             setLoading(false);
+            setPrice("");
         }
     };
-
+    const hadleclose = () => {
+        onClose();
+        setPrice("");
+    };
     return (
-        <Dialog open={open.open} onClose={onClose} fullWidth maxWidth="sm">
+        <Dialog open={open.open} onClose={hadleclose} fullWidth maxWidth="sm">
             <DialogTitle>Update Lens Price</DialogTitle>
             <DialogContent>
                 <Box
@@ -75,7 +79,11 @@ export default function LensePriceUpdate({ open, onClose }) {
                 </Box>
             </DialogContent>
             <DialogActions sx={{ px: 3, pb: 2 }}>
-                <Button onClick={onClose} color="secondary" variant="outlined">
+                <Button
+                    onClick={hadleclose}
+                    color="secondary"
+                    variant="outlined"
+                >
                     Cancel
                 </Button>
                 <Button

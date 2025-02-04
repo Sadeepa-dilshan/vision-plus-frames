@@ -148,7 +148,7 @@ export default function FrameIndex() {
             size: 50,
             Cell: ({ cell }) => (
                 <span style={{ textTransform: "capitalize" }}>
-                    {cell.getValue()[0]["initial_count"]}
+                    {cell.getValue()[0]["qty"]}
                 </span>
             ),
         },

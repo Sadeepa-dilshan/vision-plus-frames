@@ -51,11 +51,11 @@ export default function VarianceAdd() {
                 showAlert("Delete Failed try again", "error");
             }
         } else if (field === "lensCoatings") {
-            console.log(id);
+           
 
             try {
                 const response = await axiosClient.delete(
-                    `/lens-coatings/${id}`,
+                    `/lens-coatings/${id}/delete`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`, // Optional: If your API requires authentication
@@ -95,7 +95,7 @@ export default function VarianceAdd() {
                     options: lenseCotingsList,
                     selectedValue: selectedValues.lensCoatings,
                     field: "lensCoatings",
-                    path: "lense_coating",
+                    path: "lens-coatings",
                     loading: loadingLenseCoting,
                 },
             ].map((item, index) => (

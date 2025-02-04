@@ -12,7 +12,7 @@ import axiosClient from "../axiosClient";
 import { useStateContext } from "../contexts/contextprovider";
 import { useAlert } from "../contexts/AlertContext";
 
-export default function StockAlertDialog({ id, open, onClose }) {
+export default function StockAlertDialog({ id, open, onClose, refresh }) {
     const [stockAlert, setStockAlert] = useState("");
     const { token } = useStateContext();
     const { showAlert } = useAlert();
@@ -40,18 +40,24 @@ export default function StockAlertDialog({ id, open, onClose }) {
                     },
                 }
             );
+
             showAlert("Lens Alert successfully Updated", "success");
             onClose();
+            // refresh();
         } catch (error) {
             showAlert("Network error, try again", "error");
             setLoading(false);
+            console.log("Error creating lens:", error);
         } finally {
             setLoading(false);
         }
     };
-
+    const hadleclose = () => {
+        onClose();
+        setStockAlert("");
+    };
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+        <Dialog open={open} onClose={hadleclose} maxWidth="sm" fullWidth>
             <DialogTitle>Set Stock Alert</DialogTitle>
             <DialogContent>
                 <TextField
@@ -66,7 +72,7 @@ export default function StockAlertDialog({ id, open, onClose }) {
                 />
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose} color="secondary">
+                <Button onClick={hadleclose} color="secondary">
                     Cancel
                 </Button>
                 <Button
@@ -86,4 +92,5 @@ StockAlertDialog.propTypes = {
     id: PropTypes.string,
     open: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
+    refresh: PropTypes.func.isRequired,
 };

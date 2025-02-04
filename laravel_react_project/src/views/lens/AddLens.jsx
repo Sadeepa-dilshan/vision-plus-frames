@@ -23,10 +23,12 @@ export default function AddLens() {
     const { token } = useStateContext();
     const { showAlert } = useAlert();
     const [loading, setLoading] = useState(false);
+ 
     const { data: lensTypeList, loading: loadingLensType } =
         useData("lens-types");
     const { data: lenseCotingsList, loading: loadingLenseCoting } =
         useData("lens-coatings");
+
 
     const [formData, setFormData] = useState({
         lensType: "",
@@ -38,7 +40,7 @@ export default function AddLens() {
         corting: "",
         side: null,
     });
-
+const [alertLvl,setAlertLvl]=useState(0)
     const [errors, setErrors] = useState({
         lensType: false,
         sph: false,
@@ -81,8 +83,6 @@ export default function AddLens() {
         setStockAlert({ id: null, open: false });
     };
     const handleAddLens = async () => {
-        console.log(formData);
-
         if (validateForm()) {
             const singleVisionPowers = [
                 {
@@ -126,27 +126,114 @@ export default function AddLens() {
             };
 
             try {
-                setLoading(true);
-                const response = await axiosClient.post("/lenses", lensData, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                showAlert("Lens created successfully", "success");
-                setFormData({
-                    lensType: "",
-                    sph: "",
-                    cyl: "",
-                    add: "",
-                    price: "",
-                    quantity: "",
-                    corting: "",
-                });
-
-                setStockAlert({
-                    id: response.data.lens.id,
-                    open: true,
-                });
+                if(formData.side=='both' && parseInt(formData.lensType)===3){
+                    setLoading(true);
+                    const response = await axiosClient.post("/lenses", {
+                        type_id: parseInt(formData.lensType),
+                        price: parseFloat(formData.price),
+                        quantity: parseInt(formData.quantity),
+                        coating_id: parseInt(formData.corting),
+        
+                        lens_powers:[
+                {
+                    power_id: 1,
+                    value: parseFloat(formData.sph),
+                    side: 'left',
+                },
+                {
+                    power_id: 3,
+                    value: parseFloat(formData.add),
+                    side: 'left',
+                },
+            ]
+                    }, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    })
+                    //1
+                    await axiosClient.post(
+                        `/lens-stocks/${response.data.lens_stock.id}/set-limit`,
+                        {
+                            limit: alertLvl,
+                        },
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        }
+                    );
+                    
+                    //
+                    const response2 = await axiosClient.post("/lenses", {
+                        type_id: parseInt(formData.lensType),
+                        price: parseFloat(formData.price),
+                        quantity: parseInt(formData.quantity),
+                        coating_id: parseInt(formData.corting),
+        
+                        lens_powers:[
+                {
+                    power_id: 1,
+                    value: parseFloat(formData.sph),
+                    side: 'right',
+                },
+                {
+                    power_id: 3,
+                    value: parseFloat(formData.add),
+                    side: 'right',
+                },
+            ]
+                    }, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    })
+                    await axiosClient.post(
+                        `/lens-stocks/${response2.data.lens_stock.id}/set-limit`,
+                        {
+                            limit: alertLvl,
+                        },
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        }
+                    );
+                      showAlert("Lens created successfully", "success");
+                    setFormData({
+                        lensType: "",
+                        sph: "",
+                        cyl: "",
+                        add: "",
+                        price: "",
+                        quantity: "",
+                        corting: "",
+                    })
+                    setAlertLvl(0)
+                }else{
+                    setLoading(true);
+                    const response = await axiosClient.post("/lenses", lensData, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    })
+                    showAlert("Lens created successfully", "success");
+                    setFormData({
+                        lensType: "",
+                        sph: "",
+                        cyl: "",
+                        add: "",
+                        price: "",
+                        quantity: "",
+                        corting: "",
+                    })
+                    console.log(response.data.lens_stock.id);
+    
+                    setStockAlert({
+                        id: response.data.lens_stock.id,
+                        open: true,
+                    });
+                }
             } catch (error) {
                 showAlert("Network error, try again", "error");
             } finally {
@@ -300,6 +387,9 @@ export default function AddLens() {
                                                     <MenuItem value="right">
                                                         Right
                                                     </MenuItem>
+                                                    <MenuItem value="both">
+                                                        Both
+                                                    </MenuItem>
                                                 </Select>
                                                 {errors.side && (
                                                     <Typography
@@ -351,6 +441,7 @@ export default function AddLens() {
                             errors.quantity ? "Quantity is required." : ""
                         }
                     />
+                  
                 </Grid>
                 <Grid item xs={12}>
                     <FormControl fullWidth error={errors.corting}>
@@ -378,6 +469,19 @@ export default function AddLens() {
                             </Typography>
                         )}
                     </FormControl>
+                   {formData.side ==='both'&& <TextField
+                        label="Alert Limit"
+                        variant="outlined"
+                        fullWidth
+                        type="number"
+                        inputProps={{ min: 0 }}
+                        sx={{ mt: 2 }}
+                        name="alert"
+                        value={alertLvl}
+                        onChange={(e)=>setAlertLvl(e.target.value)}
+                        error={errors.quantity}
+                       
+                    />}
                 </Grid>
                 <Grid item xs={12}>
                     <Button

@@ -38,6 +38,7 @@ export default function LenseCoatingsEdit() {
                 setDescription(response.data.description);
             } catch (err) {
                 showAlert("Failed to load lens coating details", "error");
+                console.log
             } finally {
                 setLoadingCoating(false);
             }
@@ -52,8 +53,8 @@ export default function LenseCoatingsEdit() {
         try {
             setLoading(true);
 
-            await axiosClient.put(
-                `/lens-coatings/${id}`,
+            await axiosClient.patch(
+                `/lens-coatings/${id}/update`,
                 { name, description },
                 {
                     headers: { Authorization: `Bearer ${token}` },
@@ -61,7 +62,7 @@ export default function LenseCoatingsEdit() {
             );
 
             showAlert("Lens Coating updated successfully", "success");
-            // navigate("/lens/add_variance");
+            navigate("/lens/add_variance");
         } catch (err) {
             if (err.response && err.response.status === 422) {
                 setErrors(err.response.data.errors);

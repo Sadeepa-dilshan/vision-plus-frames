@@ -52,7 +52,6 @@ const LensStoreIndex = () => {
 
     const handleClose = () => {
         setStockAlert({ id: null, open: false });
-        refreshLenses();
     };
     const [openQuantityAjust, setOpenQuantityAjust] = React.useState({
         open: false,
@@ -94,17 +93,31 @@ const LensStoreIndex = () => {
     const transformLensData = (data) => {
         const lens_powers = data.powers.map((power) => ({
             power_id: power.id,
-            value: parseFloat(power.pivot.value),
+            value: power.pivot.value,
+            side: power.side,
         }));
 
         return {
             type_id: data.type_id,
             coating_id: data.coating_id,
-            price: parseFloat(data.price),
+            price: data.price,
             lens_powers,
             quantity: data.lens_stock.qty,
         };
     };
+    const showDecimals = (value) => {
+        if (
+            typeof value === "number" &&
+            !isNaN(value) &&
+            Number.isFinite(value)
+        ) {
+            return parseFloat(value).toFixed(2);
+        } else {
+            // Value is not a number
+            return "-";
+        }
+    };
+
     const columns = useMemo(
         () => [
             {
@@ -132,36 +145,6 @@ const LensStoreIndex = () => {
 
                 Cell: ({ row, cell }) => (
                     <Box sx={{ display: "flex", alignItems: "center" }}>
-                        {/* <IconButton
-                            variant="contained"
-                            color="success"
-                            size="small"
-                            onClick={() => {
-                                setOpenQuantityAjust({
-                                    open: true,
-                                    openType: "add",
-                                });
-
-                                setSelectedLens(row.original);
-                            }}
-                        >
-                            <AddCircle />
-                        </IconButton> */}
-
-                        {/* <IconButton
-                            variant="contained"
-                            color="error"
-                            size="small"
-                            onClick={() => {
-                                setOpenQuantityAjust({
-                                    open: true,
-                                    openType: "remove",
-                                });
-                                setSelectedLens(row.original);
-                            }}
-                        >
-                            <RemoveCircle />
-                        </IconButton> */}
                         <Box>{cell.getValue()}</Box>
                     </Box>
                 ),
@@ -179,9 +162,11 @@ const LensStoreIndex = () => {
                             textAlign: "center",
                         }}
                     >
+                        {parseFloat(cell.getValue()) > 0 && "+"}
+
                         {parseFloat(cell.getValue()) === 0
                             ? "Plano"
-                            : cell.getValue() || "-"}
+                            : showDecimals(cell.getValue()) || "-"}
                     </Typography>
                 ),
             },
@@ -198,9 +183,10 @@ const LensStoreIndex = () => {
                             textAlign: "center",
                         }}
                     >
+                        {parseFloat(cell.getValue()) > 0 && "+"}
                         {parseFloat(cell.getValue()) === 0
                             ? "Plano"
-                            : cell.getValue() || "-"}
+                            : showDecimals(cell.getValue()) || "-"}
                     </Typography>
                 ),
             },
@@ -217,9 +203,10 @@ const LensStoreIndex = () => {
                             textAlign: "center",
                         }}
                     >
+                        {parseFloat(cell.getValue()) > 0 && "+"}
                         {parseFloat(cell.getValue()) === 0
                             ? "Plano"
-                            : cell.getValue() || "-"}
+                            : showDecimals(cell.getValue())}
                     </Typography>
                 ),
             },
@@ -263,14 +250,11 @@ const LensStoreIndex = () => {
                     >
                         <Typography>{cell.getValue()}</Typography>
                         <IconButton
-                            onClick={
-                                () => {
-                                    // handleDelete
+                            onClick={() => {
+                                // handleDelete
 
-                                    handleDelete(row.original.id);
-                                }
-                                // navigate(`/lens/edit_lens/${row.original.id}`)
-                            }
+                                handleDelete(row.original.id);
+                            }}
                         >
                             <Delete color="error" />
                         </IconButton>
@@ -291,26 +275,23 @@ const LensStoreIndex = () => {
                     >
                         <Typography>{cell.getValue()}</Typography>
                         <IconButton
-                            onClick={
-                                () => {
-                                    // handleDelete
+                            onClick={() => {
+                                // handleDelete
 
-                                    setStockAlert({
-                                        id: row.original.id,
-                                        open: true,
-                                    });
-                                }
-                                // navigate(`/lens/edit_lens/${row.original.id}`)
-                            }
+                                setStockAlert({
+                                    id: row.original.lens_stock.id,
+                                    open: true,
+                                });
+                            }}
                         >
-                            <Edit color="error" />
+                            <Edit color="warning" />
                         </IconButton>
                     </Box>
                 ),
             },
             {
                 header: "Quantity Ajust",
-                accessorKey: "id",
+                accessorKey: "lens_stock.id",
                 enableGrouping: false,
                 Cell: ({ row }) => (
                     <Box
@@ -346,7 +327,7 @@ const LensStoreIndex = () => {
                 ),
             },
         ],
-        [lensesList, qtyAjust]
+        [lensesList, qtyAjust, updatePrice]
     );
     const handlePriceUpdateClose = () => {
         setUpdatePrice({
@@ -436,19 +417,21 @@ const LensStoreIndex = () => {
                                 setQtyAjust(updatedState);
                             }}
                         />
-                        {/* <IconButton
-                            variant="contained"
-                            size="small"
-                            onClick={() => {
-                                setUpdatePrice({
-                                    open: true,
-                                    id: row.original.id,
-                                    data: transformLensData(row.original),
-                                });
-                            }}
-                        >
-                            <Edit />
-                        </IconButton> */}
+                        {
+                            <IconButton
+                                variant="contained"
+                                size="small"
+                                onClick={() => {
+                                    setUpdatePrice({
+                                        open: true,
+                                        id: row.original.id,
+                                        data: transformLensData(row.original),
+                                    });
+                                }}
+                            >
+                                <Edit />
+                            </IconButton>
+                        }
                     </Box>
                 )}
                 columns={columns}
@@ -469,7 +452,11 @@ const LensStoreIndex = () => {
                         { id: "add", desc: false }, // Sort 'add' in ascending order
                     ],
                 }}
-                state={{ isLoading: loadingLensesList }}
+                state={{
+                    isLoading: loadingLensesList,
+                    showAlertBanner: errorLensesList !== null,
+                    showProgressBars: loadingLensesList,
+                }}
                 muiToolbarAlertBannerChipProps={{ color: "primary" }}
                 muiTableContainerProps={{ sx: { maxHeight: 700 } }}
                 muiTableBodyRowProps={({ row }) => {
@@ -501,10 +488,12 @@ const LensStoreIndex = () => {
                 id={stockAlert.id}
                 open={stockAlert.open}
                 onClose={handleClose}
+                refresh={refreshLenses}
             />
             <LensePriceUpdate
                 open={updatePrice}
                 onClose={handlePriceUpdateClose}
+                refresh={refreshLenses}
             />
         </div>
     );

@@ -12,6 +12,7 @@ import {
     CircularProgress,
     Typography,
     Box,
+    Chip,
 } from "@mui/material";
 import axios from "axios";
 import axiosClient from "../axiosClient";
@@ -59,30 +60,32 @@ export default function StockAlertTable({ open, onClose }) {
             },
             {
                 header: "Lens Powers",
-                accessorKey: "id", // Custom rendering
-                Cell: ({ row }) => (
-                    <div style={{ display: "flex", flexDirection: "column" }}>
-                        {/* {row.original.powers?.map((power, index) => (
-                            <div key={index}>{power}</div>
-                        ))} */}
-                        {row.original["powers"]?.map((power, index) => (
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    gap: 1,
-                                    alignItems: "center",
-                                }}
-                                my={1}
-                                key={index}
-                            >
-                                <div style={{ textTransform: "capitalize" }}>
-                                    {" "}
-                                    {power.name}
+                accessorKey: "powers", // Custom rendering
+                Cell: ({ row, cell }) => (
+                    <Box>
+                        {cell
+                            .getValue()
+                            .sort((a, b) =>
+                                a.name === "sph" ? -1 : b.name === "sph" ? 1 : 0
+                            ) // Sort sph first
+                            .map((power, index) => (
+                                <div>
+                                    <Typography
+                                        sx={{ textTransform: "capitalize" }}
+                                    >
+                                        {power.name}: {power.value}
+                                    </Typography>
                                 </div>
-                                <div> {power.value}</div>
-                            </Box>
-                        ))}
-                    </div>
+                            ))}
+                        {row.original.type_id === 3 && (
+                            <Chip
+                                size="small"
+                                label={`${cell.getValue()[0].side} side`}
+                                color="primary"
+                                sx={{ textTransform: "capitalize" }}
+                            />
+                        )}
+                    </Box>
                 ),
             },
             {
@@ -127,6 +130,11 @@ export default function StockAlertTable({ open, onClose }) {
                     data={lensStocks}
                     enablePagination
                     enableSorting
+                    state={{
+                        isLoading: loading,
+                        showAlertBanner: error !== null,
+                        showProgressBars: loading,
+                    }}
                 />
             </DialogContent>
         </Dialog>

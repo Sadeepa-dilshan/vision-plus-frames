@@ -31,12 +31,16 @@ export default function DashboardLens() {
                 }
             );
             setLenses(response.data);
+            console.log(response.data);
         } catch (error) {
             console.error("Error fetching top frames:", error);
         } finally {
             setLoading(false);
         }
     };
+    console.log(fromDate.format("YYYY-MM-DD"));
+    console.log(toDate.format("YYYY-MM-DD"));
+
     // const fetchLowFrames = async () => {
     //     setLowLenseloading(true);
     //     try {

@@ -285,7 +285,7 @@ const router = createBrowserRouter([
                 ),
             },
             {
-                path: "lense_coating/new",
+                path: "lens-coatings/new",
                 element: (
                     <AnimatedPage>
                         {/* <LenseCoatingsCreate /> */}
@@ -296,7 +296,7 @@ const router = createBrowserRouter([
                 ),
             },
             {
-                path: "lense_coating/edit/:id",
+                path: "lens-coatings/edit/:id",
                 element: (
                     <AnimatedPage>
                         <LenseCoatingsEdit />

@@ -64,7 +64,6 @@ export default function LenseQuantityAjustDialog({
                         value: parseFloat(item.pivot.value),
                         side: item.side,
                     })),
-                    branch_id: null,
                 };
                 const lensDataEdit = {
                     type_id: selectedLens.type_id,
