@@ -29,6 +29,7 @@ export default function LenseQuantityAjustDialog({
     refreshLenses,
     setQtyAjust,
 }) {
+   
     const { token } = useStateContext();
     const { showAlert } = useAlert();
     const { branchDataList, loadingBranchList } = useBranchList();
@@ -48,62 +49,37 @@ export default function LenseQuantityAjustDialog({
         }
     }, [openQuantityAjust.open]);
 
+
     const addQty = async () => {
-        setLoading(true);
-        Object.values(selectedLenses).map(async (selectedLens) => {
-            if (selectedLens) {
-                const lensData = {
-                    type_id: selectedLens.type_id,
-                    price: parseInt(selectedLens.price),
-                    quantity:
-                        parseInt(selectedLens.lens_stock.qty) +
-                        parseInt(selectedLens.ajustQty),
-                    coating_id: selectedLens.coating_id,
-                    lens_powers: selectedLens.powers.map((item) => ({
-                        power_id: item.pivot.power_id,
-                        value: parseFloat(item.pivot.value),
-                        side: item.side,
-                    })),
-                };
-                const lensDataEdit = {
-                    type_id: selectedLens.type_id,
-                    branch_id: branch.id,
-                    price: parseInt(selectedLens.price),
-                    quantity:
-                        parseInt(selectedLens.lens_stock.qty) -
-                        parseInt(selectedLens.ajustQty),
-                    coating_id: selectedLens.coating_id,
-                    lens_powers: selectedLens.powers.map((item) => ({
-                        power_id: item.pivot.power_id,
-                        value: parseFloat(item.pivot.value),
-                        side: item.side,
-                    })),
-                };
-
-                if (openQuantityAjust.openType === "remove") {
-                    if (
-                        selectedLens.lens_stock.qty - selectedLens.ajustQty <
-                        0
-                    ) {
-                        showAlert(
-                            "Quntity is lower than your Input, try again",
-                            "error"
-                        );
-                        setLoading(false);
-                    } else {
-                        await sendData(lensDataEdit, selectedLens.id);
-                    }
-                } else if (openQuantityAjust.openType === "add") {
-                    await sendData(lensData, selectedLens.id);
-                }
-            }
-        });
-    };
-
-    const sendData = async (data, ID) => {
         try {
             setLoading(true);
-            await axiosClient.put(`lenses/${ID}`, data, {
+    
+            // Resolve all async operations
+            const data = await Promise.all(Object.values(selectedLenses).map(async (selectedLens) => ({
+                lens_id: selectedLens.id,
+                change_qty: openQuantityAjust.openType === "remove" ? -Math.abs(selectedLens.ajustQty) : selectedLens.ajustQty,
+                branch_id: openQuantityAjust.openType === "remove" ? branch.id : null
+            })));
+    
+            console.log(data); // Ensure this logs resolved data, not promises
+    
+            if (openQuantityAjust.openType === "remove") {
+                await sendData(data);
+            } else if (openQuantityAjust.openType === "add") {
+                await sendData(data);
+            }
+        } catch (error) {
+            console.error("Error in addQty:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+
+    const sendData = async (data) => {
+        try {
+            setLoading(true);
+            await axiosClient.put(`lenses/bulk-stock-update`, data, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

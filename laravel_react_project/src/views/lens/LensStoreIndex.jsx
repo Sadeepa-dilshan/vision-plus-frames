@@ -51,6 +51,7 @@ const LensStoreIndex = () => {
     } = useLenseStoreValueSort();
 
     const handleClose = () => {
+       
         setStockAlert({ id: null, open: false });
     };
     const [openQuantityAjust, setOpenQuantityAjust] = React.useState({
